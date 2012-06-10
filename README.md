@@ -1,4 +1,4 @@
-#googlemusic-xbmc: Google Music addon for XBMC
+#Google Music addon for XBMC
 
 ##Usage and notes
 
