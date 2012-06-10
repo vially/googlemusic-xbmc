@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<settings>
+    <!-- General -->
+    <category label="30001">
+        <setting label="30011" type="text" id="username" default=""/>
+        <setting label="30012" type="text" id="password" option="hidden" default=""/>
+    </category>
+
+    <!-- Advanced -->
+    <category label="30051">
+        <setting id="debug" type="bool" label="30061" default="true" />
+        <setting id="clear_cache" type="action" label="30062" option="close" action="RunPlugin(plugin://plugin.audio.googlemusic/?action=clear_cache)" />
+    </category>
+</settings>
