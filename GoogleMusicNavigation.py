@@ -1,5 +1,6 @@
 import sys
 import urllib
+import GoogleMusicLogin
 
 class GoogleMusicNavigation():
     def __init__(self):
@@ -21,6 +22,8 @@ class GoogleMusicNavigation():
             #{'title':self.language(30204), 'params':{'path':"playlists", 'type':"auto"}}
         )
 
+        self.login = GoogleMusicLogin.GoogleMusicLogin()
+
     def listMenu(self, params={}):
         get = params.get
         path = get("path", "root")
@@ -34,8 +37,10 @@ class GoogleMusicNavigation():
                     cm = self.getPlayAllContextMenuItems(params['playlist_id'])
                 self.addFolderListItem(menu_item['title'], params, cm)
         elif path == "playlist":
+            self.login.login()
             self.listPlaylistSongs(get("playlist_id"))
         elif path == "playlists":
+            self.login.login()
             playlist_type = get('type')
             if playlist_type in ('auto', 'instant', 'user'):
                 self.getPlaylists(playlist_type)
@@ -49,8 +54,10 @@ class GoogleMusicNavigation():
     def executeAction(self, params={}):
         get = params.get
         if (get("action") == "play_all"):
+            self.login.login()
             self.playAll(params)
         elif (get("action") == "play_song"):
+            self.login.login()
             self.playSong(params)
         elif (get("action") == "clear_cache"):
             self.clearCache()

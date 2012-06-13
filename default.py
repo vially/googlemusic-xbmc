@@ -32,10 +32,6 @@ if (__name__ == "__main__" ):
     common = CommonFunctions
     common.plugin = plugin
 
-    import GoogleMusicLogin
-    login = GoogleMusicLogin.GoogleMusicLogin()
-    login.login()
-
     import GoogleMusicNavigation
     navigation = GoogleMusicNavigation.GoogleMusicNavigation()
 
