@@ -2,7 +2,7 @@ import sys, xbmc, xbmcgui, xbmcplugin, xbmcaddon, xbmcvfs
 from gmusicapi.api import Api
 
 # plugin constants
-version = "0.1.0"
+version = "0.2.0"
 plugin = "GoogleMusic-" + version
 
 # xbmc hooks
