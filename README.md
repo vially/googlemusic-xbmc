@@ -9,10 +9,11 @@ This plugin has been tested with XBMC 11.0 Eden on Linux running Python 2.7.3
 ##Installation
 
 To install this add-on you must download it from the [Downloads](https://github.com/vially/googlemusic-xbmc/downloads) page and install it using the Add-on Manager from within XBMC by going to:
-    1. Settings
-    2. Add-ons
-    3. Install from zip file
-    4. Enter the path to the downloaded file and select OK
+
+1. Settings
+2. Add-ons
+3. Install from zip file
+4. Enter the path to the downloaded file and select OK
 
 That's it. You should now be able to run the plugin and enjoy your Google Music from XBMC.
 
