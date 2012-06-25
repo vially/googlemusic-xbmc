@@ -6,6 +6,9 @@
     <string id="30012">Password</string>
     <string id="30061">Debug</string>
     <string id="30062">Clear cache</string>
+    <string id="30063">Clear cookie</string>
+    <string id="30064">SQLite database</string>
+    <string id="30065">Cookie file</string>
 
     <!-- menu items -->
     <string id="30201">All songs</string>
@@ -16,6 +19,8 @@
     <!-- context menu items -->
     <string id="30301">Play all</string>
     <string id="30302">Play all &amp; shuffle</string>
+    <string id="30303">Update playlist</string>
+    <string id="30304">Update playlists</string>
 
     <!-- messages -->
     <string id="30101">Login failed</string>
