@@ -1,4 +1,4 @@
-import sys, xbmc, xbmcgui, xbmcplugin, xbmcaddon
+import sys, xbmc, xbmcgui, xbmcplugin, xbmcaddon, xbmcvfs
 from gmusicapi.api import Api
 
 # plugin constants
@@ -12,8 +12,8 @@ dbg = settings.getSetting( "debug" ) == "true"
 dbglevel = 3
 
 # plugin variables
-api = Api()
-cache = ""
+gmusicapi = Api()
+storage = ""
 common = ""
 
 if (__name__ == "__main__" ):
@@ -22,15 +22,16 @@ if (__name__ == "__main__" ):
     else:
         print plugin
 
-    try:
-        import StorageServer
-    except:
-        import storageserverdummy as StorageServer
-    cache = StorageServer.StorageServer("GoogleMusic")
-
     import CommonFunctions
     common = CommonFunctions
     common.plugin = plugin
+
+    import GoogleMusicStorage
+    storage = GoogleMusicStorage.GoogleMusicStorage()
+
+    if (not settings.getSetting("firstrun")):
+        storage.initializeDatabase()
+        settings.setSetting("firstrun", "1")
 
     import GoogleMusicNavigation
     navigation = GoogleMusicNavigation.GoogleMusicNavigation()

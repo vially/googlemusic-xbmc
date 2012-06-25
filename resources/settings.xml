@@ -2,13 +2,16 @@
 <settings>
     <!-- General -->
     <category label="30001">
-        <setting label="30011" type="text" id="username" default=""/>
-        <setting label="30012" type="text" id="password" option="hidden" default=""/>
+        <setting id="username" type="text" label="30011" default=""/>
+        <setting id="password" type="text" label="30012" option="hidden" default=""/>
     </category>
 
     <!-- Advanced -->
     <category label="30051">
         <setting id="debug" type="bool" label="30061" default="true" />
+        <setting id="sqlite_db" type="text" label="30064" default="googlemusic.db"/>
+        <setting id="cookie_file" type="text" label="30065" default="gmusic_cookies.txt"/>
+        <setting id="clear_cookie" type="action" label="30063" option="close" action="RunPlugin(plugin://plugin.audio.googlemusic/?action=clear_cookie)" />
         <setting id="clear_cache" type="action" label="30062" option="close" action="RunPlugin(plugin://plugin.audio.googlemusic/?action=clear_cache)" />
     </category>
 </settings>

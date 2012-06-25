@@ -15,6 +15,9 @@ cp "icon and thumbnail licensing.txt" $dest/
 cp *.py $dest/
 cp -r resources $dest/
 
-rm $dest-$version.zip
+if [ -f $dest-$version.zip ]; then
+    rm $dest-$version.zip
+fi
+
 zip -r $dest-$version.zip $dest
 rm -r $dest

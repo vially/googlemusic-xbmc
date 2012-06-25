@@ -5,8 +5,7 @@
        provider-name="Valentin-Costel Hăloiu">
   <requires>
     <import addon="xbmc.python" version="2.0"/>
-    <import addon="script.module.parsedom" version="0.9.2"/>
-    <import addon="script.common.plugin.cache" version="0.9.2"/>
+    <import addon="script.module.parsedom" version="1.0.0"/>
     <import addon="script.module.gmusicapi" version="2012.05.04"/>
   </requires>
   <extension point="xbmc.python.pluginsource"
