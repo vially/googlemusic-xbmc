@@ -107,7 +107,9 @@ class GoogleMusicStorage():
         self.conn.commit()
 
         result = self.curs.execute("SELECT playlist_id FROM playlists WHERE type = ? AND playlist_id IN (%s)" % ','.join('?' * (len(all_ids) - 1)), all_ids)
-        existing_playlists = result.fetchall()
+        existing_playlists = []
+        for playlist_id, in result:
+            existing_playlists.append(playlist_id)
 
         for (playlist_id, playlist_name) in all_playlists:
             if playlist_id in existing_playlists:

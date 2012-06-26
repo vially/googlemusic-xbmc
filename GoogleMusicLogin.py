@@ -3,13 +3,13 @@ import sys
 import xbmcgui
 
 class GoogleMusicLogin():
-    def __init__(self):
+    def __init__(self, gmusicapi):
         self.xbmcgui = sys.modules["__main__"].xbmcgui
         self.settings = sys.modules["__main__"].settings
         self.language = sys.modules["__main__"].language
         self.common = sys.modules["__main__"].common
         self.dbg = sys.modules["__main__"].dbg
-        self.gmusicapi = sys.modules["__main__"].gmusicapi
+        self.gmusicapi = gmusicapi
 
         self._cookie_file = os.path.join(self.settings.getAddonInfo('path'), self.settings.getSetting('cookie_file'))
 
