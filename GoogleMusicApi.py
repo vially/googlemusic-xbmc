@@ -1,5 +1,6 @@
 import sys
 import GoogleMusicLogin
+from gmusicapi.api import Api
 
 class GoogleMusicApi():
     def __init__(self):
@@ -11,11 +12,10 @@ class GoogleMusicApi():
         self.language = sys.modules["__main__"].language
         self.dbg = sys.modules["__main__"].dbg
         self.common = sys.modules["__main__"].common
-
-        self.gmusicapi = sys.modules["__main__"].gmusicapi
         self.storage = sys.modules["__main__"].storage
 
-        self.login = GoogleMusicLogin.GoogleMusicLogin()
+        self.gmusicapi = Api()
+        self.login = GoogleMusicLogin.GoogleMusicLogin(self.gmusicapi)
 
     def getPlaylistSongs(self, playlist_id, forceRenew=False):
         if not self.storage.isPlaylistFetched(playlist_id) or forceRenew:

@@ -1,5 +1,4 @@
 import sys, xbmc, xbmcgui, xbmcplugin, xbmcaddon, xbmcvfs
-from gmusicapi.api import Api
 
 # plugin constants
 version = "0.1.0"
@@ -12,7 +11,6 @@ dbg = settings.getSetting( "debug" ) == "true"
 dbglevel = 3
 
 # plugin variables
-gmusicapi = Api()
 storage = ""
 common = ""
 
