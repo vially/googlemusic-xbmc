@@ -6,6 +6,7 @@ class GoogleMusicStorage():
     def __init__(self):
         self.xbmc = sys.modules["__main__"].xbmc
         self.xbmcvfs = sys.modules["__main__"].xbmcvfs
+        self.common = sys.modules["__main__"].common
         self.settings = sys.modules["__main__"].settings
         self.path = os.path.join(self.xbmc.translatePath("special://database"), self.settings.getSetting('sqlite_db'))
 
@@ -75,8 +76,10 @@ class GoogleMusicStorage():
 
             existing_song = self.curs.execute("SELECT * FROM songs WHERE song_id = ?", (api_song["id"],)).fetchone()
             if existing_song is not None:
+                self.common.log("existing_song: %s" % song["song_id"])
                 self.curs.execute("UPDATE songs SET comment=:comment, rating=:rating, last_played=:last_played, disc=:disc, composer=:composer, year=:year, album=:album, title=:title, album_artist=:album_artist, type=:type, track=:track, total_tracks=:total_tracks, beats_per_minute=:beats_per_minute, genre=:genre, play_count=:play_count, creation_date=:creation_date, name=:name, artist=:artist, url=:url, total_discs=:total_discs, duration_millis=:duration_millis, album_art_url=:album_art_url, display_name=:display_name WHERE song_id=:song_id", song)
             else:
+                self.common.log("new_song: %s" % song["song_id"])
                 new_songs.append(song)
 
             playlist_song = (playlist_id, api_song["id"])
