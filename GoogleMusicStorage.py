@@ -12,7 +12,7 @@ class GoogleMusicStorage():
 		# Make sure to initialize database when it does not exist.
         if ((not os.path.isfile(self.path)) or
             (not settings.getSetting("firstrun"))):
-            storage.initializeDatabase()
+            self.initializeDatabase()
             settings.setSetting("firstrun", "1")
 
     def getPlaylistSongs(self, playlist_id):
