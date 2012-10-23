@@ -9,6 +9,12 @@ class GoogleMusicStorage():
         self.settings = sys.modules["__main__"].settings
         self.path = os.path.join(self.xbmc.translatePath("special://database"), self.settings.getSetting('sqlite_db'))
 
+		# Make sure to initialize database when it does not exist.
+        if ((not os.path.isfile(self.path)) or
+            (not settings.getSetting("firstrun"))):
+            storage.initializeDatabase()
+            settings.setSetting("firstrun", "1")
+
     def getPlaylistSongs(self, playlist_id):
         self._connect()
 

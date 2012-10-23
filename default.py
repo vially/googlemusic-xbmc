@@ -27,10 +27,6 @@ if (__name__ == "__main__" ):
     import GoogleMusicStorage
     storage = GoogleMusicStorage.GoogleMusicStorage()
 
-    if (not settings.getSetting("firstrun")):
-        storage.initializeDatabase()
-        settings.setSetting("firstrun", "1")
-
     import GoogleMusicNavigation
     navigation = GoogleMusicNavigation.GoogleMusicNavigation()
 
