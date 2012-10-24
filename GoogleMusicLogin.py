@@ -1,6 +1,7 @@
 import os
 import sys
 import xbmcgui
+import datetime
 
 class GoogleMusicLogin():
     def __init__(self, gmusicapi):
@@ -14,6 +15,14 @@ class GoogleMusicLogin():
         self._cookie_file = os.path.join(self.settings.getAddonInfo('path'), self.settings.getSetting('cookie_file'))
 
     def login(self):
+        # Remove cookie file if it is older then 14 days
+        # -> https://developers.google.com/gdata/faq#clientlogin_expire
+        if ((os.path.isfile(self._cookie_file)) and
+            ((datetime.datetime.now() - datetime.datetime.fromtimestamp(os.stat(self._cookie_file).st_mtime)).days >= 14)):
+            os.remove(self._cookie_file)
+            self.settings.setSetting('logged_in', "")
+
+        # Continue with normal procedure
         if not self.settings.getSetting('logged_in'):
             self.common.log('Logging in')
 
