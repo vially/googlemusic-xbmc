@@ -52,7 +52,7 @@ class GoogleMusicApi():
 
     def updatePlaylists(self, playlist_type):
         self.login.login()
-        playlists = self.gmusicapi.get_all_playlist_ids(playlist_type=="auto", playlist_type=="instant", playlist_type=="user", always_id_lists=True)
+        playlists = self.gmusicapi.get_all_playlist_ids(playlist_type=="auto", playlist_type=="user", always_id_lists=True)
         self.storage.storePlaylists(playlists[playlist_type], playlist_type)
 
     def getSongStreamUrl(self, song_id):
