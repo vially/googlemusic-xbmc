@@ -61,3 +61,12 @@ class GoogleMusicApi():
         #self.storage.updateSongStreamUrl(song_id, stream_url)
 
         return stream_url
+
+    def getFilterSongs(self, filter_type, filter_criteria):
+        songs = self.storage.getFilterSongs(filter_type, filter_criteria)
+
+        return songs
+
+    def getCriteria(self, criteria):
+        return self.storage.getCriteria(criteria)
+        
