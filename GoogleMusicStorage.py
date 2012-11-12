@@ -119,8 +119,11 @@ class GoogleMusicStorage():
         # rebuild table
         def playlist_rows():
           for playlist_name, playlist_ids in playlists.iteritems():
-            for playlist_id in playlist_ids:
-              yield (playlist_name, playlist_id, playlist_type)
+            if isinstance(playlist_ids,str):
+               yield (playlist_name, playlist_ids, playlist_type)
+            else:
+               for playlist_id in playlist_ids:
+                  yield (playlist_name, playlist_id, playlist_type)
 
         self.curs.executemany("INSERT INTO playlists (name, playlist_id, type, fetched) VALUES (?, ?, ?, 0)", playlist_rows())
 
