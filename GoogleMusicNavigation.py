@@ -37,7 +37,7 @@ class GoogleMusicNavigation():
                 cm = []
                 if 'playlist_id' in params:
                     cm = self.getPlayAllContextMenuItems(params['playlist_id'])
-                else:
+                elif 'playlist_type' in params:
                     cm = self.getPlaylistsContextMenuItems(params['playlist_type'])
                 self.addFolderListItem(menu_item['title'], params, cm)
         elif path == "playlist":
@@ -48,6 +48,14 @@ class GoogleMusicNavigation():
                 self.getPlaylists(playlist_type)
             else:
                 self.common.log("Invalid playlist type: " + playlist_type)
+        elif path == "filter":
+            criteria  = get('criteria')
+            #self.common.log("Filter path: " + criteria)
+            self.getCriteria(criteria)
+        elif path in ["genre","artist","album"]:
+            filter_criteria = get('name')
+            self.common.log("Genre path: " + get("path"))
+            self.listFilterSongs(path,filter_criteria)
         else:
             self.common.log("Invalid path: " + get("path"))
 
