@@ -15,7 +15,10 @@
     <string id="30202">Playlists</string>
     <string id="30203">Instant Mixes</string>
     <string id="30204">Auto Playlists</string>
-
+    <string id="30205">Artists</string>
+    <string id="30206">Albums</string>
+    <string id="30207">Genres</string>
+    
     <!-- context menu items -->
     <string id="30301">Play all</string>
     <string id="30302">Play all &amp; shuffle</string>
