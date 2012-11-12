@@ -29,6 +29,21 @@ class GoogleMusicStorage():
 
         return songs
 
+    def getFilterSongs(self, filter_type, filter_criteria):
+        self._connect()
+ 
+        result = self.curs.execute("SELECT * FROM songs WHERE "+ filter_type +"  = ?",(filter_criteria,))
+        songs = result.fetchall()
+
+        return songs
+                
+    def getCriteria(self, criteria):
+        self._connect()
+        criterias = self.curs.execute("SELECT DISTINCT "+criteria+" FROM songs").fetchall()
+        self.conn.close()
+
+        return criterias   
+
     def getPlaylistsByType(self, playlist_type):
         self._connect()
         result = self.curs.execute("SELECT * FROM playlists WHERE playlists.type = ?", (playlist_type,))
