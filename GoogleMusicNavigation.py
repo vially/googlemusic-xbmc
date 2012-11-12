@@ -23,7 +23,8 @@ class GoogleMusicNavigation():
             {'title':self.language(30204), 'params':{'path':"playlists", 'playlist_type':"auto"}},
             {'title':self.language(30205), 'params':{'path':"filter", 'criteria':"artist"}},
             {'title':self.language(30206), 'params':{'path':"filter", 'criteria':"album"}},
-            {'title':self.language(30207), 'params':{'path':"filter", 'criteria':"genre"}}        )
+            {'title':self.language(30207), 'params':{'path':"filter", 'criteria':"genre"}}
+        )
 
     def listMenu(self, params={}):
         get = params.get
