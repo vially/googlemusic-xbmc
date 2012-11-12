@@ -62,7 +62,7 @@ class GoogleMusicApi():
 
         return stream_url
 
-def getFilterSongs(self, filter_type, filter_criteria):
+    def getFilterSongs(self, filter_type, filter_criteria):
         songs = self.storage.getFilterSongs(filter_type, filter_criteria)
 
         return songs
