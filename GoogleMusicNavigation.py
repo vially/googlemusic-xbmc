@@ -20,9 +20,10 @@ class GoogleMusicNavigation():
         self.main_menu = (
             {'title':self.language(30201), 'params':{'path':"playlist", 'playlist_id':"all_songs"}},
             {'title':self.language(30202), 'params':{'path':"playlists", 'playlist_type':"user"}},
-            {'title':self.language(30203), 'params':{'path':"playlists", 'playlist_type':"instant"}},
-            #{'title':self.language(30204), 'params':{'path':"playlists", 'playlist_type':"auto"}}
-        )
+            {'title':self.language(30204), 'params':{'path':"playlists", 'playlist_type':"auto"}},
+            {'title':self.language(30205), 'params':{'path':"filter", 'criteria':"artist"}},
+            {'title':self.language(30206), 'params':{'path':"filter", 'criteria':"album"}},
+            {'title':self.language(30207), 'params':{'path':"filter", 'criteria':"genre"}}        )
 
     def listMenu(self, params={}):
         get = params.get
@@ -87,11 +88,10 @@ class GoogleMusicNavigation():
 
         return li
 
-    def addSongItem(self, song, playlist_id):
+    def addSongItem(self, song):
         song_id = song[0].encode('utf-8')
 
         li = self.createSongListItem(song)
-        #li.addContextMenuItems(self.getPlayAllContextMenuItems(playlist_id))
 
         url = '%s?action=play_song&song_id=%s' % (sys.argv[0], song_id)
         return self.xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=url, listitem=li)
@@ -99,17 +99,29 @@ class GoogleMusicNavigation():
     def listPlaylistSongs(self, playlist_id):
         self.common.log("Loading playlist: " + playlist_id)
         songs = self.api.getPlaylistSongs(playlist_id)
-        self.addSongsFromLibrary(songs, playlist_id)
+        self.addSongsFromLibrary(songs)
 
-    def addSongsFromLibrary(self, library, playlist_id):
+    def addSongsFromLibrary(self, library):
         for song in library:
-            self.addSongItem(song, playlist_id)
+            self.addSongItem(song)
 
     def getPlaylists(self, playlist_type):
         self.common.log("Getting playlists of type: " + playlist_type)
         playlists = self.api.getPlaylistsByType(playlist_type)
         self.common.log(str(playlists))
         self.addPlaylistsItems(playlists)
+        
+    def listFilterSongs(self, filter_type, filter_criteria):
+        songs = self.api.getFilterSongs(filter_type, urllib.unquote_plus(filter_criteria))
+        self.common.log(str(songs))
+        self.addSongsFromLibrary(songs)
+
+    def getCriteria(self, criteria):
+        genres = self.api.getCriteria(criteria)
+        for genre in genres:
+            cm = []
+            self.addFolderListItem(genre[0], {'path':criteria, 'name':genre[0].encode('utf8')}, cm)
+        self.common.log(str(genres))
 
     def addPlaylistsItems(self, playlists):
         for playlist_id, playlist_name, playlist_type, fetched in playlists:
