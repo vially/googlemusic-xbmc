@@ -118,7 +118,9 @@ class GoogleMusicNavigation():
         if art_url is None:
             return ''
 
+        art_url = re.sub('=s\d+-c', '=s256-c', art_url)
         uid = re.compile('.*/([^/]+)$')
+
         try:
             file_path = image_path + uid.findall(art_url)[0] + '.jpg'
             if (not os.path.isfile(file_path)):
