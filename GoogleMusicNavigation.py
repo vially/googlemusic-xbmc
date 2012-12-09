@@ -1,7 +1,14 @@
 import os
 import sys
+import re
+import socket
 import urllib
+import urllib2
+import xbmc
+import xbmcaddon
 import GoogleMusicApi
+
+ADDON = xbmcaddon.Addon(id='plugin.audio.googlemusic')
 
 class GoogleMusicNavigation():
     def __init__(self):
@@ -89,8 +96,48 @@ class GoogleMusicNavigation():
 
         return self.xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=url, listitem=li, isFolder=True)
 
+    def getImage(self, url, path):
+        timeout = 10
+        socket.setdefaulttimeout(timeout)
+
+        try :
+                # Set useragent, sites don't like to interact with scripts
+                headers = { 'User-Agent':'Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9.2.8) Gecko/20100723 Ubuntu/10.04 (lucid) Firefox/3.6.8','Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8','Accept-Language':'en-us,en;q=0.5','Accept-Charset':'ISO-8859-1,utf-8;q=0.7,*;q=0.7'}
+                req = urllib2.Request(url=url, headers=headers)
+                f = urllib2.urlopen(req)
+                imagedata = f.read()		# Downloads imagedata
+
+                open(path, 'wb').write(imagedata)
+
+                # Return true
+                return True
+        except Exception:
+                return False
+
+    def getAlbumArt(self, image_path, art_url):
+        if art_url is None:
+            return ''
+
+        uid = re.compile('.*/([^/]+)$')
+        try:
+            file_path = image_path + uid.findall(art_url)[0] + '.jpg'
+            if (not os.path.isfile(file_path)):
+                self.getImage('http:' + art_url, file_path)
+            return file_path
+        except Exception :
+            sys.exc_clear()
+            return ''
+
     def createSongListItem(self, song):
-        li = self.xbmcgui.ListItem(song[23])
+        artwork_path = ''
+        image_path = xbmc.translatePath( ADDON.getAddonInfo('profile') ).decode('utf-8')
+        artwork_path = self.getAlbumArt(image_path, song[22])
+
+        if len(artwork_path) > 0:
+            li = self.xbmcgui.ListItem(song[23], thumbnailImage=artwork_path)
+        else:
+            li = self.xbmcgui.ListItem(song[23])
+
         li.setProperty('IsPlayable', 'true')
         li.setProperty('Music', 'true')
         li.setInfo(type='music', infoLabels=self.getInfoLabels(song))
