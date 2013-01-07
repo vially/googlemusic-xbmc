@@ -12,15 +12,15 @@ ADDON = xbmcaddon.Addon(id='plugin.audio.googlemusic')
 
 class GoogleMusicNavigation():
     def __init__(self):
-        self.xbmc = sys.modules["__main__"].xbmc
-        self.xbmcgui = sys.modules["__main__"].xbmcgui
+        self.xbmc       = sys.modules["__main__"].xbmc
+        self.xbmcgui    = sys.modules["__main__"].xbmcgui
         self.xbmcplugin = sys.modules["__main__"].xbmcplugin
-        self.xbmcvfs = sys.modules["__main__"].xbmcvfs
-
-        self.settings = sys.modules["__main__"].settings
-        self.language = sys.modules["__main__"].language
-        self.dbg = sys.modules["__main__"].dbg
-        self.common = sys.modules["__main__"].common
+        self.xbmcvfs    = sys.modules["__main__"].xbmcvfs
+        
+        self.settings   = sys.modules["__main__"].settings
+        self.language   = sys.modules["__main__"].language
+        self.dbg        = sys.modules["__main__"].dbg
+        self.common     = sys.modules["__main__"].common
 
         self.api = GoogleMusicApi.GoogleMusicApi()
 
@@ -102,7 +102,10 @@ class GoogleMusicNavigation():
 
         try :
                 # Set useragent, sites don't like to interact with scripts
-                headers = { 'User-Agent':'Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9.2.8) Gecko/20100723 Ubuntu/10.04 (lucid) Firefox/3.6.8','Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8','Accept-Language':'en-us,en;q=0.5','Accept-Charset':'ISO-8859-1,utf-8;q=0.7,*;q=0.7'}
+                headers = { 'User-Agent':'Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9.2.8) Gecko/20100723 Ubuntu/10.04 (lucid) Firefox/3.6.8',
+                            'Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                            'Accept-Language':'en-us,en;q=0.5',
+                            'Accept-Charset':'ISO-8859-1,utf-8;q=0.7,*;q=0.7'}
                 req = urllib2.Request(url=url, headers=headers)
                 f = urllib2.urlopen(req)
                 imagedata = f.read()		# Downloads imagedata

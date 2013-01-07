@@ -4,11 +4,16 @@
 
 **This plugin is a very early release and uses an [Unofficial-Google-Music-Api](https://github.com/simon-weber/Unofficial-Google-Music-API) so use at your own risk.**
 
-This plugin has been tested with XBMC 11.0 Eden on Linux running Python 2.7.3
+This plugin has been tested with:
+ *  XBMC 11.0 Eden on Linux running Python 2.7.3
+ *  XBMC 12.0 rc3 Frodo on Mac running Python 2.7.3
 
 ##Installation
 
-To install this add-on you must download it from the [Downloads](https://github.com/vially/googlemusic-xbmc/downloads) page and install it using the Add-on Manager from within XBMC by going to:
+To install this add-on you must download it from the
+[Downloads](https://github.com/vially/googlemusic-xbmc/downloads) (or get the
+[current version](https://github.com/vially/googlemusic-xbmc/archive/master.zip)
+and install it using the Add-on Manager from within XBMC by going to:
 
 1. Settings
 2. Add-ons
@@ -47,3 +52,6 @@ Since no checks are being made to verify that the cookie file is still valid, wh
 When this happens you will have to open the add-on settings dialog, go to the Advanced tab and select "Clear cookies".
 
 Hopefully this will be fixed in the next release so this should be just a temporary problem.
+
+### Google Two-Factor Authentication
+Remember if you use two-factor auth with Google you need to get an application specific password.
