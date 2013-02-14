@@ -7,6 +7,7 @@ import urllib2
 import xbmc
 import xbmcaddon
 import GoogleMusicApi
+import CommonFunctions as common
 
 ADDON = xbmcaddon.Addon(id='plugin.audio.googlemusic')
 
@@ -25,6 +26,7 @@ class GoogleMusicNavigation():
         self.api = GoogleMusicApi.GoogleMusicApi()
 
         self.main_menu = (
+            {'title':self.language(30208), 'params':{'path':"search"}},
             {'title':self.language(30201), 'params':{'path':"playlist", 'playlist_id':"all_songs"}},
             {'title':self.language(30202), 'params':{'path':"playlists", 'playlist_type':"user"}},
             {'title':self.language(30204), 'params':{'path':"playlists", 'playlist_type':"auto"}},
@@ -63,6 +65,8 @@ class GoogleMusicNavigation():
             filter_criteria = get('name')
             self.common.log("Genre path: " + get("path"))
             self.listFilterSongs(path,filter_criteria)
+        elif path == "search":
+            self.getSearch()
         else:
             self.common.log("Invalid path: " + get("path"))
 
@@ -266,3 +270,10 @@ class GoogleMusicNavigation():
             self.xbmcvfs.delete(cookie_file)
 
         self.settings.setSetting('logged_in', "")
+        
+    def getSearch(self):
+        query = common.getUserInput(self.language(30208), '')
+        if not query:
+           return False
+        results = self.api.getSearch(query)
+        self.addSongsFromLibrary(results)
