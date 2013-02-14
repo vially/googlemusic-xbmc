@@ -72,3 +72,6 @@ class GoogleMusicApi():
     def getCriteria(self, criteria):
         return self.storage.getCriteria(criteria)
         
+    def getSearch(self, query):
+        return self.storage.getSearch(query)
+        
