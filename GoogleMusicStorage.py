@@ -58,6 +58,14 @@ class GoogleMusicStorage():
         self.conn.close()
 
         return result
+        
+    def getSearch(self, query):
+        query = '%'+ query.replace('%','') + '%'
+        self._connect()
+        result = self.curs.execute("SELECT * FROM songs WHERE name like ? OR artist like ? ORDER BY display_name", (query,query,)).fetchall()
+        self.conn.close()
+
+        return result
 
     def storeApiSongs(self, api_songs, playlist_id = 'all_songs'):
         self._connect()
