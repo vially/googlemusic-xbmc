@@ -4,20 +4,22 @@ from gmusicapi.api import Api
 
 class GoogleMusicApi():
     def __init__(self):
-        self.xbmc = sys.modules["__main__"].xbmc
-        self.xbmcgui = sys.modules["__main__"].xbmcgui
-        self.xbmcplugin = sys.modules["__main__"].xbmcplugin
-
-        self.settings = sys.modules["__main__"].settings
-        self.language = sys.modules["__main__"].language
-        self.dbg = sys.modules["__main__"].dbg
-        self.common = sys.modules["__main__"].common
         self.storage = sys.modules["__main__"].storage
 
         self.gmusicapi = Api()
         self.login = GoogleMusicLogin.GoogleMusicLogin(self.gmusicapi)
 
     def getPlaylistSongs(self, playlist_id, forceRenew=False):
+
+        if playlist_id == 'thumbsup':
+            return self.storage.getThumbsup()
+        if playlist_id == 'lastadded':
+            return self.storage.getLastadded()
+        if playlist_id == 'mostplayed':
+            return self.storage.getMostplayed()
+        if playlist_id == 'freepurchased':
+            return self.storage.getFreepurchased()
+
         if not self.storage.isPlaylistFetched(playlist_id) or forceRenew:
             self.updatePlaylistSongs(playlist_id)
 
@@ -26,6 +28,10 @@ class GoogleMusicApi():
         return songs
 
     def getPlaylistsByType(self, playlist_type, forceRenew=False):
+        if playlist_type == 'auto':
+            #return [['freepurchased','Free and Purchased'],['thumbsup','Highly Rated'],['lastadded','Last Added'],['mostplayed','Most Played']]
+            return [['thumbsup','Highly Rated'],['lastadded','Last Added'],['mostplayed','Most Played']]
+
         if forceRenew:
             self.updatePlaylists(playlist_type)
 
@@ -47,14 +53,13 @@ class GoogleMusicApi():
             api_songs = self.gmusicapi.get_all_songs()
         else:
             api_songs = self.gmusicapi.get_playlist_songs(playlist_id)
-
-        self.storage.storeApiSongs(api_songs, playlist_id)
+ 
+        if api_songs:
+            self.storage.storeApiSongs(api_songs, playlist_id)
 
     def updatePlaylists(self, playlist_type):
         self.login.login()
-        playlists = self.gmusicapi.get_all_playlist_ids(auto=True,
-                                                        user=True,
-                                                        always_id_lists=True)
+        playlists = self.gmusicapi.get_all_playlist_ids(playlist_type, always_id_lists=True)
         self.storage.storePlaylists(playlists[playlist_type], playlist_type)
 
     def getSongStreamUrl(self, song_id):
@@ -74,4 +79,10 @@ class GoogleMusicApi():
         
     def getSearch(self, query):
         return self.storage.getSearch(query)
-        
+
+    def clearCache(self):
+        self.storage.clearCache()
+        self.login.clearCookie()
+
+    def clearCookie(self):
+        self.login.clearCookie()
