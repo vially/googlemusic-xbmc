@@ -38,13 +38,14 @@ class GoogleMusicStorage():
 
     def getFilterSongs(self, filter_type, filter_criteria):
         self._connect()
+
         order_by = 'title asc'
         if filter_type == 'album':
             order_by = 'track asc'
         elif filter_type == 'artist':
             order_by = 'album asc, track asc'
-        result = self.curs.execute("SELECT * FROM songs WHERE %s = '%s' ORDER BY %s, display_name" % 
-                                   (filter_type,(filter_criteria.decode('utf8') if filter_criteria else ''),order_by))
+
+        result = self.curs.execute("SELECT * FROM songs WHERE %s = ? ORDER BY %s, display_name" % (filter_type, order_by), (filter_criteria,))
         songs = result.fetchall()
         self.conn.close()
 

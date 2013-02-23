@@ -1,7 +1,7 @@
 import sys, xbmc, xbmcgui, xbmcplugin, xbmcaddon
 
 # plugin constants
-version = "0.2.2"
+version = "0.6.0"
 plugin = "GoogleMusic-" + version
 
 # xbmc hooks
@@ -29,7 +29,7 @@ def parameters_string_to_dict(parameters):
 
 def log(message):
     if dbg:
-        print "[%s] %s" % (plugin,message)
+        print "[%s] %s" % (plugin, message)
 
 if (__name__ == "__main__" ):
     if dbg:
@@ -50,11 +50,8 @@ if (__name__ == "__main__" ):
     get = params.get
 
     if (get("action") == "play_song"):
-
         song.play(get("song_id"))
-
     else:
-
         import GoogleMusicNavigation
         navigation = GoogleMusicNavigation.GoogleMusicNavigation()
 
@@ -76,4 +73,3 @@ if (__name__ == "__main__" ):
             navigation.listMenu(params)
         else:
             print plugin + " ARGV Nothing done.. verify params " + repr(params)
-

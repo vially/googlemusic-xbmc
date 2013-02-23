@@ -32,17 +32,10 @@ class GoogleMusicNavigation():
         path = get("path", "root")
 
         listItems = []
+        updateListing = False
 
         if path == "root":
-            ''' Show the plugin root menu. '''
-            for menu_item in self.main_menu:
-                params = menu_item['params']
-                cm = []
-                if 'playlist_id' in params:
-                    cm = self.getPlayAllContextMenuItems(params['playlist_id'])
-                elif 'playlist_type' in params:
-                    cm = self.getPlaylistsContextMenuItems(params['playlist_type'])
-                listItems.append(self.addFolderListItem(menu_item['title'], params, cm))
+            listItems = self.getMainMenuItems()
         elif path == "playlist":
             listItems = self.listPlaylistSongs(get("playlist_id"))
         elif path == "playlists":
@@ -58,12 +51,32 @@ class GoogleMusicNavigation():
             filter_criteria = get('name')
             listItems = self.listFilterSongs(path,filter_criteria)
         elif path == "search":
-            listItems = self.getSearch()
+            query = common.getUserInput(self.language(30208), '')
+            if query:
+                listItems = self.getSearch(query)
+            else:
+                self.main.log("No query specified. Showing main menu")
+                listItems = self.getMainMenuItems()
+                updateListing = True
         else:
             self.main.log("Invalid path: " + get("path"))
 
         self.xbmcplugin.addDirectoryItems(int(sys.argv[1]), listItems)
-        self.xbmcplugin.endOfDirectory(int(sys.argv[1]), succeeded=True)
+        self.xbmcplugin.endOfDirectory(int(sys.argv[1]), succeeded=True, updateListing=updateListing)
+
+    def getMainMenuItems(self):
+        ''' Build the plugin root menu. '''
+        menuItems = []
+        for menu_item in self.main_menu:
+            params = menu_item['params']
+            cm = []
+            if 'playlist_id' in params:
+                cm = self.getPlayAllContextMenuItems(params['playlist_id'])
+            elif 'playlist_type' in params:
+                cm = self.getPlaylistsContextMenuItems(params['playlist_type'])
+            menuItems.append(self.addFolderListItem(menu_item['title'], params, cm))
+
+        return menuItems
 
     def executeAction(self, params={}):
         get = params.get
@@ -190,10 +203,7 @@ class GoogleMusicNavigation():
         cm.append((self.language(30304), "XBMC.RunPlugin(%s?action=update_playlists&playlist_type=%s)" % (sys.argv[0], playlist_type)))
         return cm
 
-    def getSearch(self):
-        query = common.getUserInput(self.language(30208), '')
-        if not query:
-           return False
+    def getSearch(self, query):
         results = self.api.getSearch(query)
         return self.addSongsFromLibrary(results)
 
