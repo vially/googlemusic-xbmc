@@ -34,7 +34,7 @@ class GoogleMusicLogin():
             username = self.settings.getSetting('username')
             password = self.settings.getSetting('password')
 
-            self.gmusicapi.login(username, password)
+            self.gmusicapi.login(username, password, False)
             if not self.gmusicapi.is_authenticated():
                 self.main.log("Login failed")
                 self.settings.setSetting('logged_in', "")
@@ -43,13 +43,13 @@ class GoogleMusicLogin():
                 dialog.ok(self.language(30101), self.language(30102))
             else:
                 self.main.log("Login succeeded")
-                self.gmusicapi.session.cookies.save(filename=self._cookie_file, ignore_discard=True)
+                self.gmusicapi.session.web_cookies.save(filename=self._cookie_file, ignore_discard=True)
                 self.settings.setSetting('logged_in', "1")
         else:
 
             from cookielib import LWPCookieJar
 
             self.main.log("Loading cookie from file")
-            self.gmusicapi.session.cookies = LWPCookieJar()
-            self.gmusicapi.session.cookies.load(filename=self._cookie_file, ignore_discard=True)
+            self.gmusicapi.session.web_cookies = LWPCookieJar()
+            self.gmusicapi.session.web_cookies.load(filename=self._cookie_file, ignore_discard=True)
             self.gmusicapi.session.logged_in = True
