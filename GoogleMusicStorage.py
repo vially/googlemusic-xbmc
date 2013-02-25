@@ -45,7 +45,7 @@ class GoogleMusicStorage():
         elif filter_type == 'artist':
             order_by = 'album asc, track asc'
 
-        result = self.curs.execute("SELECT * FROM songs WHERE %s = ? ORDER BY %s, display_name" % (filter_type, order_by), (filter_criteria,))
+        result = self.curs.execute("SELECT * FROM songs WHERE %s = ? ORDER BY %s, display_name" % (filter_type, order_by), (filter_criteria.decode('utf8') if filter_criteria else '',))
         songs = result.fetchall()
         self.conn.close()
 
