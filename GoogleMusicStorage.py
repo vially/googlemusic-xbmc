@@ -77,14 +77,14 @@ class GoogleMusicStorage():
 
     def getLastadded(self):
         self._connect()
-        result = self.curs.execute("SELECT * FROM songs ORDER BY creation_date desc LIMIT 100")
+        result = self.curs.execute("SELECT * FROM songs ORDER BY creation_date desc LIMIT 500")
         results = result.fetchall()
         self.conn.close()
         return results
 
     def getMostplayed(self):
         self._connect()
-        result = self.curs.execute("SELECT * FROM songs ORDER BY play_count desc LIMIT 100")
+        result = self.curs.execute("SELECT * FROM songs ORDER BY play_count desc LIMIT 500")
         results = result.fetchall()
         self.conn.close()
         return results
