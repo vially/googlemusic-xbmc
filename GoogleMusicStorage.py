@@ -91,7 +91,7 @@ class GoogleMusicStorage():
 
     def getFreepurchased(self):
         self._connect()
-        result = self.curs.execute("SELECT * FROM songs WHERE type = 1")
+        result = self.curs.execute("SELECT * FROM songs WHERE type = 0 OR type = 1")
         results = result.fetchall()
         self.conn.close()
         return results
