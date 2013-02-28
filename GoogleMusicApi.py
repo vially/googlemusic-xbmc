@@ -6,7 +6,7 @@ class GoogleMusicApi():
     def __init__(self):
         self.storage = sys.modules["__main__"].storage
 
-        self.gmusicapi = Api()
+        self.gmusicapi = Api(debug_logging=True)
         self.login = GoogleMusicLogin.GoogleMusicLogin(self.gmusicapi)
 
     def getPlaylistSongs(self, playlist_id, forceRenew=False):
