@@ -18,13 +18,13 @@ class GoogleMusicNavigation():
         self.song = self.main.song
 
         self.main_menu = (
-            {'title':self.language(30208), 'params':{'path':"search"}},
             {'title':self.language(30201), 'params':{'path':"playlist", 'playlist_id':"all_songs"}},
             {'title':self.language(30202), 'params':{'path':"playlists", 'playlist_type':"user"}},
             {'title':self.language(30204), 'params':{'path':"playlists", 'playlist_type':"auto"}},
             {'title':self.language(30205), 'params':{'path':"filter", 'criteria':"artist"}},
             {'title':self.language(30206), 'params':{'path':"filter", 'criteria':"album"}},
-            {'title':self.language(30207), 'params':{'path':"filter", 'criteria':"genre"}}
+            {'title':self.language(30207), 'params':{'path':"filter", 'criteria':"genre"}},
+            {'title':self.language(30208), 'params':{'path':"search"}}
         )
 
     def listMenu(self, params={}):

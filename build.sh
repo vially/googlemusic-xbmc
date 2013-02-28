@@ -10,6 +10,7 @@ fi
 mkdir $dest
 cp addon.xml $dest/
 cp LICENSE.txt $dest/
+cp changelog.txt $dest/
 cp icon.png $dest/
 cp "icon and thumbnail licensing.txt" $dest/
 cp *.py $dest/
