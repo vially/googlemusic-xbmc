@@ -10,7 +10,7 @@ This plugin has been tested with:
 
 ##Installation
 
-To install this add-on you must download it from [here](https://docs.google.com/uc?export=download&id=0B3hilBJzOZ-1bUxFckRkQWdsdTg)
+To install this add-on you must download it from [here](https://docs.google.com/uc?export=download&id=0B3hilBJzOZ-1U3lHZ3F1TnBrbk0)
 and install it using the Add-on Manager from within XBMC by going to:
 
 1. Settings
