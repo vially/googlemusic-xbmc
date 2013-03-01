@@ -4,13 +4,9 @@
 
 **This plugin is a very early release and uses an [Unofficial-Google-Music-Api](https://github.com/simon-weber/Unofficial-Google-Music-API) so use at your own risk.**
 
-This plugin has been tested with:
- *  XBMC 12.0 rc3 Frodo on Mac running Python 2.7.3
- *  XBMC 12.0 Frodo on Linux running Python 2.7.3
-
 ##Installation
 
-To install this add-on you must download it from [here](https://docs.google.com/uc?export=download&id=0B3hilBJzOZ-1U3lHZ3F1TnBrbk0)
+To install this add-on you must download it from [here](http://forum.xbmc.org/showthread.php?tid=134783&pid=1134966#pid1134966)
 and install it using the Add-on Manager from within XBMC by going to:
 
 1. Settings
