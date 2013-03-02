@@ -49,12 +49,11 @@ class GoogleMusicApi():
 
         self.login.login()
         if playlist_id == 'all_songs':
-            api_songs = self.gmusicapi.get_all_songs()
+            self.storage.storeAllSongs(self.gmusicapi.get_all_songs_generator)
         else:
             api_songs = self.gmusicapi.get_playlist_songs(playlist_id)
- 
-        if api_songs:
-            self.storage.storeApiSongs(api_songs, playlist_id)
+            if api_songs:
+                self.storage.storePlaylistSongs(api_songs, playlist_id)
 
     def updatePlaylists(self, playlist_type):
         self.login.login()

@@ -111,58 +111,67 @@ class GoogleMusicStorage():
 
         return result
 
-    def storeApiSongs(self, api_songs, playlist_id = 'all_songs'):
+    def storeAllSongs(self, api_songs_generator):
+        self._connect()
+        self.curs.execute("PRAGMA foreign_keys = OFF")
+        self.curs.execute("DELETE FROM songs")
+
+        for api_songs in api_songs_generator():
+            self._storeApiSongs(api_songs)
+
+        self.settings.setSetting("fetched_all_songs", "1")
+        self.conn.commit()
+        self.conn.close()
+
+    def storePlaylistSongs(self, api_songs, playlist_id = 'all_songs'):
         self._connect()
         self.curs.execute("PRAGMA foreign_keys = OFF")
 
-        if playlist_id == 'all_songs':
-            self.curs.execute("DELETE FROM songs")
-        else:
-            self.curs.execute("DELETE FROM songs WHERE song_id IN (SELECT song_id FROM playlists_songs WHERE playlist_id = ?)", (playlist_id,))
-            self.curs.execute("DELETE FROM playlists_songs WHERE playlist_id = ?", (playlist_id,))
-            self.curs.executemany("INSERT INTO playlists_songs (playlist_id, song_id) VALUES (?, ?)", [(playlist_id, s["id"]) for s in api_songs])
+        self.curs.execute("DELETE FROM songs WHERE song_id IN (SELECT song_id FROM playlists_songs WHERE playlist_id = ?)", (playlist_id,))
+        self.curs.execute("DELETE FROM playlists_songs WHERE playlist_id = ?", (playlist_id,))
+        self.curs.executemany("INSERT INTO playlists_songs (playlist_id, song_id) VALUES (?, ?)", [(playlist_id, s["id"]) for s in api_songs])
 
-        def songs():
-          for api_song in api_songs:
-              yield {
-                  'song_id': api_song["id"],
-                  'comment': api_song["comment"],
-                  'rating': api_song["rating"],
-                  'last_played': (api_song["lastPlayed"] if "lastPlayed" in api_song else 0),
-                  'disc': (api_song["disc"] if "disc" in api_song else 0),
-                  'composer': api_song["composer"],
-                  'year': (api_song["year"] if "year" in api_song else 0),
-                  'album': api_song["album"],
-                  'title': api_song["title"],
-                  'album_artist': api_song["albumArtist"],
-                  'type': api_song["type"],
-                  'track': (api_song["track"] if "track" in api_song else 0),
-                  'total_tracks': (api_song["total_tracks"] if "total_tracks" in api_song else 0),
-                  'beats_per_minute': api_song["beatsPerMinute"],
-                  'genre': api_song["genre"],
-                  'play_count': api_song["playCount"],
-                  'creation_date': api_song["creationDate"],
-                  'name': api_song["name"],
-                  'artist': api_song["artist"],
-                  'url': api_song.get("url", None),
-                  'total_discs': (api_song["total_discs"] if "total_discs" in api_song else 0),
-                  'duration_millis': api_song["durationMillis"],
-                  'album_art_url': api_song.get("albumArtUrl", None),
-                  'display_name': self._getSongDisplayName(api_song)
-              }
+        self._storeApiSongs(api_songs)
 
-        self.curs.executemany("INSERT OR REPLACE INTO songs VALUES ("+
-                              ":song_id, :comment, :rating, :last_played, :disc, :composer, :year, :album, :title, :album_artist,"+
-                              ":type, :track, :total_tracks, :beats_per_minute, :genre, :play_count, :creation_date, :name, :artist, "+
-                              ":url, :total_discs, :duration_millis, :album_art_url, :display_name, NULL)", songs())
-
-        if playlist_id == 'all_songs':
-            self.settings.setSetting("fetched_all_songs", "1")
-        else:
-            self.curs.execute("UPDATE playlists SET fetched = 1 WHERE playlist_id = ?", (playlist_id,))
+        self.curs.execute("UPDATE playlists SET fetched = 1 WHERE playlist_id = ?", (playlist_id,))
 
         self.conn.commit()
         self.conn.close()
+
+    def _storeApiSongs(self, api_songs):
+        self.curs.executemany("INSERT OR REPLACE INTO songs VALUES ("+
+                              ":song_id, :comment, :rating, :last_played, :disc, :composer, :year, :album, :title, :album_artist,"+
+                              ":type, :track, :total_tracks, :beats_per_minute, :genre, :play_count, :creation_date, :name, :artist, "+
+                              ":url, :total_discs, :duration_millis, :album_art_url, :display_name, NULL)", self._api_songs_to_dict(api_songs))
+
+    def _api_songs_to_dict(self, api_songs):
+        for api_song in api_songs:
+            yield {
+                'song_id': api_song["id"],
+                'comment': api_song["comment"],
+                'rating': api_song["rating"],
+                'last_played': (api_song["lastPlayed"] if "lastPlayed" in api_song else 0),
+                'disc': (api_song["disc"] if "disc" in api_song else 0),
+                'composer': api_song["composer"],
+                'year': (api_song["year"] if "year" in api_song else 0),
+                'album': api_song["album"],
+                'title': api_song["title"],
+                'album_artist': api_song["albumArtist"],
+                'type': api_song["type"],
+                'track': (api_song["track"] if "track" in api_song else 0),
+                'total_tracks': (api_song["total_tracks"] if "total_tracks" in api_song else 0),
+                'beats_per_minute': api_song["beatsPerMinute"],
+                'genre': api_song["genre"],
+                'play_count': api_song["playCount"],
+                'creation_date': api_song["creationDate"],
+                'name': api_song["name"],
+                'artist': api_song["artist"],
+                'url': api_song.get("url", None),
+                'total_discs': (api_song["total_discs"] if "total_discs" in api_song else 0),
+                'duration_millis': api_song["durationMillis"],
+                'album_art_url': api_song.get("albumArtUrl", None),
+                'display_name': self._getSongDisplayName(api_song)
+            }
 
     def storePlaylists(self, playlists, playlist_type):
         self._connect()
