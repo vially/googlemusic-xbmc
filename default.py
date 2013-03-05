@@ -40,9 +40,6 @@ if (__name__ == "__main__" ):
     import GoogleMusicStorage
     storage = GoogleMusicStorage.GoogleMusicStorage()
 
-    import GoogleMusicApi
-    api = GoogleMusicApi.GoogleMusicApi()
-
     import GoogleMusicPlaySong
     song = GoogleMusicPlaySong.GoogleMusicPlaySong()
         

@@ -1,20 +1,63 @@
-import sys
+import sys, time
+import simplejson as json
 
 class GoogleMusicPlaySong():
 
     def __init__(self):
-        self.xbmcplugin = sys.modules["__main__"].xbmcplugin
-        self.xbmcgui = sys.modules["__main__"].xbmcgui
-        self.api = sys.modules["__main__"].api
+        self.main       = sys.modules["__main__"]
+        self.xbmcplugin = self.main.xbmcplugin
+        self.xbmcgui    = self.main.xbmcgui
+        self.xbmc       = self.main.xbmc
+        self.storage    = self.main.storage
 
     def play(self, song_id):
-        song = self.api.getSong(song_id)
-        url = self.api.getSongStreamUrl(song_id)
+        song = self.storage.getSong(song_id)
+        url = song[24]
+
+        if not url or int(self.main.parameters_string_to_dict(url).get('expire')) < time.time():
+            self.main.log("URL invalid or expired")
+            url = self.__getSongStreamUrl(song_id)
 
         li = self.createItem(song)
         li.setPath(url)
 
         self.xbmcplugin.setResolvedUrl(handle=int(sys.argv[1]), succeeded=True, listitem=li)
+
+        count = 10
+        while not self.xbmc.Player().isPlaying() and count > 0:
+            self.xbmc.sleep(1000)
+            count = count - 1
+
+        try:
+            # get song position in playlist
+            get_players = json.loads(self.xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "Player.GetProperties", "params": {"playerid":0,"properties":["playlistid","position"]},"id": 1}'))
+            position = get_players['result']['position']
+
+            # get next song id and fetch url
+            get_playlist = json.loads(self.xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "Playlist.GetItems", "params": {"playlistid":0, "properties": ["file","duration"]}, "id": 1}'))
+            song_id_next = self.main.parameters_string_to_dict(get_playlist['result']['items'][position+1]['file']).get("song_id")
+            self.__getSongStreamUrl(song_id_next)
+
+            # get playing song duration
+            duration = get_playlist['result']['items'][position]['duration']
+            # stream url expires in 1 minute, refetch to always have a valid one
+            while duration > 50:
+                self.xbmc.sleep(50000)
+                duration = duration - 50
+                # test if user manually changed the music
+                get_players = json.loads(self.xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "Player.GetProperties", "params": {"playerid":0,"properties":["playlistid","position"]},"id": 1}'))
+                if get_players.get('error') or position != get_players['result']['position']:
+                    break           
+                # before the stream url expires we fetch it again
+                self.__getSongStreamUrl(song_id_next)
+        except Exception as ex:
+            # playlist ended 
+            self.main.log("ERROR trying to fetch url: "+repr(ex))
+
+    def __getSongStreamUrl(self,song_id):
+        import GoogleMusicApi
+        self.api = GoogleMusicApi.GoogleMusicApi()
+        return self.api.getSongStreamUrl(song_id)
 
     def createItem(self, song):
         coverURL = ""

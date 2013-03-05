@@ -64,7 +64,7 @@ class GoogleMusicApi():
     def getSongStreamUrl(self, song_id):
         self.login.login()
         stream_url = self.gmusicapi.get_stream_url(song_id)
-        #self.storage.updateSongStreamUrl(song_id, stream_url)
+        self.storage.updateSongStreamUrl(song_id, stream_url)
 
         return stream_url
 
