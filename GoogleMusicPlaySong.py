@@ -43,7 +43,7 @@ class GoogleMusicPlaySong():
                 duration = duration - 50
                 # test if user manually changed the music
                 get_players = json.loads(self.xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "Player.GetProperties", "params": {"playerid":0,"properties":["playlistid","position"]},"id": 1}'))
-                if get_players.get('error') or position != get_players['result']['position']:
+                if position != get_players['result']['position']:
                     break           
                 # before the stream url expires we fetch it again
                 self.__getSongStreamUrl(song_id_next)
