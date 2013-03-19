@@ -56,7 +56,7 @@ class GoogleMusicPlaySong():
         self.api = GoogleMusicApi.GoogleMusicApi()
         return self.api.getSongStreamUrl(song_id)
 
-    def createItem(self, song):
+    def createItem(self, song, label=None):
         coverURL = ""
         if song[22]:
             coverURL = "http:" + song[22]
@@ -72,7 +72,10 @@ class GoogleMusicPlaySong():
             'playcount': song[15]
         }
 
-        li = self.xbmcgui.ListItem(label=song[23], iconImage=coverURL, thumbnailImage=coverURL)
+        if not label:
+            label = song[23]
+
+        li = self.xbmcgui.ListItem(label, iconImage=coverURL, thumbnailImage=coverURL)
         li.setProperty('IsPlayable', 'true')
         li.setProperty('Music', 'true')
         li.setProperty('mimetype', 'audio/mpeg')

@@ -29,28 +29,28 @@ class GoogleMusicNavigation():
 
     def listMenu(self, params={}):
         get = params.get
-        path = get("path", "root")
+        self.path = get("path", "root")
 
         listItems = []
         updateListing = False
 
-        if path == "root":
+        if self.path == "root":
             listItems = self.getMainMenuItems()
-        elif path == "playlist":
+        elif self.path == "playlist":
             listItems = self.listPlaylistSongs(get("playlist_id"))
-        elif path == "playlists":
+        elif self.path == "playlists":
             playlist_type = get('playlist_type')
             if playlist_type in ('auto', 'user'):
                 listItems = self.getPlaylists(playlist_type)
             else:
                 self.main.log("Invalid playlist type: " + playlist_type)
-        elif path == "filter":
+        elif self.path == "filter":
             criteria  = get('criteria')
             listItems = self.getCriteria(criteria)
-        elif path in ["genre","artist","album"]:
+        elif self.path in ["genre","artist","album"]:
             filter_criteria = get('name')
-            listItems = self.listFilterSongs(path,filter_criteria)
-        elif path == "search":
+            listItems = self.listFilterSongs(self.path,filter_criteria)
+        elif self.path == "search":
             query = common.getUserInput(self.language(30208), '')
             if query:
                 listItems = self.getSearch(query)
@@ -109,7 +109,10 @@ class GoogleMusicNavigation():
     def addSongItem(self, song):
         song_id = song[0].encode('utf-8')
 
-        li = self.song.createItem(song)
+        if self.path == 'artist' and song[7]:
+            li = self.song.createItem(song, ('['+song[7]+'] '+song[8]).encode('utf-8'))
+        else:
+            li = self.song.createItem(song)
 
         url = '%s?action=play_song&song_id=%s' % (sys.argv[0], song_id)
         return url,li
