@@ -23,12 +23,9 @@ class GoogleMusicPlaySong():
 
         self.xbmcplugin.setResolvedUrl(handle=int(sys.argv[1]), succeeded=True, listitem=li)
 
-        count = 10
-        while not self.xbmc.Player().isPlaying() and count > 0:
-            self.xbmc.sleep(1000)
-            count = count - 1
-
         try:
+            #wait for song playing and playlist ready
+            self.xbmc.sleep(10000)
             # get song position in playlist
             get_players = json.loads(self.xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "Player.GetProperties", "params": {"playerid":0,"properties":["playlistid","position"]},"id": 1}'))
             position = get_players['result']['position']
