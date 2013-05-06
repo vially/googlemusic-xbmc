@@ -29,7 +29,7 @@ class GoogleMusicStorage():
             result = self.curs.execute("SELECT * FROM songs ORDER BY display_name")
         else:
             result = self.curs.execute("SELECT * FROM songs INNER JOIN playlists_songs ON songs.song_id = playlists_songs.song_id "+
-                                       "WHERE playlists_songs.playlist_id = ? ORDER BY display_name", (playlist_id,))
+                                       "WHERE playlists_songs.playlist_id = ?", (playlist_id,))
 
         songs = result.fetchall()
         self.conn.close()
@@ -41,9 +41,9 @@ class GoogleMusicStorage():
 
         order_by = 'title asc'
         if filter_type == 'album':
-            order_by = 'track asc'
+            order_by = 'disc asc, track asc'
         elif filter_type == 'artist':
-            order_by = 'album asc, track asc'
+            order_by = 'album asc, disc asc, track asc'
 
         result = self.curs.execute("SELECT * FROM songs WHERE %s = ? ORDER BY %s, display_name" % (filter_type, order_by), (filter_criteria.decode('utf8') if filter_criteria else '',))
         songs = result.fetchall()
