@@ -28,3 +28,9 @@ pip-log.txt
 
 # Cookies
 gmusic_cookies.txt
+
+# PyCharm
+.idea/
+
+.venv
+.env

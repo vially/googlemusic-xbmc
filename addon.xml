@@ -9,8 +9,8 @@
     <import addon="script.module.parsedom" version="2.5.1"/>
     <import addon="script.module.gmusicapi" version="2013.02.28"/>
   </requires>
-  <extension point="xbmc.python.pluginsource" library="default.py">
-        <provides>audio</provides>
+  <extension point="xbmc.python.pluginsource" library="addon.py">
+    <provides>audio</provides>
   </extension>
   <extension point="xbmc.addon.metadata">
     <platform>all</platform>
