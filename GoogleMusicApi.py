@@ -1,13 +1,12 @@
 import sys
 import GoogleMusicLogin
-from gmusicapi.api import Api
 
 class GoogleMusicApi():
     def __init__(self):
-        self.storage = sys.modules["__main__"].storage
-
-        self.gmusicapi = Api(debug_logging=False)
-        self.login = GoogleMusicLogin.GoogleMusicLogin(self.gmusicapi)
+        self.main      = sys.modules["__main__"]
+        self.storage   = self.main.storage
+        self.login     = GoogleMusicLogin.GoogleMusicLogin()
+        self.gmusicapi = self.login.getApi()
 
     def getPlaylistSongs(self, playlist_id, forceRenew=False):
 
@@ -49,23 +48,51 @@ class GoogleMusicApi():
 
         self.login.login()
         if playlist_id == 'all_songs':
+            #gen = self.gmusicapi.get_all_songs(incremental=True)
+            #for chunk in gen:
+            #    for song in chunk:
+                    #print song
+            #        api_songs.append(song)
+            #    break
+            #api_songs = [song for chunk in api_songs for song in chunk]
             api_songs = self.gmusicapi.get_all_songs()
+            self.main.log("Library Size: "+repr(len(api_songs)))
+            self.main.log("First Song: "+repr(api_songs[0]))
         else:
-            api_songs = self.gmusicapi.get_playlist_songs(playlist_id)
- 
+            if self.login.getDevice():
+                 self.storage.storePlaylistSongs(self.gmusicapi.get_all_user_playlist_contents())
+            else:
+                 api_songs = self.gmusicapi.get_playlist_songs(playlist_id)
+
         if api_songs:
             self.storage.storeApiSongs(api_songs, playlist_id)
 
     def updatePlaylists(self, playlist_type):
         self.login.login()
-        playlists = self.gmusicapi.get_all_playlist_ids(playlist_type)
-        self.storage.storePlaylists(playlists[playlist_type], playlist_type)
+        if self.login.getDevice():
+            self.storage.storePlaylistSongs(self.gmusicapi.get_all_user_playlist_contents())
+        else:
+            playlists = self.gmusicapi.get_all_playlist_ids(playlist_type)
+            self.storage.storePlaylists(playlists[playlist_type], playlist_type)
 
     def getSongStreamUrl(self, song_id):
-        self.login.login()
-        stream_url = self.gmusicapi.get_stream_url(song_id)
-        self.storage.updateSongStreamUrl(song_id, stream_url)
 
+        self.login.login()
+
+        device_id = self.login.getDevice()
+        self.main.log("getSongStreamUrl device: "+device_id)
+
+        if device_id:
+            stream_url = self.gmusicapi.get_stream_url(song_id, device_id)
+        else:
+            streams = self.gmusicapi.get_stream_urls(song_id)
+            if len(streams) > 1:
+                xbmc.executebuiltin("XBMC.Notification("+plugin+",'All Access track not playable')")
+                raise Exception('All Access track not playable, no mobile device found in account!')
+            stream_url = streams[0]
+
+        self.storage.updateSongStreamUrl(song_id, stream_url)
+        self.main.log("getSongStreamUrl: "+stream_url)
         return stream_url
 
     def getFilterSongs(self, filter_type, filter_criteria):
@@ -73,9 +100,9 @@ class GoogleMusicApi():
 
         return songs
 
-    def getCriteria(self, criteria):
-        return self.storage.getCriteria(criteria)
-        
+    def getCriteria(self, criteria, artist=''):
+        return self.storage.getCriteria(criteria,artist)
+
     def getSearch(self, query):
         return self.storage.getSearch(query)
 
@@ -85,3 +112,23 @@ class GoogleMusicApi():
 
     def clearCookie(self):
         self.login.clearCookie()
+
+    def getStations(self):
+        self.login.login()
+        stations = {}
+        try:
+            stations = self.gmusicapi.get_all_stations()
+        except Exception as e:
+            self.main.log("*** NO STATIONS *** "+repr(e))
+        self.main.log("STATIONS: "+repr(stations))
+        return stations
+
+    def getStationTracks(self, station_id):
+        self.login.login()
+        tracks = {}
+        try:
+            tracks = self.gmusicapi.get_station_tracks(station_id)
+            self.main.log("TRACKS *** "+repr(tracks))
+        except Exception as e:
+            self.main.log("*** NO TRACKS *** "+repr(e))
+        return tracks

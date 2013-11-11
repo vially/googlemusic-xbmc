@@ -9,21 +9,36 @@ class GoogleMusicPlaySong():
         self.xbmcgui    = self.main.xbmcgui
         self.xbmc       = self.main.xbmc
         self.storage    = self.main.storage
+        self.prefetch   = self.main.settings.getSetting( "prefetch" )
 
-    def play(self, song_id):
+    def play(self, song_id, params={}):
         song = self.storage.getSong(song_id)
-        url = song[24]
 
-        if not url or int(self.main.parameters_string_to_dict(url).get('expire')) < time.time():
-            self.main.log("URL invalid or expired")
+        if song:
+            if self.prefetch=="false" or not song[24] or int(self.main.parameters_string_to_dict(song[24]).get('expire'))  < time.time():
+                 self.main.log("Prefetch disabled or URL invalid or expired :")
+                 url = self.__getSongStreamUrl(song_id)
+            else:
+                 url = song[24]
+
+            li = self.createItem(song)
+        else:
+            self.main.log("Track not in library :: "+repr(params))
+            if params:
+                label=params.get('title')
+            li = self.xbmcgui.ListItem(label)
+            li.setProperty('IsPlayable', 'true')
+            li.setProperty('Music', 'true')
             url = self.__getSongStreamUrl(song_id)
 
-        li = self.createItem(song)
-        li.setPath(url)
 
+        self.main.log("URL :: "+repr(url))
+
+        li.setPath(url)
         self.xbmcplugin.setResolvedUrl(handle=int(sys.argv[1]), succeeded=True, listitem=li)
 
-        try:
+        if self.prefetch=="true":
+         try:
             #wait for song playing and playlist ready
             self.xbmc.sleep(10000)
             # get song position in playlist
@@ -32,6 +47,8 @@ class GoogleMusicPlaySong():
 
             # get next song id and fetch url
             get_playlist = json.loads(self.xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "Playlist.GetItems", "params": {"playlistid":0, "properties": ["file","duration"]}, "id": 1}'))
+            self.main.log("Get playlist:: "+repr(get_playlist))
+
             song_id_next = self.main.parameters_string_to_dict(get_playlist['result']['items'][position+1]['file']).get("song_id")
             self.__getSongStreamUrl(song_id_next)
 
@@ -44,12 +61,12 @@ class GoogleMusicPlaySong():
                 # test if user manually changed the music
                 get_players = json.loads(self.xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "Player.GetProperties", "params": {"playerid":0,"properties":["playlistid","position"]},"id": 1}'))
                 if position != get_players['result']['position']:
-                    break           
+                    break
                 # before the stream url expires we fetch it again
                 self.__getSongStreamUrl(song_id_next)
-        except Exception as ex:
-            # playlist ended 
+         except Exception as ex:
             self.main.log("ERROR trying to fetch url: "+repr(ex))
+            #raise
 
     def __getSongStreamUrl(self,song_id):
         import GoogleMusicApi
@@ -57,10 +74,6 @@ class GoogleMusicPlaySong():
         return self.api.getSongStreamUrl(song_id)
 
     def createItem(self, song, label=None):
-        coverURL = ""
-        if song[22]:
-            coverURL = "http:" + song[22]
-
         infoLabels = {
             'tracknumber': song[11],
             'duration': song[21] / 1000,
@@ -75,7 +88,10 @@ class GoogleMusicPlaySong():
         if not label:
             label = song[23]
 
-        li = self.xbmcgui.ListItem(label, iconImage=coverURL, thumbnailImage=coverURL)
+        if song[22]:
+            li = self.xbmcgui.ListItem(label, iconImage=song[22], thumbnailImage=song[22])
+        else:
+            li = self.xbmcgui.ListItem(label)
         li.setProperty('IsPlayable', 'true')
         li.setProperty('Music', 'true')
         li.setProperty('mimetype', 'audio/mpeg')

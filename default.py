@@ -1,7 +1,7 @@
 import sys, xbmc, xbmcgui, xbmcplugin, xbmcaddon
 
 # plugin constants
-version = "0.8.2"
+version = "0.8exp14"
 plugin = "GoogleMusic-" + version
 
 # xbmc hooks
@@ -42,31 +42,41 @@ if (__name__ == "__main__" ):
 
     import GoogleMusicPlaySong
     song = GoogleMusicPlaySong.GoogleMusicPlaySong()
-        
+
     params = parameters_string_to_dict(sys.argv[2])
     get = params.get
 
     if (get("action") == "play_song"):
-        song.play(get("song_id"))
+        song.play(get("song_id"),params)
     else:
-        import GoogleMusicNavigation
-        navigation = GoogleMusicNavigation.GoogleMusicNavigation()
-
         import GoogleMusicLogin
+        login = GoogleMusicLogin.GoogleMusicLogin()
+
+        import GoogleMusicNavigation
 
         if (not params):
             # check for initing cookies, db and library only on main menu
-            GoogleMusicLogin.GoogleMusicLogin(None).checkCookie()
             storage.checkDbInit()
-            
+
+            login.checkCredentials()
+            login.checkCookie()
+            login.initDevice()
+
+            navigation = GoogleMusicNavigation.GoogleMusicNavigation()
+
             if not storage.isPlaylistFetched('all_songs'):
                 xbmc.executebuiltin("XBMC.Notification("+plugin+",'Loading library',5000,"+__icon__ +")")
+                log('Loading library')
                 navigation.api.updatePlaylistSongs('all_songs')
-            
+
             navigation.listMenu()
         elif (get("action")):
+            navigation = GoogleMusicNavigation.GoogleMusicNavigation()
             navigation.executeAction(params)
         elif (get("path")):
+            navigation = GoogleMusicNavigation.GoogleMusicNavigation()
             navigation.listMenu(params)
         else:
             print plugin + " ARGV Nothing done.. verify params " + repr(params)
+            
+        login.logout()
