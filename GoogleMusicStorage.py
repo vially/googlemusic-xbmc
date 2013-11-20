@@ -221,7 +221,7 @@ class GoogleMusicStorage():
     def isPlaylistFetched(self, playlist_id):
         fetched = False
         if playlist_id == 'all_songs':
-            fetched = bool(int(self.settings.getSetting("fetched_all_songs")))
+            fetched = bool(self.settings.getSetting("fetched_all_songs"))
         else:
             self._connect()
             playlist = self.curs.execute("SELECT fetched FROM playlists WHERE playlist_id = ?", (playlist_id,)).fetchone()
