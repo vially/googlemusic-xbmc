@@ -17,7 +17,7 @@ class GoogleMusicPlaySong():
         if song:
             if self.prefetch=="false" or not song[24] or int(self.main.parameters_string_to_dict(song[24]).get('expire'))  < time.time():
                  self.main.log("Prefetch disabled or URL invalid or expired :")
-                 url = self.__getSongStreamUrl(song_id)
+                 url = self.__getSongStreamUrl(song[-1])
             else:
                  url = song[24]
 

@@ -60,9 +60,9 @@ class GoogleMusicApi():
             self.main.log("First Song: "+repr(api_songs[0]))
         else:
             if self.login.getDevice():
-                 self.storage.storePlaylistSongs(self.gmusicapi.get_all_user_playlist_contents())
+                self.storage.storePlaylistSongs(self.gmusicapi.get_all_user_playlist_contents())
             else:
-                 api_songs = self.gmusicapi.get_playlist_songs(playlist_id)
+                api_songs = self.gmusicapi.get_playlist_songs(playlist_id)
 
         if api_songs:
             self.storage.storeApiSongs(api_songs, playlist_id)
@@ -87,7 +87,7 @@ class GoogleMusicApi():
         else:
             streams = self.gmusicapi.get_stream_urls(song_id)
             if len(streams) > 1:
-                xbmc.executebuiltin("XBMC.Notification("+plugin+",'All Access track not playable')")
+                self.main.xbmc.executebuiltin("XBMC.Notification("+plugin+",'All Access track not playable')")
                 raise Exception('All Access track not playable, no mobile device found in account!')
             stream_url = streams[0]
 

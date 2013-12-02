@@ -10,8 +10,8 @@ class GoogleMusicStorage():
 
     def checkDbInit(self):
         # Make sure to initialize database when it does not exist.
-        if (not os.path.isfile(self.path)) :
-            self.initializeDatabase()
+        if (not os.path.isfile(self.path)):
+	    self.initializeDatabase()
             self.settings.setSetting("fetched_all_songs","0")
 
     def clearCache(self):
@@ -22,7 +22,6 @@ class GoogleMusicStorage():
     def getPlaylistSongs(self, playlist_id):
         self._connect()
 
-        result = []
         if playlist_id == 'all_songs':
             result = self.curs.execute("SELECT * FROM songs ORDER BY display_name")
         else:
@@ -123,17 +122,27 @@ class GoogleMusicStorage():
 
         self.curs.execute("DELETE FROM playlists_songs")
         self.curs.execute("DELETE FROM playlists")
+                            
+        api_songs = []
 
         for playlist in playlists_songs:
             print playlist['name']+' id:'+playlist['id']+' tracks:'+str(len(playlist['tracks']))
             playlistId = playlist['id']
             if len(playlist['name']) > 0:
                 self.curs.execute("INSERT INTO playlists (name, playlist_id, type, fetched) VALUES (?, ?, 'user', 1)", (playlist['name'], playlistId) )
-                self.curs.executemany("INSERT INTO playlists_songs (playlist_id, song_id) VALUES (?, ?)", [(playlistId, s['trackId']) for s in playlist['tracks']])
-            #for track in playlist['tracks']:
-            #   print track['trackId']+' '+track['id']
+                for entry in playlist['tracks']:
+                    self.curs.executemany("INSERT INTO playlists_songs (playlist_id, song_id) VALUES (?, ?)", [(playlistId, entry['id'])])
+                    if entry.has_key('track'):
+                        track = entry.pop('track')
+                        song = dict(entry.items() + track.items())
+                        api_songs.append(song)
+
         self.conn.commit()
         self.conn.close()
+
+        self.storeInAllSongs(api_songs)
+            #for track in playlist['tracks']:
+            #   print track['trackId']+' '+track['id']
 
     def storeApiSongs(self, api_songs, playlist_id = 'all_songs'):
         self._connect()
@@ -146,6 +155,20 @@ class GoogleMusicStorage():
             self.curs.execute("DELETE FROM playlists_songs WHERE playlist_id = ?", (playlist_id,))
             self.curs.executemany("INSERT INTO playlists_songs (playlist_id, song_id) VALUES (?, ?)", [(playlist_id, s["id"]) for s in api_songs])
 
+        self.storeInAllSongs(api_songs)
+
+        if playlist_id == 'all_songs':
+            self.settings.setSetting("fetched_all_songs", "1")
+        else:
+            self.curs.execute("UPDATE playlists SET fetched = 1 WHERE playlist_id = ?", (playlist_id,))
+
+        self.conn.commit()
+        self.conn.close()
+
+    def storeInAllSongs(self, api_songs):
+
+        self._connect()
+        self.curs.execute("PRAGMA foreign_keys = OFF")
 
         def songs():
           for api_song in api_songs:
@@ -175,17 +198,13 @@ class GoogleMusicStorage():
                   'album_art_url': self._getAlbumArtUrl(api_song),
                   'display_name': self._getSongDisplayName(api_song),
                   'song_nid': api_song.get("nid"),
+                  'track_id': (api_song["trackId"] if "trackId" in api_song else api_song["id"])
               }
 
         self.curs.executemany("INSERT OR REPLACE INTO songs VALUES ("+
                               ":song_id, :comment, :rating, :last_played, :disc, :composer, :year, :album, :title, :album_artist,"+
                               ":type, :track, :total_tracks, :beats_per_minute, :genre, :play_count, :creation_date, :name, :artist, "+
-                              ":url, :total_discs, :duration_millis, :album_art_url, :display_name, NULL, :song_nid)", songs())
-
-        if playlist_id == 'all_songs':
-            self.settings.setSetting("fetched_all_songs", "1")
-        else:
-            self.curs.execute("UPDATE playlists SET fetched = 1 WHERE playlist_id = ?", (playlist_id,))
+                              ":url, :total_discs, :duration_millis, :album_art_url, :display_name, NULL, :song_nid, :track_id)", songs())
 
         self.conn.commit()
         self.conn.close()
@@ -270,7 +289,8 @@ class GoogleMusicStorage():
                 album_art_url VARCHAR,                          --# 22
                 display_name VARCHAR,                           --# 23
                 stream_url VARCHAR,                             --# 24
-                song_nid VARCHAR                                 --# 25
+                song_nid VARCHAR,                               --# 25
+                track_id VARCHAR                                --# 26
         )''')
 
         self.curs.execute('''CREATE TABLE IF NOT EXISTS playlists (
