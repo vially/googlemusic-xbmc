@@ -26,9 +26,7 @@ class GoogleMusicStorage():
             result = self.curs.execute("SELECT * FROM songs ORDER BY display_name")
         else:
             result = self.curs.execute("SELECT * FROM songs INNER JOIN playlists_songs ON songs.song_id = playlists_songs.song_id "+
-                                       "WHERE playlists_songs.playlist_id = ? UNION "+
-                                       "SELECT * FROM songs INNER JOIN playlists_songs ON songs.song_nid = playlists_songs.song_id "+
-                                       "WHERE playlists_songs.playlist_id = ? ", (playlist_id,playlist_id))
+                                       "WHERE playlists_songs.playlist_id = ?", (playlist_id,))
 
         songs = result.fetchall()
         self.conn.close()
@@ -60,8 +58,6 @@ class GoogleMusicStorage():
                                       "(SELECT "+criteria+", album_art_url FROM songs "+artist+" GROUP BY "+criteria+", album_art_url) "+
                                       "GROUP BY "+criteria).fetchall()
         self.conn.close()
-        if artist:
-            print repr(criterias)
         return criterias
 
     def getPlaylistsByType(self, playlist_type):
@@ -131,7 +127,7 @@ class GoogleMusicStorage():
             if len(playlist['name']) > 0:
                 self.curs.execute("INSERT INTO playlists (name, playlist_id, type, fetched) VALUES (?, ?, 'user', 1)", (playlist['name'], playlistId) )
                 for entry in playlist['tracks']:
-                    self.curs.executemany("INSERT INTO playlists_songs (playlist_id, song_id) VALUES (?, ?)", [(playlistId, entry['id'])])
+                    self.curs.execute("INSERT INTO playlists_songs (playlist_id, song_id) VALUES (?, ?)", (playlistId, entry['id']))
                     if entry.has_key('track'):
                         track = entry.pop('track')
                         song = dict(entry.items() + track.items())
@@ -155,8 +151,6 @@ class GoogleMusicStorage():
             self.curs.execute("DELETE FROM playlists_songs WHERE playlist_id = ?", (playlist_id,))
             self.curs.executemany("INSERT INTO playlists_songs (playlist_id, song_id) VALUES (?, ?)", [(playlist_id, s["id"]) for s in api_songs])
 
-        self.storeInAllSongs(api_songs)
-
         if playlist_id == 'all_songs':
             self.settings.setSetting("fetched_all_songs", "1")
         else:
@@ -165,6 +159,8 @@ class GoogleMusicStorage():
         self.conn.commit()
         self.conn.close()
 
+	self.storeInAllSongs(api_songs)
+ 
     def storeInAllSongs(self, api_songs):
 
         self._connect()
@@ -197,14 +193,13 @@ class GoogleMusicStorage():
                   'duration_millis': api_song["durationMillis"],
                   'album_art_url': self._getAlbumArtUrl(api_song),
                   'display_name': self._getSongDisplayName(api_song),
-                  'song_nid': api_song.get("nid"),
                   'track_id': (api_song["trackId"] if "trackId" in api_song else api_song["id"])
               }
 
         self.curs.executemany("INSERT OR REPLACE INTO songs VALUES ("+
                               ":song_id, :comment, :rating, :last_played, :disc, :composer, :year, :album, :title, :album_artist,"+
                               ":type, :track, :total_tracks, :beats_per_minute, :genre, :play_count, :creation_date, :name, :artist, "+
-                              ":url, :total_discs, :duration_millis, :album_art_url, :display_name, NULL, :song_nid, :track_id)", songs())
+                              ":url, :total_discs, :duration_millis, :album_art_url, :display_name, NULL, :track_id)", songs())
 
         self.conn.commit()
         self.conn.close()
@@ -240,7 +235,8 @@ class GoogleMusicStorage():
     def isPlaylistFetched(self, playlist_id):
         fetched = False
         if playlist_id == 'all_songs':
-            fetched = bool(self.settings.getSetting("fetched_all_songs"))
+            if self.settings.getSetting("fetched_all_songs"):
+		fetched = bool(int(self.settings.getSetting("fetched_all_songs")))
         else:
             self._connect()
             playlist = self.curs.execute("SELECT fetched FROM playlists WHERE playlist_id = ?", (playlist_id,)).fetchone()
@@ -289,8 +285,7 @@ class GoogleMusicStorage():
                 album_art_url VARCHAR,                          --# 22
                 display_name VARCHAR,                           --# 23
                 stream_url VARCHAR,                             --# 24
-                song_nid VARCHAR,                               --# 25
-                track_id VARCHAR                                --# 26
+                track_id VARCHAR                                --# 25
         )''')
 
         self.curs.execute('''CREATE TABLE IF NOT EXISTS playlists (
