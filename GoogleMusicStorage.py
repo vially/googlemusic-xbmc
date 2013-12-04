@@ -147,7 +147,7 @@ class GoogleMusicStorage():
         else:
             self.curs.execute("DELETE FROM songs WHERE song_id IN (SELECT song_id FROM playlists_songs WHERE playlist_id = ?)", (playlist_id,))
             self.curs.execute("DELETE FROM playlists_songs WHERE playlist_id = ?", (playlist_id,))
-            self.curs.executemany("INSERT INTO playlists_songs (playlist_id, song_id) VALUES (?, ?)", [(playlist_id, s["id"]) for s in api_songs])
+            self.curs.executemany("INSERT INTO playlists_songs (playlist_id, song_id) VALUES (?, ?)", [(playlist_id, s["track_id"]) for s in api_songs])
 
         if playlist_id == 'all_songs':
             self.settings.setSetting("fetched_all_songs", "1")
