@@ -26,9 +26,7 @@ class GoogleMusicStorage():
             result = self.curs.execute("SELECT * FROM songs ORDER BY display_name")
         else:
             result = self.curs.execute("SELECT * FROM songs INNER JOIN playlists_songs ON songs.song_id = playlists_songs.song_id "+
-                                       "WHERE playlists_songs.playlist_id = ? UNION "+
-                                       "SELECT * FROM songs INNER JOIN playlists_songs ON songs.song_nid = playlists_songs.song_id "+
-                                       "WHERE playlists_songs.playlist_id = ? ", (playlist_id,playlist_id))
+                                       "WHERE playlists_songs.playlist_id = ?", (playlist_id,))
 
         songs = result.fetchall()
         self.conn.close()
@@ -60,8 +58,6 @@ class GoogleMusicStorage():
                                       "(SELECT "+criteria+", album_art_url FROM songs "+artist+" GROUP BY "+criteria+", album_art_url) "+
                                       "GROUP BY "+criteria).fetchall()
         self.conn.close()
-        if artist:
-            print repr(criterias)
         return criterias
 
     def getPlaylistsByType(self, playlist_type):
@@ -131,11 +127,9 @@ class GoogleMusicStorage():
             if len(playlist['name']) > 0:
                 self.curs.execute("INSERT INTO playlists (name, playlist_id, type, fetched) VALUES (?, ?, 'user', 1)", (playlist['name'], playlistId) )
                 for entry in playlist['tracks']:
-                    self.curs.executemany("INSERT INTO playlists_songs (playlist_id, song_id) VALUES (?, ?)", [(playlistId, entry['id'])])
+                    self.curs.execute("INSERT INTO playlists_songs (playlist_id, song_id) VALUES (?, ?)", (playlistId, entry['trackId']))
                     if entry.has_key('track'):
-                        track = entry.pop('track')
-                        song = dict(entry.items() + track.items())
-                        api_songs.append(song)
+                        api_songs.append(entry['track'])
 
         self.conn.commit()
         self.conn.close()
@@ -153,9 +147,7 @@ class GoogleMusicStorage():
         else:
             self.curs.execute("DELETE FROM songs WHERE song_id IN (SELECT song_id FROM playlists_songs WHERE playlist_id = ?)", (playlist_id,))
             self.curs.execute("DELETE FROM playlists_songs WHERE playlist_id = ?", (playlist_id,))
-            self.curs.executemany("INSERT INTO playlists_songs (playlist_id, song_id) VALUES (?, ?)", [(playlist_id, s["id"]) for s in api_songs])
-
-        self.storeInAllSongs(api_songs)
+            self.curs.executemany("INSERT INTO playlists_songs (playlist_id, song_id) VALUES (?, ?)", [(playlist_id, s["track_id"]) for s in api_songs])
 
         if playlist_id == 'all_songs':
             self.settings.setSetting("fetched_all_songs", "1")
@@ -165,6 +157,8 @@ class GoogleMusicStorage():
         self.conn.commit()
         self.conn.close()
 
+	self.storeInAllSongs(api_songs)
+ 
     def storeInAllSongs(self, api_songs):
 
         self._connect()
@@ -173,7 +167,7 @@ class GoogleMusicStorage():
         def songs():
           for api_song in api_songs:
               yield {
-                  'song_id': api_song["id"],
+                  'song_id': (api_song["id"] if "id" in api_song else api_song['storeId']),
                   'comment': (api_song["comment"] if "comment" in api_song else 0),
                   'rating': (api_song["rating"] if "rating" in api_song else 0),
                   'last_played': (api_song["lastPlayed"] if "lastPlayed" in api_song else api_song.get("recentTimestamp",None)),
@@ -189,7 +183,7 @@ class GoogleMusicStorage():
                   'beats_per_minute': (api_song["beatsPerMinute"] if "beatsPerMinute" in api_song else 0),
                   'genre': (api_song["genre"] if "genre" in api_song else ''),
                   'play_count': (api_song["playCount"] if "playCount" in api_song else 0),
-                  'creation_date': (api_song["creationDate"] if "creationDate" in api_song else api_song["creationTimestamp"]),
+                  'creation_date': (api_song["creationDate"] if "creationDate" in api_song else api_song.get("creationTimestamp", 0)),
                   'name': (api_song["name"] if "name" in api_song else api_song["title"]),
                   'artist': (api_song["artist"] if "artist" in api_song else 'Unknown'),
                   'url': api_song.get("url", None),
@@ -197,14 +191,12 @@ class GoogleMusicStorage():
                   'duration_millis': api_song["durationMillis"],
                   'album_art_url': self._getAlbumArtUrl(api_song),
                   'display_name': self._getSongDisplayName(api_song),
-                  'song_nid': api_song.get("nid"),
-                  'track_id': (api_song["trackId"] if "trackId" in api_song else api_song["id"])
               }
 
         self.curs.executemany("INSERT OR REPLACE INTO songs VALUES ("+
                               ":song_id, :comment, :rating, :last_played, :disc, :composer, :year, :album, :title, :album_artist,"+
                               ":type, :track, :total_tracks, :beats_per_minute, :genre, :play_count, :creation_date, :name, :artist, "+
-                              ":url, :total_discs, :duration_millis, :album_art_url, :display_name, NULL, :song_nid, :track_id)", songs())
+                              ":url, :total_discs, :duration_millis, :album_art_url, :display_name, NULL)", songs())
 
         self.conn.commit()
         self.conn.close()
@@ -240,7 +232,8 @@ class GoogleMusicStorage():
     def isPlaylistFetched(self, playlist_id):
         fetched = False
         if playlist_id == 'all_songs':
-            fetched = bool(self.settings.getSetting("fetched_all_songs"))
+            if self.settings.getSetting("fetched_all_songs"):
+		fetched = bool(int(self.settings.getSetting("fetched_all_songs")))
         else:
             self._connect()
             playlist = self.curs.execute("SELECT fetched FROM playlists WHERE playlist_id = ?", (playlist_id,)).fetchone()
@@ -288,9 +281,7 @@ class GoogleMusicStorage():
                 duration_millis INTEGER,                        --# 21
                 album_art_url VARCHAR,                          --# 22
                 display_name VARCHAR,                           --# 23
-                stream_url VARCHAR,                             --# 24
-                song_nid VARCHAR,                               --# 25
-                track_id VARCHAR                                --# 26
+                stream_url VARCHAR                              --# 24
         )''')
 
         self.curs.execute('''CREATE TABLE IF NOT EXISTS playlists (
