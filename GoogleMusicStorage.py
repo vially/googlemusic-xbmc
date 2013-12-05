@@ -167,7 +167,7 @@ class GoogleMusicStorage():
         def songs():
           for api_song in api_songs:
               yield {
-                  'song_id': (api_song["storeId"] if "storeId" in api_song else api_song['id']),
+                  'song_id': (api_song["id"] if "id" in api_song else api_song['storeId']),
                   'comment': (api_song["comment"] if "comment" in api_song else 0),
                   'rating': (api_song["rating"] if "rating" in api_song else 0),
                   'last_played': (api_song["lastPlayed"] if "lastPlayed" in api_song else api_song.get("recentTimestamp",None)),
