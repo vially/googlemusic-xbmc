@@ -49,7 +49,7 @@ class GoogleMusicLogin():
                 devices = webclient.get_registered_devices()
                 self.main.log(repr(devices))
                 for device in devices:
-                    if device["type"] == "PHONE":
+                    if device["type"] in ("PHONE","IOS"):
                         device_id = str(device["id"])
                         break
             if device_id:
