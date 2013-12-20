@@ -56,7 +56,7 @@ class GoogleMusicNavigation():
             listItems = self.getCriteria("album",urllib.unquote(get('name')))
             listItems.insert(0,self.addFolderListItem(self.language(30201),{'path':"artist_allsongs", 'name':urllib.unquote(get('name'))}))
         elif self.path == "artist_allsongs":
-            listItems = self.listFilterSongs("artist",get('name'))
+            listItems = self.listFilterSongs("artist_allsongs",get('name'))
         elif self.path in ["genre","artist","album"]:
             filter_criteria = get('name')
             listItems = self.listFilterSongs(self.path,filter_criteria)
