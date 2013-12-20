@@ -50,13 +50,26 @@ class GoogleMusicStorage():
         self.conn.close()
         return songs
 
+
+    def getFilterAllSongsArtist(self, artist_name):
+        query = "select * from songs where artist = '"+artist_name+ "' order by name"
+        self._connect()
+        result = self.curs.execute(query)
+        songs = result.fetchall()
+        self.conn.close()
+        return songs
+
     def getFilterSongs(self, filter_type, filter_criteria):
         songs = ''
+        print(filter_type)
         if filter_type == 'album':
             songs = self.getFilterSongsAlbum(filter_criteria.decode('utf8'))
         elif filter_type == 'artist':
             songs = self.getFilterSongsArtist(filter_criteria.decode('utf8'))
             #order_by = 'album asc, disc asc, track asc'
+        elif filter_type == 'artist_allsongs':
+            print('allsongs')
+            songs = self.getFilterAllSongsArtist(urllib.unquote_plus(filter_criteria.decode('utf8')))
         return songs
 
     def getCriteriaArtist(self):
