@@ -1,6 +1,7 @@
 import os
 import sys
 import sqlite3
+import urllib
 
 class GoogleMusicStorage():
     def __init__(self):
@@ -33,32 +34,106 @@ class GoogleMusicStorage():
 
         return songs
 
-    def getFilterSongs(self, filter_type, filter_criteria):
+    def getFilterSongsArtist(self, artist_name):
+        query = "select * from songs where artist = '"+artist_name+"' order by artist"
         self._connect()
-
-        order_by = 'title asc'
-        if filter_type == 'album':
-            order_by = 'disc asc, track asc'
-        elif filter_type == 'artist':
-            order_by = 'album asc, disc asc, track asc'
-
-        query = "SELECT * FROM songs WHERE %s = ? ORDER BY %s, display_name" % (filter_type, order_by)
-        result = self.curs.execute(query, (filter_criteria.decode('utf8') if filter_criteria else '',))
+        result = self.curs.execute(query)
         songs = result.fetchall()
         self.conn.close()
-
         return songs
 
-    def getCriteria(self, criteria, artist):
+    def getFilterSongsAlbum(self, album_name):
+        query = "select * from songs where album = '"+album_name+ "' order by disc asc, track asc"
         self._connect()
-        if artist:
-            artist = 'WHERE artist = "'+artist+'"'
-            #print artist
-        criterias = self.curs.execute("SELECT "+criteria+", album_art_url FROM "+
-                                      "(SELECT "+criteria+", album_art_url FROM songs "+artist+" GROUP BY "+criteria+", album_art_url) "+
-                                      "GROUP BY "+criteria).fetchall()
+        result = self.curs.execute(query)
+        songs = result.fetchall()
+        self.conn.close()
+        return songs
+
+
+    def getFilterAllSongsArtist(self, artist_name):
+        query = "select * from songs where artist = '"+artist_name+ "' order by name"
+        self._connect()
+        result = self.curs.execute(query)
+        songs = result.fetchall()
+        self.conn.close()
+        return songs
+
+    def getFilterSongs(self, filter_type, filter_criteria):
+        songs = ''
+        print(filter_type)
+        if filter_type == 'album':
+            songs = self.getFilterSongsAlbum(filter_criteria.decode('utf8'))
+        elif filter_type == 'artist':
+            songs = self.getFilterSongsArtist(filter_criteria.decode('utf8'))
+            #order_by = 'album asc, disc asc, track asc'
+        elif filter_type == 'artist_allsongs':
+            print('allsongs')
+            songs = self.getFilterAllSongsArtist(urllib.unquote_plus(filter_criteria.decode('utf8')))
+        return songs
+
+    def getCriteriaArtist(self):
+        query = "select artist, max(album_art_url) from songs group by artist order by artist"
+        #print (query)
+        self._connect()
+        criterias = self.curs.execute(query).fetchall()
         self.conn.close()
         return criterias
+
+    def getCriteriaAlbum(self, artist_name): #nb provide artist name in utf8
+        query = "select album, max(album_art_url) from songs where artist = '"+artist_name+"' group by album"
+        #can't include album_art_url without getting multiple results for the same album if any songs have different artwork
+        #print (query)
+        self._connect()
+        criterias = self.curs.execute(query).fetchall()
+        #test_res = self.curs.execute(query).fetchone()
+        self.conn.close()
+        #print (test_res)
+        return criterias
+
+    def getCriteria(self, criteria, artist_name):
+        #print('getCriteria '+criteria+' '+artist_name)
+        if (criteria == 'artist'):
+            criterias = self.getCriteriaArtist()
+        if (criteria == 'album'):
+            #print (artist_name.decode('utf8'))
+            criterias = self.getCriteriaAlbum(urllib.unquote_plus(artist_name))
+        if artist_name:
+            print repr(criterias)
+        return criterias
+#-------------------------------------------------------------
+#     def getFilterSongs(self, filter_type, filter_criteria):
+#         self._connect()
+#
+#         order_by = 'title asc'
+#         if filter_type == 'album':
+#             order_by = 'disc asc, track asc'
+#         elif filter_type == 'artist':
+#             order_by = 'album asc, disc asc, track asc'
+#
+#         query = "SELECT * FROM songs WHERE %s = ? ORDER BY %s, display_name" % (filter_type, order_by)
+#         result = self.curs.execute(query, (filter_criteria.decode('utf8') if filter_criteria else '',))
+#         songs = result.fetchall()
+#         self.conn.close()
+#
+#         return songs
+#
+#
+#
+#
+#
+#
+#     def getCriteria(self, criteria, artist):
+#         print ('here I am')
+#         self._connect()
+#         if artist:
+#             artist = 'WHERE artist = "'+artist+'"'
+#             #print artist
+#         criterias = self.curs.execute("SELECT "+criteria+", album_art_url FROM "+
+#                                       "(SELECT "+criteria+", album_art_url FROM songs "+artist+" GROUP BY "+criteria+", album_art_url) "+
+#                                       "GROUP BY "+criteria).fetchall()
+#         self.conn.close()
+#         return criterias
 
     def getPlaylistsByType(self, playlist_type):
         self._connect()
