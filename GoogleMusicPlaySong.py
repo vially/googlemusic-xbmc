@@ -78,10 +78,10 @@ class GoogleMusicPlaySong():
             'tracknumber': song[11],
             'duration': song[21] / 1000,
             'year': song[6],
-            'genre': song[14].encode('utf-8'),
-            'album': song[7].encode('utf-8'),
-            'artist': song[18].encode('utf-8'),
-            'title': song[8].encode('utf-8'),
+            'genre': song[14],
+            'album': song[7],
+            'artist': song[18],
+            'title': song[8],
             'playcount': song[15]
         }
 

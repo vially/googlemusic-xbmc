@@ -122,15 +122,13 @@ class GoogleMusicNavigation():
         return url, li, "true"
 
     def addSongItem(self, song):
-        song_id = song[0].encode('utf-8')
-
         if self.path == 'artist_allsongs' and song[7]:
             # add album name when showing all artist songs
-            li = self.song.createItem(song, ('['+song[7]+'] '+song[8]).encode('utf-8'))
+            li = self.song.createItem(song, ('['+song[7]+'] '+song[8]))
         else:
             li = self.song.createItem(song)
 
-        url = '%s?action=play_song&song_id=%s' % (sys.argv[0], song_id)
+        url = '%s?action=play_song&song_id=%s' % (sys.argv[0], song[0])
         return url,li
 
     def listPlaylistSongs(self, playlist_id):
@@ -159,12 +157,12 @@ class GoogleMusicNavigation():
         listItems = []
         genres = self.api.getCriteria(criteria,artist)
         for genre in genres:
-            if genre[1]:
+            if len(genre)>1:
                 art = genre[1]
             else:
                 art = self.main.__icon__
             cm = self.getFilterContextMenuItems(criteria,genre[0])
-            listItems.append(self.addFolderListItem(genre[0], {'path':criteria, 'name':genre[0].encode('utf8')}, cm, art))
+            listItems.append(self.addFolderListItem(genre[0], {'path':criteria, 'name':genre[0]}, cm, art))
         return listItems
 
     def addPlaylistsItems(self, playlists):
@@ -184,7 +182,6 @@ class GoogleMusicNavigation():
         else:
             songs = self.api.getFilterSongs(get('filter_type'), get('filter_criteria'))
 
-
         player = self.xbmc.Player()
         if (player.isPlaying()):
             player.stop()
@@ -194,10 +191,7 @@ class GoogleMusicNavigation():
 
         song_url = "%s?action=play_song&song_id=%s"
         for song in songs:
-            song_id = song[0].encode('utf-8')
-
-            li = self.song.createItem(song)
-            playlist.add(song_url % (sys.argv[0], song_id), li)
+            playlist.add(song_url % (sys.argv[0], song[0]), self.song.createItem(song))
 
         if (get("shuffle")):
             playlist.shuffle()

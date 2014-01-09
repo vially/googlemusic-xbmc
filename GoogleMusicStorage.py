@@ -326,6 +326,7 @@ class GoogleMusicStorage():
 
     def _connect(self):
         self.conn = sqlite3.connect(self.path)
+        self.conn.text_factory = str
         self.curs = self.conn.cursor()
 
     def initializeDatabase(self):
