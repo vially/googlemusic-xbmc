@@ -1,9 +1,7 @@
 import os
 import sys
 import urllib
-import CommonFunctions as common
 import GoogleMusicApi
-from gmusicapi.utils.utils import id_or_nid
 
 class GoogleMusicNavigation():
     def __init__(self):
@@ -39,7 +37,7 @@ class GoogleMusicNavigation():
 
         if self.path == "root":
             listItems = self.getMenuItems(self.main_menu)
-            if self.api.login.getDevice():
+            if self.api.getDevice():
                 listItems.insert(1,self.addFolderListItem(self.language(30203),{'path':"playlists",'playlist_type':"radio"}))
         elif self.path == "library":
             listItems = self.getMenuItems(self.lib_menu)
@@ -60,6 +58,7 @@ class GoogleMusicNavigation():
         elif self.path in ["genre","artist","album"]:
             listItems = self.listFilterSongs(self.path,get('name'))
         elif self.path == "search":
+            import CommonFunctions as common
             query = common.getUserInput(self.language(30208), '')
             if query:
                 listItems = self.getSearch(query)
