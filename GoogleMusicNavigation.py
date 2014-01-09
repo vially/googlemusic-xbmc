@@ -12,22 +12,24 @@ class GoogleMusicNavigation():
         self.xbmcgui = self.main.xbmcgui
         self.xbmcplugin = self.main.xbmcplugin
 
-        self.settings = self.main.settings
-        self.language = self.settings.getLocalizedString
+        self.language = self.main.settings.getLocalizedString
 
         self.api = GoogleMusicApi.GoogleMusicApi()
         self.song = self.main.song
 
         self.main_menu = (
-            {'title':self.language(30201), 'params':{'path':"playlist", 'playlist_id':"all_songs"}},
-            {'title':self.language(30202), 'params':{'path':"playlists", 'playlist_type':"user"}},
+            {'title':self.language(30209), 'params':{'path':"library"}},
             {'title':self.language(30204), 'params':{'path':"playlists", 'playlist_type':"auto"}},
+            {'title':self.language(30202), 'params':{'path':"playlists", 'playlist_type':"user"}},
+            {'title':self.language(30208), 'params':{'path':"search"}}
+        )
+        self.lib_menu = (
+            {'title':self.language(30201), 'params':{'path':"playlist", 'playlist_id':"all_songs"}},
             {'title':self.language(30205), 'params':{'path':"filter", 'criteria':"artist"}},
             {'title':self.language(30206), 'params':{'path':"filter", 'criteria':"album"}},
             {'title':self.language(30207), 'params':{'path':"filter", 'criteria':"genre"}},
-            {'title':self.language(30208), 'params':{'path':"search"}}
         )
-
+        
     def listMenu(self, params={}):
         get = params.get
         self.path = get("path", "root")
@@ -36,37 +38,34 @@ class GoogleMusicNavigation():
         updateListing = False
 
         if self.path == "root":
-            listItems = self.getMainMenuItems()
+            listItems = self.getMenuItems(self.main_menu)
+            if self.api.login.getDevice():
+                listItems.insert(1,self.addFolderListItem(self.language(30203),{'path':"playlists",'playlist_type':"radio"}))
+        elif self.path == "library":
+            listItems = self.getMenuItems(self.lib_menu)
         elif self.path == "playlist":
             listItems = self.listPlaylistSongs(get("playlist_id"))
         elif self.path == "station":
             listItems = self.getStationTracks(get('id'))
         elif self.path == "playlists":
-            playlist_type = get('playlist_type')
-            if playlist_type in ('auto', 'user'):
-                listItems = self.getPlaylists(playlist_type)
-            elif playlist_type == 'radio':
-                listItems = self.getStations()
-            else:
-                self.main.log("Invalid playlist type: " + playlist_type)
+            listItems = self.getPlaylists(get('playlist_type'))
         elif self.path == "filter":
-            criteria  = get('criteria')
-            listItems = self.getCriteria(criteria)
+            listItems = self.getCriteria(get('criteria'))
         elif self.path == "artist":
-            listItems = self.getCriteria("album",urllib.unquote(get('name')))
-            listItems.insert(0,self.addFolderListItem(self.language(30201),{'path':"artist_allsongs", 'name':urllib.unquote(get('name'))}))
+            albumName = urllib.unquote_plus(get('name'))
+            listItems = self.getCriteria("album",albumName)
+            listItems.insert(0,self.addFolderListItem(self.language(30201),{'path':"artist_allsongs", 'name':albumName}))
         elif self.path == "artist_allsongs":
-            listItems = self.listFilterSongs("artist_allsongs",get('name'))
+            listItems = self.listFilterSongs("artist",get('name'))
         elif self.path in ["genre","artist","album"]:
-            filter_criteria = get('name')
-            listItems = self.listFilterSongs(self.path,filter_criteria)
+            listItems = self.listFilterSongs(self.path,get('name'))
         elif self.path == "search":
             query = common.getUserInput(self.language(30208), '')
             if query:
                 listItems = self.getSearch(query)
             else:
                 self.main.log("No query specified. Showing main menu")
-                listItems = self.getMainMenuItems()
+                listItems = self.getMenuItems(self.main_menu)
                 updateListing = True
         else:
             self.main.log("Invalid path: " + get("path"))
@@ -74,10 +73,10 @@ class GoogleMusicNavigation():
         self.xbmcplugin.addDirectoryItems(int(sys.argv[1]), listItems)
         self.xbmcplugin.endOfDirectory(int(sys.argv[1]), succeeded=True, updateListing=updateListing)
 
-    def getMainMenuItems(self):
+    def getMenuItems(self,items):
         ''' Build the plugin root menu. '''
         menuItems = []
-        for menu_item in self.main_menu:
+        for menu_item in items:
             params = menu_item['params']
             cm = []
             if 'playlist_id' in params:
@@ -85,10 +84,6 @@ class GoogleMusicNavigation():
             elif 'playlist_type' in params:
                 cm = self.getPlaylistsContextMenuItems(params['playlist_type'])
             menuItems.append(self.addFolderListItem(menu_item['title'], params, cm))
-
-        if self.getStations():
-            menuItems.append(self.addFolderListItem('Stations', {'path':"playlists", 'playlist_type':"radio"}))
-
         return menuItems
 
     def executeAction(self, params={}):
@@ -144,6 +139,8 @@ class GoogleMusicNavigation():
 
     def getPlaylists(self, playlist_type):
         self.main.log("Getting playlists of type: " + playlist_type)
+        if playlist_type == 'radio':
+            return self.getStations()
         playlists = self.api.getPlaylistsByType(playlist_type)
         return self.addPlaylistsItems(playlists)
 
@@ -217,8 +214,7 @@ class GoogleMusicNavigation():
         return cm
 
     def getSearch(self, query):
-        results = self.api.getSearch(query)
-        return self.addSongsFromLibrary(results)
+        return self.addSongsFromLibrary(self.api.getSearch(query))
 
     def getStations(self):
         listItems = []
