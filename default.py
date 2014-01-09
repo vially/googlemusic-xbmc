@@ -73,7 +73,7 @@ if (__name__ == "__main__" ):
             if not storage.isPlaylistFetched('all_songs'):
                 xbmc.executebuiltin("XBMC.Notification("+plugin+",'Loading library',5000,"+__icon__ +")")
                 log('Loading library')
-                navigation.api.updatePlaylistSongs('all_songs')
+                navigation.api.loadLibrary()
 
             navigation.listMenu()
         elif (get("action")):

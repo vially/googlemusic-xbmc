@@ -1,9 +1,7 @@
 import os
 import sys
 import urllib
-import CommonFunctions as common
 import GoogleMusicApi
-from gmusicapi.utils.utils import id_or_nid
 
 class GoogleMusicNavigation():
     def __init__(self):
@@ -39,7 +37,7 @@ class GoogleMusicNavigation():
 
         if self.path == "root":
             listItems = self.getMenuItems(self.main_menu)
-            if self.api.login.getDevice():
+            if self.api.getDevice():
                 listItems.insert(1,self.addFolderListItem(self.language(30203),{'path':"playlists",'playlist_type':"radio"}))
         elif self.path == "library":
             listItems = self.getMenuItems(self.lib_menu)
@@ -60,6 +58,7 @@ class GoogleMusicNavigation():
         elif self.path in ["genre","artist","album"]:
             listItems = self.listFilterSongs(self.path,get('name'))
         elif self.path == "search":
+            import CommonFunctions as common
             query = common.getUserInput(self.language(30208), '')
             if query:
                 listItems = self.getSearch(query)
@@ -104,8 +103,6 @@ class GoogleMusicNavigation():
             self.main.log("Invalid action: " + get("action"))
 
     def addFolderListItem(self, name, params={}, contextMenu=[], album_art_url=""):
-        if not name:
-            name = 'Unknown'
         li = self.xbmcgui.ListItem(label=name, iconImage=album_art_url, thumbnailImage=album_art_url)
         li.setProperty("Folder", "true")
 
@@ -219,20 +216,19 @@ class GoogleMusicNavigation():
     def getStations(self):
         listItems = []
         stations = self.api.getStations()
-        #stations = [{'name':'Teste','id':'1287yed82d'}]
         for rs in stations:
            listItems.append(self.addFolderListItem(rs['name'], {'path':"station",'id':rs['id']}))
         return listItems
 
     def getStationTracks(self,station_id):
+        import gmusicapi.utils.utils as utils
         listItems = []
         tracks = self.api.getStationTracks(station_id)
-        #tracks = [{'title':'Teste1','id':'f5d1db5a-77d6-3b89-993b-b6ee45b3abce'},{'title':'Teste2','id':'kf7fi765'}]
         for track in tracks:
             li = self.xbmcgui.ListItem(track['title'])
             li.setProperty('IsPlayable', 'true')
             li.setProperty('Music', 'true')
-            url = '%s?action=play_song&song_id=%s&title=%s' % (sys.argv[0],id_or_nid(track).encode('utf8'),track['title'].encode('utf8'))
+            url = '%s?action=play_song&song_id=%s&title=%s' % (sys.argv[0],utils.id_or_nid(track).encode('utf8'),track['title'].encode('utf8'))
             li.setPath(url)
             listItems.append([url,li])
         return listItems
