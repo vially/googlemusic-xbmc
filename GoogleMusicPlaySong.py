@@ -76,7 +76,7 @@ class GoogleMusicPlaySong():
     def createItem(self, song, label=None):
         infoLabels = {
             'tracknumber': song[11],
-            'duration': song[21] / 1000,
+            'duration': song[21],
             'year': song[6],
             'genre': song[14],
             'album': song[7],

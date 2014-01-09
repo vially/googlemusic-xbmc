@@ -263,7 +263,7 @@ class GoogleMusicStorage():
                   'artist': (api_song["artist"] if "artist" in api_song else 'Unknown'),
                   'url': api_song.get("url", None),
                   'total_discs': (api_song["total_discs"] if "total_discs" in api_song else api_song.get("totalDiscCount",None)),
-                  'duration_millis': api_song["durationMillis"],
+                  'duration': int(api_song["durationMillis"])/1000,
                   'album_art_url': self._getAlbumArtUrl(api_song),
                   'display_name': self._getSongDisplayName(api_song),
               }
@@ -271,7 +271,7 @@ class GoogleMusicStorage():
         self.curs.executemany("INSERT OR REPLACE INTO songs VALUES ("+
                               ":song_id, :comment, :rating, :last_played, :disc, :composer, :year, :album, :title, :album_artist,"+
                               ":type, :track, :total_tracks, :beats_per_minute, :genre, :play_count, :creation_date, :name, :artist, "+
-                              ":url, :total_discs, :duration_millis, :album_art_url, :display_name, NULL)", songs())
+                              ":url, :total_discs, :duration, :album_art_url, :display_name, NULL)", songs())
 
         self.conn.commit()
         self.conn.close()
@@ -354,7 +354,7 @@ class GoogleMusicStorage():
                 artist VARCHAR,                                 --# 18
                 url VARCHAR,                                    --# 19
                 total_discs INTEGER,                            --# 20
-                duration_millis INTEGER,                        --# 21
+                duration INTEGER,                               --# 21
                 album_art_url VARCHAR,                          --# 22
                 display_name VARCHAR,                           --# 23
                 stream_url VARCHAR                              --# 24
