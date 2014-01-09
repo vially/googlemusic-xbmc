@@ -28,7 +28,7 @@ class GoogleMusicApi():
         return self.login
                 
     def getPlaylistSongs(self, playlist_id, forceRenew=False):
-        if playlist_id in ('thumbsup','lastadded','mostplayed','freepurchased'):
+        if playlist_id in ('thumbsup','lastadded','mostplayed','freepurchased','feellucky'):
             return self.storage.getAutoPlaylistSongs(playlist_id)
 
         if not self.storage.isPlaylistFetched(playlist_id) or forceRenew:

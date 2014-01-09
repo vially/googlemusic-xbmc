@@ -22,6 +22,7 @@ class GoogleMusicNavigation():
             {'title':self.language(30208), 'params':{'path':"search"}}
         )
         self.lib_menu = (
+            {'title':self.language(30210), 'params':{'path':"playlist", 'playlist_id':"feellucky"}},
             {'title':self.language(30201), 'params':{'path':"playlist", 'playlist_id':"all_songs"}},
             {'title':self.language(30205), 'params':{'path':"filter", 'criteria':"artist"}},
             {'title':self.language(30206), 'params':{'path':"filter", 'criteria':"album"}},

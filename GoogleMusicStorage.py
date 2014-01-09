@@ -76,6 +76,7 @@ class GoogleMusicStorage():
                   'lastadded':'SELECT * FROM songs ORDER BY creation_date desc LIMIT 500',
                   'mostplayed':'SELECT * FROM songs ORDER BY play_count desc LIMIT 500',
                   'freepurchased':'SELECT * FROM songs WHERE type = 0 OR type = 1',
+                  'feellucky':'SELECT * FROM songs ORDER BY random() LIMIT 500',
                  }
         self._connect()
         result = self.curs.execute(querys[playlist]).fetchall()
