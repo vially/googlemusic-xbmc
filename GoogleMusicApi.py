@@ -9,15 +9,8 @@ class GoogleMusicApi():
         self.gmusicapi = self.login.getApi()
 
     def getPlaylistSongs(self, playlist_id, forceRenew=False):
-
-        if playlist_id == 'thumbsup':
-            return self.storage.getThumbsup()
-        if playlist_id == 'lastadded':
-            return self.storage.getLastadded()
-        if playlist_id == 'mostplayed':
-            return self.storage.getMostplayed()
-        if playlist_id == 'freepurchased':
-            return self.storage.getFreepurchased()
+        if playlist_id in ('thumbsup','lastadded','mostplayed','freepurchased'):
+            return self.storage.getAutoPlaylistSongs(playlist_id)
 
         if not self.storage.isPlaylistFetched(playlist_id) or forceRenew:
             self.updatePlaylistSongs(playlist_id)
@@ -33,10 +26,10 @@ class GoogleMusicApi():
         if forceRenew:
             self.updatePlaylists(playlist_type)
 
-        playlists = self.storage.getPlaylistsByType(playlist_type)
+        playlists = self.storage.getPlaylists()
         if len(playlists) == 0 and not forceRenew:
             self.updatePlaylists(playlist_type)
-            playlists = self.storage.getPlaylistsByType(playlist_type)
+            playlists = self.storage.getPlaylists()
 
         return playlists
 

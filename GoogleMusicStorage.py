@@ -1,7 +1,7 @@
 import os
 import sys
 import sqlite3
-import urllib
+
 
 class GoogleMusicStorage():
     def __init__(self):
@@ -11,8 +11,8 @@ class GoogleMusicStorage():
 
     def checkDbInit(self):
         # Make sure to initialize database when it does not exist.
-        if (not os.path.isfile(self.path)):
-	    self.initializeDatabase()
+        if not os.path.isfile(self.path):
+            self.initializeDatabase()
             self.settings.setSetting("fetched_all_songs","0")
 
     def clearCache(self):
@@ -22,7 +22,6 @@ class GoogleMusicStorage():
 
     def getPlaylistSongs(self, playlist_id):
         self._connect()
-
         if playlist_id == 'all_songs':
             result = self.curs.execute("SELECT * FROM songs ORDER BY display_name")
         else:
@@ -34,148 +33,59 @@ class GoogleMusicStorage():
 
         return songs
 
-    def getFilterSongsArtist(self, artist_name):
-        query = "select * from songs where artist = '"+artist_name+"' order by artist"
-        self._connect()
-        result = self.curs.execute(query)
-        songs = result.fetchall()
-        self.conn.close()
-        return songs
-
-    def getFilterSongsAlbum(self, album_name):
-        query = "select * from songs where album = '"+album_name+ "' order by disc asc, track asc"
-        self._connect()
-        result = self.curs.execute(query)
-        songs = result.fetchall()
-        self.conn.close()
-        return songs
-
-
-    def getFilterAllSongsArtist(self, artist_name):
-        query = "select * from songs where artist = '"+artist_name+ "' order by name"
-        self._connect()
-        result = self.curs.execute(query)
-        songs = result.fetchall()
-        self.conn.close()
-        return songs
-
     def getFilterSongs(self, filter_type, filter_criteria):
-        songs = ''
-        print(filter_type)
         if filter_type == 'album':
-            songs = self.getFilterSongsAlbum(filter_criteria.decode('utf8'))
+            query = "select * from songs where album = ? order by disc asc, track asc"
         elif filter_type == 'artist':
-            songs = self.getFilterSongsArtist(filter_criteria.decode('utf8'))
-            #order_by = 'album asc, disc asc, track asc'
-        elif filter_type == 'artist_allsongs':
-            print('allsongs')
-            songs = self.getFilterAllSongsArtist(urllib.unquote_plus(filter_criteria.decode('utf8')))
+            query = "select * from songs where artist = ? order by album asc, disc asc, track asc"
+        else:
+            query = "select * from songs where genre = ? order by title asc"
+
+        self._connect()
+        songs = self.curs.execute(query,(filter_criteria if filter_criteria else '',)).fetchall()
+        self.conn.close()
+
         return songs
-
-    def getCriteriaArtist(self):
-        query = "select artist, max(album_art_url) from songs group by artist order by artist"
-        #print (query)
-        self._connect()
-        criterias = self.curs.execute(query).fetchall()
-        self.conn.close()
-        return criterias
-
-    def getCriteriaAlbum(self, artist_name): #nb provide artist name in utf8
-        query = "select album, max(album_art_url) from songs where artist = '"+artist_name+"' group by album"
-        #can't include album_art_url without getting multiple results for the same album if any songs have different artwork
-        #print (query)
-        self._connect()
-        criterias = self.curs.execute(query).fetchall()
-        #test_res = self.curs.execute(query).fetchone()
-        self.conn.close()
-        #print (test_res)
-        return criterias
 
     def getCriteria(self, criteria, artist_name):
-        #print('getCriteria '+criteria+' '+artist_name)
-        if (criteria == 'artist'):
-            criterias = self.getCriteriaArtist()
-        if (criteria == 'album'):
-            #print (artist_name.decode('utf8'))
-            criterias = self.getCriteriaAlbum(urllib.unquote_plus(artist_name))
-        if artist_name:
-            print repr(criterias)
-        return criterias
-#-------------------------------------------------------------
-#     def getFilterSongs(self, filter_type, filter_criteria):
-#         self._connect()
-#
-#         order_by = 'title asc'
-#         if filter_type == 'album':
-#             order_by = 'disc asc, track asc'
-#         elif filter_type == 'artist':
-#             order_by = 'album asc, disc asc, track asc'
-#
-#         query = "SELECT * FROM songs WHERE %s = ? ORDER BY %s, display_name" % (filter_type, order_by)
-#         result = self.curs.execute(query, (filter_criteria.decode('utf8') if filter_criteria else '',))
-#         songs = result.fetchall()
-#         self.conn.close()
-#
-#         return songs
-#
-#
-#
-#
-#
-#
-#     def getCriteria(self, criteria, artist):
-#         print ('here I am')
-#         self._connect()
-#         if artist:
-#             artist = 'WHERE artist = "'+artist+'"'
-#             #print artist
-#         criterias = self.curs.execute("SELECT "+criteria+", album_art_url FROM "+
-#                                       "(SELECT "+criteria+", album_art_url FROM songs "+artist+" GROUP BY "+criteria+", album_art_url) "+
-#                                       "GROUP BY "+criteria).fetchall()
-#         self.conn.close()
-#         return criterias
-
-    def getPlaylistsByType(self, playlist_type):
         self._connect()
-        result = self.curs.execute("SELECT playlist_id, name FROM playlists WHERE playlists.type = ? ORDER BY name", (playlist_type,))
+        if (criteria == 'artist'):
+            result = self.curs.execute("select artist, max(album_art_url) from songs group by artist")
+        elif (criteria == 'album'):
+            if artist_name:
+               result = self.curs.execute("select album, max(album_art_url) from songs where artist=? group by album",(artist_name.decode('utf8'),))
+            else:
+               result = self.curs.execute("select album, max(album_art_url) from songs group by album")
+        else:
+            result = self.curs.execute("select genre from songs group by genre")
+
+        criterias = result.fetchall()
+        self.conn.close()
+
+        return criterias
+
+    def getPlaylists(self):
+        self._connect()
+        result = self.curs.execute("SELECT playlist_id, name FROM playlists ORDER BY name")
         playlists = result.fetchall()
         self.conn.close()
-
         return playlists
 
-    def getThumbsup(self):
+    def getAutoPlaylistSongs(self,playlist):
+        querys = {'thumbsup':'SELECT * FROM songs WHERE rating = 5 ORDER BY display_name',
+                  'lastadded':'SELECT * FROM songs ORDER BY creation_date desc LIMIT 500',
+                  'mostplayed':'SELECT * FROM songs ORDER BY play_count desc LIMIT 500',
+                  'freepurchased':'SELECT * FROM songs WHERE type = 0 OR type = 1',
+                 }
         self._connect()
-        result = self.curs.execute("SELECT * FROM songs WHERE rating = 5 ORDER BY display_name")
-        results = result.fetchall()
+        result = self.curs.execute(querys[playlist]).fetchall()
         self.conn.close()
-        return results
-
-    def getLastadded(self):
-        self._connect()
-        result = self.curs.execute("SELECT * FROM songs ORDER BY creation_date desc LIMIT 500")
-        results = result.fetchall()
-        self.conn.close()
-        return results
-
-    def getMostplayed(self):
-        self._connect()
-        result = self.curs.execute("SELECT * FROM songs ORDER BY play_count desc LIMIT 500")
-        results = result.fetchall()
-        self.conn.close()
-        return results
-
-    def getFreepurchased(self):
-        self._connect()
-        result = self.curs.execute("SELECT * FROM songs WHERE type = 0 OR type = 1")
-        results = result.fetchall()
-        self.conn.close()
-        return results
+        return result
 
     def getSong(self, song_id):
         self._connect()
         result = self.curs.execute("SELECT * FROM songs WHERE song_id = ? ", (song_id,)).fetchone()
         self.conn.close()
-
         return result
 
     def getSearch(self, query):
@@ -183,9 +93,7 @@ class GoogleMusicStorage():
         self._connect()
         result = self.curs.execute("SELECT * FROM songs WHERE name like ? OR artist like ? ORDER BY display_name", (query,query,)).fetchall()
         self.conn.close()
-
         return result
-
 
     def storePlaylistSongs(self, playlists_songs):
         self._connect()
@@ -193,7 +101,7 @@ class GoogleMusicStorage():
 
         self.curs.execute("DELETE FROM playlists_songs")
         self.curs.execute("DELETE FROM playlists")
-                            
+
         api_songs = []
 
         for playlist in playlists_songs:
@@ -210,8 +118,6 @@ class GoogleMusicStorage():
         self.conn.close()
 
         self.storeInAllSongs(api_songs)
-            #for track in playlist['tracks']:
-            #   print track['trackId']+' '+track['id']
 
     def storeApiSongs(self, api_songs, playlist_id = 'all_songs'):
         self._connect()
@@ -232,35 +138,34 @@ class GoogleMusicStorage():
         self.conn.commit()
         self.conn.close()
 
-	self.storeInAllSongs(api_songs)
- 
-    def storeInAllSongs(self, api_songs):
+        self.storeInAllSongs(api_songs)
 
+    def storeInAllSongs(self, api_songs):
         self._connect()
         self.curs.execute("PRAGMA foreign_keys = OFF")
 
         def songs():
           for api_song in api_songs:
               yield {
-                  'song_id': (api_song["id"] if "id" in api_song else api_song['storeId']),
-                  'comment': (api_song["comment"] if "comment" in api_song else 0),
+                  'song_id': (api_song["id"] if "id" in api_song else api_song['storeId']), 
+                  'comment': (api_song["comment"] if "comment" in api_song else ''),
                   'rating': (api_song["rating"] if "rating" in api_song else 0),
                   'last_played': (api_song["lastPlayed"] if "lastPlayed" in api_song else api_song.get("recentTimestamp",None)),
                   'disc': (api_song["disc"] if "disc" in api_song else api_song.get("discNumber",None)),
                   'composer': (api_song["composer"] if "composer" in api_song else 0),
                   'year': (api_song["year"] if "year" in api_song else 0),
-                  'album': (api_song["album"] if "album" in api_song else 'Unknown'),
+                  'album': (api_song["album"] if "album" in api_song and api_song["album"] else '-Unknown-'),
                   'title': api_song["title"],
-                  'album_artist': (api_song["albumArtist"] if "albumArtist" in api_song else 'Unknown'),
+                  'album_artist': (api_song["albumArtist"] if "albumArtist" in api_song else '-Unknown-'),
                   'type': (api_song["type"] if "type" in api_song else 0),
                   'track': (api_song["track"] if "track" in api_song else api_song.get("trackNumber",None)),
                   'total_tracks': (api_song["total_tracks"] if "total_tracks" in api_song else api_song.get("totalTrackCount",None)),
                   'beats_per_minute': (api_song["beatsPerMinute"] if "beatsPerMinute" in api_song else 0),
-                  'genre': (api_song["genre"] if "genre" in api_song else ''),
+                  'genre': (api_song["genre"] if "genre" in api_song and api_song["genre"] else '-Unknown-'),
                   'play_count': (api_song["playCount"] if "playCount" in api_song else 0),
                   'creation_date': (api_song["creationDate"] if "creationDate" in api_song else api_song.get("creationTimestamp", 0)),
                   'name': (api_song["name"] if "name" in api_song else api_song["title"]),
-                  'artist': (api_song["artist"] if "artist" in api_song else 'Unknown'),
+                  'artist': (api_song["artist"] if "artist" in api_song and api_song["artist"] else '-Unknown-'),
                   'url': api_song.get("url", None),
                   'total_discs': (api_song["total_discs"] if "total_discs" in api_song else api_song.get("totalDiscCount",None)),
                   'duration': int(api_song["durationMillis"])/1000,
@@ -308,14 +213,13 @@ class GoogleMusicStorage():
         fetched = False
         if playlist_id == 'all_songs':
             if self.settings.getSetting("fetched_all_songs"):
-		fetched = bool(int(self.settings.getSetting("fetched_all_songs")))
+                fetched = bool(int(self.settings.getSetting("fetched_all_songs")))
         else:
             self._connect()
             playlist = self.curs.execute("SELECT fetched FROM playlists WHERE playlist_id = ?", (playlist_id,)).fetchone()
             fetched = bool(playlist[0])
             self.conn.close()
 
-        #print "TESTE "+playlist_id+" "+repr(fetched)+" "+self.settings.getSetting("fetched_all_songs")
         return fetched
 
     def updateSongStreamUrl(self, song_id, stream_url):
@@ -381,7 +285,7 @@ class GoogleMusicStorage():
         self.conn.close()
 
     def _getSongDisplayName(self, api_song):
-        displayName = "UNKNOWN"
+        displayName = "-Unknown-"
         song_name = api_song.get("title")
         song_artist = api_song.get("artist")
 
@@ -401,17 +305,3 @@ class GoogleMusicStorage():
         elif "albumArtRef" in api_song:
             url = api_song["albumArtRef"][0]["url"]
         return url
-
-    def _encodeApiSong(self, api_song):
-        encoding_keys = ["id", "comment", "composer", "album", "title", "albumArtist", "titleNorm", "albumArtistNorm",
-                         "genre", "name", "albumNorm", "artist", "url", "artistNorm", "albumArtUrl"]
-
-        song = {}
-        for key in api_song:
-            key = key.encode('utf-8')
-            if key in encoding_keys:
-                song[key] = api_song[key].encode('utf-8')
-            else:
-                song[key] = api_song[key]
-
-        return song
