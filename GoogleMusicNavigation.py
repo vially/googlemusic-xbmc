@@ -218,7 +218,7 @@ class GoogleMusicNavigation():
         listItems = []
         stations = self.api.getStations()
         for rs in stations:
-           listItems.append(self.addFolderListItem(rs['name'], {'path':"station",'id':rs['id']}))
+           listItems.append(self.addFolderListItem(rs['name'], {'path':"station",'id':rs['id']}, album_art_url=rs['imageUrl']))
         return listItems
 
     def getStationTracks(self,station_id):
@@ -229,7 +229,13 @@ class GoogleMusicNavigation():
             li = self.xbmcgui.ListItem(track['title'])
             li.setProperty('IsPlayable', 'true')
             li.setProperty('Music', 'true')
-            url = '%s?action=play_song&song_id=%s&title=%s' % (sys.argv[0],utils.id_or_nid(track).encode('utf8'),track['title'].encode('utf8'))
+            url = '%s?action=play_song&song_id=%s' % (sys.argv[0],utils.id_or_nid(track).encode('utf8'))
+            infos = {}
+            for k,v in track.iteritems():
+                if k in ('title','album','artist'):
+                    url = url+'&'+repr(k)+'='+repr(v)
+                    infos[k] = v
+            li.setInfo(type='music', infoLabels=infos)
             li.setPath(url)
             listItems.append([url,li])
         return listItems

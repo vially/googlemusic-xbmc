@@ -25,6 +25,7 @@ class GoogleMusicPlaySong():
             li = self.xbmcgui.ListItem(label)
             li.setProperty('IsPlayable', 'true')
             li.setProperty('Music', 'true')
+            li.setInfo(type='music', infoLabels=params)
             url = self.__getSongStreamUrl(song_id)
 
         self.main.log("URL :: "+repr(url))
@@ -97,19 +98,15 @@ class GoogleMusicPlaySong():
         #self.main.log("playlistItems:: "+repr(playlistItems))
 
         if position+1 >= len(playlistItems['result']['items']):
-            self.main.log("playlist end:: position "+repr(position)+" size "+len(playlistItems['result']['items']))
+            self.main.log("playlist end:: position "+repr(position)+" size "+repr(len(playlistItems['result']['items'])))
             return
 
         song_id_next = self.main.parameters_string_to_dict(playlistItems['result']['items'][position+1]['file']).get("song_id")
         self.__getSongStreamUrl(song_id_next)
 
-        # get playing song duration
-        duration = playlistItems['result']['items'][position]['duration']
-
         # stream url expires in 1 minute, refetch to always have a valid one
-        while duration > 50:
+        while True:
             xbmc.sleep(50000)
-            duration = duration - 50
 
             # test if music changed
             playerProperties = loadJson(xbmc.executeJSONRPC(jsonGetPlaylistPos))
