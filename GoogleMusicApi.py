@@ -8,11 +8,11 @@ class GoogleMusicApi():
         self.device    = None
         self.login     = None
         
-    def getApi(self):
+    def getApi(self,nocache=False):
         if self.api == None :
             import GoogleMusicLogin
             self.login = GoogleMusicLogin.GoogleMusicLogin()
-            self.login.login()
+            self.login.login(nocache)
             self.api = self.login.getApi()
             self.device = self.login.getDevice()
         return self.api
@@ -66,7 +66,7 @@ class GoogleMusicApi():
         #api_songs = [song for chunk in api_songs for song in chunk]
         api_songs = self.getApi().get_all_songs()
         self.main.log("Library Size: "+repr(len(api_songs)))
-        self.main.log("First Song: "+repr(api_songs[0]))
+        #self.main.log("First Song: "+repr(api_songs[0]))
         self.storage.storeApiSongs(api_songs, 'all_songs')
 
     def updatePlaylistSongs(self, playlist_id):
@@ -83,6 +83,8 @@ class GoogleMusicApi():
             self.storage.storePlaylists(playlists[playlist_type], playlist_type)
 
     def getSongStreamUrl(self, song_id):
+        # using cached cookies fails with all access tracks
+        self.getApi(nocache=True)
         device_id = self.getDevice()
         self.main.log("getSongStreamUrl device: "+device_id)
 
