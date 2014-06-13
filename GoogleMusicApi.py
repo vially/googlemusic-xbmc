@@ -70,33 +70,16 @@ class GoogleMusicApi():
         self.storage.storeApiSongs(api_songs, 'all_songs')
 
     def updatePlaylistSongs(self, playlist_id):
-        if self.getDevice():
-            self.storage.storePlaylistSongs(self.api.get_all_user_playlist_contents())
-        else:
-            self.storage.storeApiSongs(self.api.get_playlist_songs(playlist_id), playlist_id)
+        self.storage.storePlaylistSongs(self.getApi().get_all_user_playlist_contents())
 
     def updatePlaylists(self, playlist_type):
-        if self.getDevice():
-            self.storage.storePlaylistSongs(self.api.get_all_user_playlist_contents())
-        else:
-            playlists = self.api.get_all_playlist_ids(playlist_type)
-            self.storage.storePlaylists(playlists[playlist_type], playlist_type)
+        self.storage.storePlaylistSongs(self.getApi().get_all_user_playlist_contents())
 
     def getSongStreamUrl(self, song_id):
         # using cached cookies fails with all access tracks
-        self.getApi(nocache=True)
-        device_id = self.getDevice()
-        self.main.log("getSongStreamUrl device: "+device_id)
+        self.getApi()
 
-        if device_id:
-            stream_url = self.api.get_stream_url(song_id, device_id)
-        else:
-            streams = self.api.get_stream_urls(song_id)
-            if len(streams) > 1:
-                self.main.xbmc.executebuiltin("XBMC.Notification("+plugin+",'All Access track not playable')")
-                raise Exception('All Access track not playable, no mobile device found in account!')
-            stream_url = streams[0]
-
+        stream_url = self.login.getStreamUrl(song_id)
         self.storage.updateSongStreamUrl(song_id, stream_url)
         self.main.log("getSongStreamUrl: "+stream_url)
         return stream_url

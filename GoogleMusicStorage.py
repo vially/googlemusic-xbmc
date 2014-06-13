@@ -1,6 +1,7 @@
 import os
 import sys
 import sqlite3
+import time
 
 
 class GoogleMusicStorage():
@@ -10,6 +11,20 @@ class GoogleMusicStorage():
         self.path     = os.path.join(self.xbmc.translatePath("special://database"), self.settings.getSetting('sqlite_db'))
 
     def checkDbInit(self):
+        # check if auto update is enabled
+        if os.path.isfile(self.path):
+            updatelib = int(self.settings.getSetting('updatelib'))
+            if updatelib != 0:
+                #difftime = datetime.datetime.now() - datetime.datetime.fromtimestamp(os.path.getctime(self.path))
+                difftime = time.time() - float(self.settings.getSetting('fetched_all_songs'))
+
+                if difftime > 7 * 24 * 60 * 60: # week
+                    self.clearCache()
+                elif updatelib == 2 and difftime > 24 * 60 * 60: # day
+                    self.clearCache()
+                elif updatelib == 3 and difftime > 60 * 60: # hour
+                    self.clearCache()
+                
         # Make sure to initialize database when it does not exist.
         if not os.path.isfile(self.path):
             self.initializeDatabase()
@@ -132,7 +147,7 @@ class GoogleMusicStorage():
             self.curs.executemany("INSERT INTO playlists_songs (playlist_id, song_id) VALUES (?, ?)", [(playlist_id, s["track_id"]) for s in api_songs])
 
         if playlist_id == 'all_songs':
-            self.settings.setSetting("fetched_all_songs", "1")
+            self.settings.setSetting("fetched_all_songs", str(time.time()))
         else:
             self.curs.execute("UPDATE playlists SET fetched = 1 WHERE playlist_id = ?", (playlist_id,))
 
@@ -214,7 +229,8 @@ class GoogleMusicStorage():
         fetched = False
         if playlist_id == 'all_songs':
             if self.settings.getSetting("fetched_all_songs"):
-                fetched = bool(int(self.settings.getSetting("fetched_all_songs")))
+                fetched = (self.settings.getSetting("fetched_all_songs") != "0")
+                #print "Fetched "+repr(fetched)+" "+self.settings.getSetting("fetched_all_songs")
         else:
             self._connect()
             playlist = self.curs.execute("SELECT fetched FROM playlists WHERE playlist_id = ?", (playlist_id,)).fetchone()

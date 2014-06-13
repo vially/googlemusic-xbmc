@@ -11,7 +11,7 @@ class GoogleMusicNavigation():
         self.xbmcplugin = self.main.xbmcplugin
 
         self.language = self.main.settings.getLocalizedString
-
+        self.icon = self.main.settings.getAddonInfo('icon')
         self.api = GoogleMusicApi.GoogleMusicApi()
         self.song = self.main.song
 
@@ -83,6 +83,8 @@ class GoogleMusicNavigation():
                 cm = self.getPlayAllContextMenuItems(params['playlist_id'])
             elif 'playlist_type' in params:
                 cm = self.getPlaylistsContextMenuItems(params['playlist_type'])
+            elif params['path'] == 'library':
+                cm.append(('Update Library', "XBMC.RunPlugin(%s?action=update_library)" % sys.argv[0]))
             menuItems.append(self.addFolderListItem(menu_item['title'], params, cm))
         return menuItems
 
@@ -100,10 +102,13 @@ class GoogleMusicNavigation():
             self.api.clearCache()
         elif (get("action") == "clear_cookie"):
             self.api.clearCookie()
+        elif (get("action") == "update_library"):
+            self.api.clearCache()
+            self.xbmc.executebuiltin("XBMC.RunPlugin(%s)" % sys.argv[0])
         else:
             self.main.log("Invalid action: " + get("action"))
 
-    def addFolderListItem(self, name, params={}, contextMenu=[], album_art_url=""):
+    def addFolderListItem(self, name, params={}, contextMenu=[], album_art_url=''):
         li = self.xbmcgui.ListItem(label=name, iconImage=album_art_url, thumbnailImage=album_art_url)
         li.setProperty("Folder", "true")
 
@@ -155,7 +160,7 @@ class GoogleMusicNavigation():
             if len(genre)>1:
                 art = genre[1]
             else:
-                art = self.main.__icon__
+                art = self.icon
             cm = self.getFilterContextMenuItems(criteria,genre[0])
             listItems.append(self.addFolderListItem(genre[0], {'path':criteria, 'name':genre[0]}, cm, art))
         return listItems
@@ -218,7 +223,7 @@ class GoogleMusicNavigation():
         listItems = []
         stations = self.api.getStations()
         for rs in stations:
-           listItems.append(self.addFolderListItem(rs['name'], {'path':"station",'id':rs['id']}, album_art_url=rs['imageUrl']))
+           listItems.append(self.addFolderListItem(rs['name'], {'path':"station",'id':rs['id']}, album_art_url=rs.get('imageUrl',self.icon)))
         return listItems
 
     def getStationTracks(self,station_id):
@@ -233,7 +238,7 @@ class GoogleMusicNavigation():
             infos = {}
             for k,v in track.iteritems():
                 if k in ('title','album','artist'):
-                    url = url+'&'+repr(k)+'='+repr(v)
+                    url = url+'&'+unicode(k)+'='+unicode(v)
                     infos[k] = v
             li.setInfo(type='music', infoLabels=infos)
             li.setPath(url)

@@ -6,8 +6,6 @@ plugin = "GoogleMusic-" + version
 
 # xbmc hooks
 settings = xbmcaddon.Addon(id='plugin.audio.googlemusic')
-__info__ = settings.getAddonInfo
-__icon__ = __info__('icon')
 
 dbg = settings.getSetting( "debug" ) == "true"
 dbglevel = 3
@@ -71,7 +69,7 @@ if (__name__ == "__main__" ):
             login.initDevice()
 
             if not storage.isPlaylistFetched('all_songs'):
-                xbmc.executebuiltin("XBMC.Notification("+plugin+",'Loading library',5000,"+__icon__ +")")
+                xbmc.executebuiltin("XBMC.Notification("+plugin+",'Loading library',5000,"+settings.getAddonInfo('icon')+")")
                 log('Loading library')
                 navigation.api.loadLibrary()
 
