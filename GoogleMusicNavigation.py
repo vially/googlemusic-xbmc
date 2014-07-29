@@ -57,7 +57,7 @@ class GoogleMusicNavigation():
         elif self.path == "artist_allsongs":
             listItems = self.listFilterSongs("artist",get('name'))
         elif self.path in ["genre","artist","album"]:
-            listItems = self.listFilterSongs(self.path,get('name'))
+            listItems = self.listFilterSongs(self.path,get('name'),get('artist'))
         elif self.path == "search":
             import CommonFunctions as common
             query = common.getUserInput(self.language(30208), '')
@@ -108,15 +108,10 @@ class GoogleMusicNavigation():
         else:
             self.main.log("Invalid action: " + get("action"))
 
-    def addFolderListItem(self, name, params={}, contextMenu=[], album_art_url=''):
+    def addFolderListItem(self, name, params, contextMenu=[], album_art_url=''):
         li = self.xbmcgui.ListItem(label=name, iconImage=album_art_url, thumbnailImage=album_art_url)
-        li.setProperty("Folder", "true")
-
-        url = sys.argv[0] + '?' + urllib.urlencode(params)
-
-        if len(contextMenu) > 0:
-            li.addContextMenuItems(contextMenu, replaceItems=True)
-
+        li.addContextMenuItems(contextMenu, replaceItems=True)
+        url = "?".join([sys.argv[0],urllib.urlencode(params)])
         return url, li, "true"
 
     def addSongItem(self, song):
@@ -147,22 +142,31 @@ class GoogleMusicNavigation():
         playlists = self.api.getPlaylistsByType(playlist_type)
         return self.addPlaylistsItems(playlists)
 
-    def listFilterSongs(self, filter_type, filter_criteria):
+    def listFilterSongs(self, filter_type, filter_criteria, artist=''):
         if filter_criteria:
             filter_criteria = urllib.unquote_plus(filter_criteria)
-        songs = self.api.getFilterSongs(filter_type, filter_criteria)
+        if artist:
+            artist = urllib.unquote_plus(artist)
+        songs = self.api.getFilterSongs(filter_type, filter_criteria, artist)
         return self.addSongsFromLibrary(songs)
 
     def getCriteria(self, criteria, artist=''):
         listItems = []
-        genres = self.api.getCriteria(criteria,artist)
-        for genre in genres:
-            if len(genre)>1:
-                art = genre[1]
-            else:
+        append = listItems.append
+        addFolderListItem = self.addFolderListItem
+        getCm = self.getFilterContextMenuItems
+        #self.main.log("CRITERIA: "+criteria+" "+artist)
+        items = self.api.getCriteria(criteria,artist)
+        for item in items:
+            try:
+                art = item[-1]
+                year = item[1]
+            except:
                 art = self.icon
-            cm = self.getFilterContextMenuItems(criteria,genre[0])
-            listItems.append(self.addFolderListItem(genre[0], {'path':criteria, 'name':genre[0]}, cm, art))
+                year = 0
+            folder = addFolderListItem(item[0], {'path':criteria, 'name':item[0], 'artist':artist}, getCm(criteria,item[0]), art)
+            folder[1].setInfo(type='music', infoLabels={'year':year,'artist':artist})
+            append(folder)
         return listItems
 
     def addPlaylistsItems(self, playlists):

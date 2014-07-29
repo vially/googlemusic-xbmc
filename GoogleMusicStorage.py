@@ -48,16 +48,21 @@ class GoogleMusicStorage():
 
         return songs
 
-    def getFilterSongs(self, filter_type, filter_criteria):
+    def getFilterSongs(self, filter_type, filter_criteria, artist):
+        #print "storage getfiltersongs: "+filter_type+" "+repr(filter_criteria)+" "+repr(artist)
+        
         if filter_type == 'album':
-            query = "select * from songs where album = ? order by disc asc, track asc"
+            if artist:
+                query = "select * from songs where album = :filter and artist = :artist order by disc asc, track asc"
+            else:
+                query = "select * from songs where album = :filter order by disc asc, track asc"
         elif filter_type == 'artist':
-            query = "select * from songs where artist = ? order by album asc, disc asc, track asc"
+            query = "select * from songs where artist = :filter order by album asc, disc asc, track asc"
         else:
-            query = "select * from songs where genre = ? order by title asc"
-
+            query = "select * from songs where genre = :filter order by title asc"
+            
         self._connect()
-        songs = self.curs.execute(query,(filter_criteria if filter_criteria else '',)).fetchall()
+        songs = self.curs.execute(query,{'filter':filter_criteria if filter_criteria else '','artist':artist}).fetchall()
         self.conn.close()
 
         return songs
@@ -65,12 +70,12 @@ class GoogleMusicStorage():
     def getCriteria(self, criteria, artist_name):
         self._connect()
         if (criteria == 'artist'):
-            result = self.curs.execute("select artist, max(album_art_url) from songs group by artist")
+            result = self.curs.execute("select artist, year, max(album_art_url) from songs group by artist")
         elif (criteria == 'album'):
             if artist_name:
-               result = self.curs.execute("select album, max(album_art_url) from songs where artist=? group by album",(artist_name.decode('utf8'),))
+               result = self.curs.execute("select album, year, album_artist, max(album_art_url) from songs where artist=? group by album",(artist_name.decode('utf8'),))
             else:
-               result = self.curs.execute("select album, max(album_art_url) from songs group by album")
+               result = self.curs.execute("select album, year, album_artist, max(album_art_url) from songs group by album")
         else:
             result = self.curs.execute("select genre from songs group by genre")
 
@@ -81,8 +86,7 @@ class GoogleMusicStorage():
 
     def getPlaylists(self):
         self._connect()
-        result = self.curs.execute("SELECT playlist_id, name FROM playlists ORDER BY name")
-        playlists = result.fetchall()
+        playlists = self.curs.execute("SELECT playlist_id, name FROM playlists ORDER BY name").fetchall()
         self.conn.close()
         return playlists
 
