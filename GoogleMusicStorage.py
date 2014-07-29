@@ -243,6 +243,12 @@ class GoogleMusicStorage():
 
         return fetched
 
+    def incrementSongPlayCount(self, song_id):
+        self._connect()
+        self.curs.execute("UPDATE songs SET play_count = play_count+1 WHERE song_id = ?", (song_id,))
+        self.conn.commit()
+        self.conn.close()
+        
     def updateSongStreamUrl(self, song_id, stream_url):
         self._connect()
         self.curs.execute("UPDATE songs SET stream_url = ? WHERE song_id = ?", (stream_url, song_id))

@@ -33,12 +33,21 @@ class GoogleMusicPlaySong():
         li.setPath(url)
         self.main.xbmcplugin.setResolvedUrl(handle=int(sys.argv[1]), succeeded=True, listitem=li)
 
+        self.main.xbmc.sleep(1000)
+
+        self.__incrementSongPlayCount(song_id)
+        
         if prefetch=="true":
             try:
                 self.__prefetchUrl()
             except Exception as ex:
                 self.main.log("ERROR trying to fetch url: "+repr(ex))
                 #raise
+                
+    def __incrementSongPlayCount(self,song_id):
+        import GoogleMusicApi
+        self.api = GoogleMusicApi.GoogleMusicApi()
+        return self.api.incrementSongPlayCount(song_id)
 
     def __getSongStreamUrl(self,song_id):
         import GoogleMusicApi

@@ -83,6 +83,14 @@ class GoogleMusicApi():
         self.storage.updateSongStreamUrl(song_id, stream_url)
         self.main.log("getSongStreamUrl: "+stream_url)
         return stream_url
+        
+    def incrementSongPlayCount(self, song_id):
+        try:
+            self.getApi().increment_song_playcount(song_id)
+        except Exception as ex:
+            self.main.log("ERROR trying to increment playcount: "+repr(ex))
+            pass
+        self.storage.incrementSongPlayCount(song_id)
 
     def getFilterSongs(self, filter_type, filter_criteria, artist):
         return self.storage.getFilterSongs(filter_type, filter_criteria, artist)
