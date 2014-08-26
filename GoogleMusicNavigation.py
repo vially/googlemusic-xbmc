@@ -147,20 +147,18 @@ class GoogleMusicNavigation():
     def getCriteria(self, criteria, artist=''):
         listItems = []
         append = listItems.append
-        addFolderListItem = self.addFolderListItem
+        addFolder = self.addFolderListItem
         getCm = self.getFilterContextMenuItems
         #self.main.log("CRITERIA: "+criteria+" "+artist)
         items = self.api.getCriteria(criteria,artist)
-        for item in items:
-            try:
-                art = item[-1]
-                year = item[1]
-            except:
-                art = self.icon
-                year = 0
-            folder = addFolderListItem(item[0], {'path':criteria, 'name':item[0], 'artist':artist}, getCm(criteria,item[0]), art)
-            folder[1].setInfo(type='music', infoLabels={'year':year,'artist':artist})
-            append(folder)
+        if criteria == 'album':
+            for item in items:
+                folder = addFolder('[%s] %s'%(item[0],item[1]),{'path':criteria,'name':item[1],'artist':artist},getCm(criteria,item[1]),item[-1])
+                folder[1].setInfo(type='music', infoLabels={'year':item[2],'artist':artist})
+                append(folder)
+        else:
+            for item in items:
+                append( addFolder(item[0], {'path':criteria,'name':item[0],'artist':artist}, getCm(criteria,item[0]), self.icon))
         return listItems
 
     def addPlaylistsItems(self, playlists):

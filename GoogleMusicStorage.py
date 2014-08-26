@@ -70,12 +70,12 @@ class GoogleMusicStorage():
     def getCriteria(self, criteria, artist_name):
         self._connect()
         if (criteria == 'artist'):
-            result = self.curs.execute("select artist, year, max(album_art_url) from songs group by artist")
+            result = self.curs.execute("select artist,  max(album_art_url) from songs group by artist")
         elif (criteria == 'album'):
             if artist_name:
-               result = self.curs.execute("select album, year, album_artist, max(album_art_url) from songs where artist=? group by album",(artist_name.decode('utf8'),))
+               result = self.curs.execute("select album_artist, album, year, max(album_art_url) from songs where artist=? group by album_artist, album",(artist_name.decode('utf8'),))
             else:
-               result = self.curs.execute("select album, year, album_artist, max(album_art_url) from songs group by album")
+               result = self.curs.execute("select album_artist, album, year, max(album_art_url) from songs group by album_artist, album")
         else:
             result = self.curs.execute("select genre from songs group by genre")
 
