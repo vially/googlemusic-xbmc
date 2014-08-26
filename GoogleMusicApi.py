@@ -99,7 +99,20 @@ class GoogleMusicApi():
         return self.storage.getCriteria(criteria,artist)
 
     def getSearch(self, query):
-        return self.storage.getSearch(query)
+        result = self.storage.getSearch(query)
+        try:
+            aaresult = self.getApi().search_all_access(query)
+            for song in aaresult['song_hits']:
+                track = song['track']
+                self.main.log("RESULT: "+track['artist']+" - "+track['title'])
+                result.append([track['nid'],'',0,0,track['discNumber'],'',0,track['album'],
+                               track['title'],track['albumArtist'],track['trackType'],
+                               track['trackNumber'],0,0,'',track.get('playCount', 0),0,track['title'],
+                               track['artist'],'',0,int(track['durationMillis'])/1000,
+                               track['albumArtRef'][0]['url'],track['artist']+" - "+track['title']+" **",''])
+        except Exception as e:
+            self.main.log("*** NO ALL ACCESS RESULT IN SEARCH *** "+repr(e))
+        return result
 
     def clearCache(self):
         self.storage.clearCache()
