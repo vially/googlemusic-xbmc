@@ -24,7 +24,7 @@ class GoogleMusicNavigation():
             {'title':self.language(30206), 'params':{'path':"filter", 'criteria':"album"}},
             {'title':self.language(30207), 'params':{'path':"filter", 'criteria':"genre"}},
         )
-        
+
     def listMenu(self, params={}):
         get = params.get
         self.path = get("path", "root")
@@ -69,18 +69,21 @@ class GoogleMusicNavigation():
         self.xbmcplugin.addDirectoryItems(int(sys.argv[1]), listItems)
         self.xbmcplugin.endOfDirectory(int(sys.argv[1]), succeeded=True, updateListing=updateListing)
 
-    def getMenuItems(self,items):
+    def getMenuItems(self, items):
         ''' Build the plugin root menu. '''
         menuItems = []
         for menu_item in items:
             params = menu_item['params']
             cm = []
             if 'playlist_id' in params:
-                cm = self.getPlayAllContextMenuItems(params['playlist_id'])
+                cm = self.getPlayAllContextMenuItems(menu_item['title'], params['playlist_id'])
             elif 'playlist_type' in params:
-                cm = self.getPlaylistsContextMenuItems(params['playlist_type'])
+                cm = self.getPlaylistsContextMenuItems(menu_item['title'], params['playlist_type'])
             elif params['path'] == 'library':
                 cm.append(('Update Library', "XBMC.RunPlugin(%s?action=update_library)" % sys.argv[0]))
+                cm.append(('Add to favourites', "XBMC.RunPlugin(%s?action=add_favourite&path=library&title=%s)" % (sys.argv[0],menu_item['title'])))
+            elif 'criteria' in params:
+                cm.append(('Add to favourites', "XBMC.RunPlugin(%s?action=add_favourite&path=filter&criteria=%s&title=%s)" % (sys.argv[0],params['criteria'],menu_item['title'])))
             menuItems.append(self.addFolderListItem(menu_item['title'], params, cm))
         return menuItems
 
@@ -96,6 +99,8 @@ class GoogleMusicNavigation():
             self.api.clearCache()
         elif (action == "clear_cookie"):
             self.api.clearCookie()
+        elif (action == "add_favourite"):
+            self.addFavourite(params.pop("title"),params)
         elif (action == "update_library"):
             self.api.clearCache()
             xbmc.executebuiltin("XBMC.RunPlugin(%s)" % sys.argv[0])
@@ -164,7 +169,7 @@ class GoogleMusicNavigation():
     def addPlaylistsItems(self, playlists):
         listItems = []
         for playlist_id, playlist_name in playlists:
-            cm = self.getPlayAllContextMenuItems(playlist_id)
+            cm = self.getPlayAllContextMenuItems(playlist_name, playlist_id)
             listItems.append(self.addFolderListItem(playlist_name, {'path':"playlist", 'playlist_id':playlist_id}, cm))
         return listItems
 
@@ -215,22 +220,25 @@ class GoogleMusicNavigation():
 
         return li
 
-    def getPlayAllContextMenuItems(self, playlist):
+    def getPlayAllContextMenuItems(self, name, playlist):
         cm = []
         cm.append((self.language(30301), "XBMC.RunPlugin(%s?action=play_all&playlist_id=%s)" % (sys.argv[0], playlist)))
         cm.append((self.language(30302), "XBMC.RunPlugin(%s?action=play_all&playlist_id=%s&shuffle=true)" % (sys.argv[0], playlist)))
         cm.append((self.language(30303), "XBMC.RunPlugin(%s?action=update_playlist&playlist_id=%s)" % (sys.argv[0], playlist)))
+        cm.append(('Add to favourites', "XBMC.RunPlugin(%s?action=add_favourite&path=playlist&playlist_id=%s&title=%s)" % (sys.argv[0], playlist, name)))
         return cm
 
     def getFilterContextMenuItems(self, filter_type, filter_criteria):
         cm = []
         cm.append((self.language(30301), "XBMC.RunPlugin(%s?action=play_all&filter_type=%s&filter_criteria=%s)" % (sys.argv[0], filter_type, filter_criteria)))
         cm.append((self.language(30302), "XBMC.RunPlugin(%s?action=play_all&filter_type=%s&filter_criteria=%s&shuffle=true)" % (sys.argv[0], filter_type, filter_criteria)))
+        cm.append(('Add to favourites', "XBMC.RunPlugin(%s?action=add_favourite&path=%s&name=%s&title=%s)" % (sys.argv[0], filter_type, filter_criteria, filter_criteria)))
         return cm
 
-    def getPlaylistsContextMenuItems(self, playlist_type):
+    def getPlaylistsContextMenuItems(self, name, playlist_type):
         cm = []
         cm.append((self.language(30304), "XBMC.RunPlugin(%s?action=update_playlists&playlist_type=%s)" % (sys.argv[0], playlist_type)))
+        cm.append(('Add to favourites', "XBMC.RunPlugin(%s?action=add_favourite&path=playlists&playlist_type=%s&title=%s)" % (sys.argv[0], playlist_type, name)))
         return cm
 
     def getSearch(self, query):
@@ -261,3 +269,19 @@ class GoogleMusicNavigation():
             li.setPath(url)
             listItems.append([url,li])
         return listItems
+
+    def addFavourite(self, name, params):
+        import fileinput
+        path = os.path.join(xbmc.translatePath("special://masterprofile"), "favourites.xml")
+
+        url = ''
+        for k,v in params.iteritems():
+            url = url+'&'+unicode(k)+'='+unicode(v)
+
+        fav = '\t<favourite name="%s" thumb="%s">ActivateWindow(10501,&quot;%s?%s&quot;,return)</favourite>'
+        fav = fav % (name, xbmc.translatePath(self.icon), sys.argv[0], url[1:])
+
+        for line in fileinput.input(path, inplace=1):
+            if line.startswith('</favourites>'):
+                print fav
+            print line,
