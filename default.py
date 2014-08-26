@@ -1,4 +1,4 @@
-import sys, xbmc, xbmcgui, xbmcplugin, xbmcaddon
+import sys, xbmcaddon, xbmcgui, xbmcplugin
 
 # plugin constants
 version = "0.8.x"
@@ -45,7 +45,7 @@ if (__name__ == "__main__" ):
     get = params.get
 
     if (get("action") == "play_song"):
-        song.play(get("song_id"),params)
+        song.play(params)
     else:
 
         import GoogleMusicNavigation
@@ -55,7 +55,8 @@ if (__name__ == "__main__" ):
  
             import GoogleMusicLogin
             login = GoogleMusicLogin.GoogleMusicLogin()
- 
+
+            # if version changed clear cache
             if not settings.getSetting('version') or settings.getSetting('version') != version:
                storage.clearCache()
                login.clearCookie()
@@ -68,12 +69,15 @@ if (__name__ == "__main__" ):
             login.checkCookie()
             login.initDevice()
 
+            # check if library needs to be loaded
             if not storage.isPlaylistFetched('all_songs'):
+                import xbmc
                 xbmc.executebuiltin("XBMC.Notification("+plugin+",'Loading library',5000,"+settings.getAddonInfo('icon')+")")
                 log('Loading library')
                 navigation.api.loadLibrary()
 
             navigation.listMenu()
+
         elif (get("action")):
             navigation.executeAction(params)
         elif (get("path")):

@@ -1,19 +1,15 @@
-import os
-import sys
-import urllib
+import os, sys, urllib, xbmc
 import GoogleMusicApi
 
 class GoogleMusicNavigation():
     def __init__(self):
         self.main = sys.modules["__main__"]
-        self.xbmc = self.main.xbmc
         self.xbmcgui = self.main.xbmcgui
         self.xbmcplugin = self.main.xbmcplugin
 
         self.language = self.main.settings.getLocalizedString
         self.icon = self.main.settings.getAddonInfo('icon')
         self.api = GoogleMusicApi.GoogleMusicApi()
-        self.song = self.main.song
 
         self.main_menu = (
             {'title':self.language(30209), 'params':{'path':"library"}},
@@ -88,41 +84,29 @@ class GoogleMusicNavigation():
             menuItems.append(self.addFolderListItem(menu_item['title'], params, cm))
         return menuItems
 
-    def executeAction(self, params={}):
-        get = params.get
-        if (get("action") == "play_all"):
+    def executeAction(self, params):
+        action = params.pop("action")
+        if (action == "play_all"):
             self.playAll(params)
-        elif (get("action") == "play_song"):
-            self.song.play(get("song_id"))
-        elif (get("action") == "update_playlist"):
+        elif (action == "update_playlist"):
             self.api.getPlaylistSongs(params["playlist_id"], True)
-        elif (get("action") == "update_playlists"):
+        elif (action == "update_playlists"):
             self.api.getPlaylistsByType(params["playlist_type"], True)
-        elif (get("action") == "clear_cache"):
+        elif (action == "clear_cache"):
             self.api.clearCache()
-        elif (get("action") == "clear_cookie"):
+        elif (action == "clear_cookie"):
             self.api.clearCookie()
-        elif (get("action") == "update_library"):
+        elif (action == "update_library"):
             self.api.clearCache()
-            self.xbmc.executebuiltin("XBMC.RunPlugin(%s)" % sys.argv[0])
+            xbmc.executebuiltin("XBMC.RunPlugin(%s)" % sys.argv[0])
         else:
-            self.main.log("Invalid action: " + get("action"))
+            self.main.log("Invalid action: " + action)
 
     def addFolderListItem(self, name, params, contextMenu=[], album_art_url=''):
         li = self.xbmcgui.ListItem(label=name, iconImage=album_art_url, thumbnailImage=album_art_url)
         li.addContextMenuItems(contextMenu, replaceItems=True)
         url = "?".join([sys.argv[0],urllib.urlencode(params)])
         return url, li, "true"
-
-    def addSongItem(self, song):
-        if self.path == 'artist_allsongs' and song[7]:
-            # add album name when showing all artist songs
-            li = self.song.createItem(song, ('['+song[7]+'] '+song[8]))
-        else:
-            li = self.song.createItem(song)
-
-        url = '%s?action=play_song&song_id=%s' % (sys.argv[0], song[0])
-        return url,li
 
     def listPlaylistSongs(self, playlist_id):
         self.main.log("Loading playlist: " + playlist_id)
@@ -131,8 +115,18 @@ class GoogleMusicNavigation():
 
     def addSongsFromLibrary(self, library):
         listItems = []
-        for song in library:
-            listItems.append(self.addSongItem(song))
+        append = listItems.append
+        createItem = self.createItem
+        url = sys.argv[0]+'?action=play_song&song_id=%s&title=%s&artist=%s'
+        # add album name when showing all artist songs
+        if self.path == 'artist_allsongs':
+            for song in library:
+                songItem = createItem(song)
+                songItem.setLabel("".join(['[',song[7],'] ',song[8]]))
+                append([url % (song[0], song[8], song[18]), songItem])
+        else:
+            for song in library:
+                append([url % (song[0], song[8], song[18]), createItem(song)])
         return listItems
 
     def getPlaylists(self, playlist_type):
@@ -186,21 +180,42 @@ class GoogleMusicNavigation():
         else:
             songs = self.api.getFilterSongs(get('filter_type'), get('filter_criteria'))
 
-        player = self.xbmc.Player()
+        player = xbmc.Player()
         if (player.isPlaying()):
             player.stop()
 
-        playlist = self.xbmc.PlayList(self.xbmc.PLAYLIST_MUSIC)
+        playlist = xbmc.PlayList(xbmc.PLAYLIST_MUSIC)
         playlist.clear()
 
-        song_url = "%s?action=play_song&song_id=%s"
+        song_url = sys.argv[0]+"?action=play_song&song_id=%s&title=%s&artist=%s"
         for song in songs:
-            playlist.add(song_url % (sys.argv[0], song[0]), self.song.createItem(song))
+            playlist.add(song_url % (song[0], song[8], song[18]), self.createItem(song))
 
         if (get("shuffle")):
             playlist.shuffle()
 
-        self.xbmc.executebuiltin('playlist.playoffset(music , 0)')
+        xbmc.executebuiltin('playlist.playoffset(music , 0)')
+
+    def createItem(self, song):
+        infoLabels = {
+            'tracknumber': song[11], 'duration': song[21],
+            'year': song[6],         'genre': song[14],
+            'album': song[7],        'artist': song[18],
+            'title': song[8],        'playcount': song[15]
+        }
+
+        li = self.xbmcgui.ListItem(song[23])
+
+        try:
+            li.setThumbnailImage(song[22])
+            li.setIconImage(song[22])
+        except: pass
+        li.setProperty('IsPlayable', 'true')
+        li.setProperty('Music', 'true')
+        li.setProperty('mimetype', 'audio/mpeg')
+        li.setInfo(type='music', infoLabels=infoLabels)
+
+        return li
 
     def getPlayAllContextMenuItems(self, playlist):
         cm = []

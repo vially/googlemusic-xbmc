@@ -5,15 +5,12 @@ from datetime import datetime
 
 from gmusicapi import Mobileclient, Webclient
 
-
 class GoogleMusicLogin():
     def __init__(self):
         self.main      = sys.modules["__main__"]
         self.xbmcgui   = self.main.xbmcgui
-        self.xbmc      = self.main.xbmc
         self.settings  = self.main.settings
         self.gmusicapi = Mobileclient(debug_logging=False,validate=False,verify_ssl=False)
-
 
     def checkCookie(self):
         # Remove cookie data if it is older then 7 days
@@ -30,7 +27,7 @@ class GoogleMusicLogin():
 
     def getStreamUrl(self,song_id):
         device_id = self.getDevice()
-        self.main.log("getStreamUrl device: "+device_id)
+        self.main.log("getStreamUrl songid: %s device: %s"%(song_id,device_id))
 
         if device_id:
             stream_url = self.gmusicapi.get_stream_url(song_id, device_id)
@@ -40,7 +37,8 @@ class GoogleMusicLogin():
             self.login(client='web')
             streams = self.gmusicapi.get_stream_urls(song_id)
             if len(streams) > 1:
-                self.main.xbmc.executebuiltin("XBMC.Notification("+plugin+",'All Access track not playable')")
+                import xbmc
+                xbmc.executebuiltin("XBMC.Notification("+plugin+",'All Access track not playable')")
                 raise Exception('All Access track not playable, no mobile device found in account!')
             stream_url = streams[0]
 

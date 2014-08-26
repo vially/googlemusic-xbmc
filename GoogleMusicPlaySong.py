@@ -4,86 +4,56 @@ class GoogleMusicPlaySong():
 
     def __init__(self):
         self.main       = sys.modules["__main__"]
-        self.xbmcgui    = self.main.xbmcgui
 
-    def play(self, song_id, params={}):
-        song = self.main.storage.getSong(song_id)
+    def play(self, params):
         prefetch = self.main.settings.getSetting( "prefetch" )
+        song_id = params.pop('song_id')
+        song = []
+        if prefetch == "true":
+            song = self.main.storage.getSong(song_id)
 
-        if song:
-            if prefetch=="false" or not song[24] or int(self.main.parameters_string_to_dict(song[24]).get('expire'))  < time.time():
-                 self.main.log("Prefetch disabled or URL invalid or expired :")
-                 url = self.__getSongStreamUrl(song_id)
-            else:
-                 url = song[24]
-
-            li = self.createItem(song)
-        else:
-            self.main.log("Track not in library :: "+repr(params))
-            if params:
-                label=params.get('title')
-            li = self.xbmcgui.ListItem(label)
-            li.setProperty('IsPlayable', 'true')
-            li.setProperty('Music', 'true')
-            li.setInfo(type='music', infoLabels=params)
+        if not song or not song[0] or int(self.main.parameters_string_to_dict(song[0]).get('expire'))  < time.time():
+            self.main.log("Prefetch disabled or URL invalid or expired :")
             url = self.__getSongStreamUrl(song_id)
+        else:
+            url = song[0]
+
+        params.pop('action')
+        li = self.main.xbmcgui.ListItem(params.get('title'))
+        li.setProperty('IsPlayable', 'true')
+        li.setProperty('Music', 'true')
+        li.setProperty('mimetype', 'audio/mpeg')
+        li.setInfo(type='music', infoLabels=params)
 
         self.main.log("URL :: "+repr(url))
 
         li.setPath(url)
         self.main.xbmcplugin.setResolvedUrl(handle=int(sys.argv[1]), succeeded=True, listitem=li)
 
-        self.main.xbmc.sleep(1000)
-
         self.__incrementSongPlayCount(song_id)
-        
-        if prefetch=="true":
+
+        if prefetch == "true":
             try:
                 self.__prefetchUrl()
             except Exception as ex:
                 self.main.log("ERROR trying to fetch url: "+repr(ex))
                 #raise
-                
-    def __incrementSongPlayCount(self,song_id):
+
+    def __incrementSongPlayCount(self, song_id):
+        import xbmc
+        xbmc.sleep(2000)
         import GoogleMusicApi
-        self.api = GoogleMusicApi.GoogleMusicApi()
-        return self.api.incrementSongPlayCount(song_id)
+        api = GoogleMusicApi.GoogleMusicApi()
+        api.incrementSongPlayCount(song_id)
 
-    def __getSongStreamUrl(self,song_id):
+    def __getSongStreamUrl(self, song_id):
         import GoogleMusicApi
-        self.api = GoogleMusicApi.GoogleMusicApi()
-        return self.api.getSongStreamUrl(song_id)
-
-    def createItem(self, song, label=None):
-        infoLabels = {
-            'tracknumber': song[11],
-            'duration': song[21],
-            'year': song[6],
-            'genre': song[14],
-            'album': song[7],
-            'artist': song[18],
-            'title': song[8],
-            'playcount': song[15]
-        }
-
-        if not label:
-            label = song[23]
-
-        if song[22]:
-            li = self.xbmcgui.ListItem(label, iconImage=song[22], thumbnailImage=song[22])
-        else:
-            li = self.xbmcgui.ListItem(label)
-        li.setProperty('IsPlayable', 'true')
-        li.setProperty('Music', 'true')
-        li.setProperty('mimetype', 'audio/mpeg')
-        li.setInfo(type='music', infoLabels=infoLabels)
-
-        return li
+        api = GoogleMusicApi.GoogleMusicApi()
+        return api.getSongStreamUrl(song_id)
 
     def __prefetchUrl(self):
-        import gmusicapi.compat as compat
+        import gmusicapi.compat as compat, xbmc
         loadJson = compat.json.loads
-        xbmc     = self.main.xbmc
         jsonGetPlaylistPos  = '{"jsonrpc":"2.0", "method":"Player.GetProperties", "params":{"playerid":0,"properties":["playlistid","position","percentage"]},"id":1}'
         jsonGetSongDuration = '{"jsonrpc":"2.0", "method":"Playlist.GetItems",    "params":{"playlistid":0, "properties":["file","duration"]}, "id":1}'
 

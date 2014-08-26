@@ -104,7 +104,8 @@ class GoogleMusicStorage():
 
     def getSong(self, song_id):
         self._connect()
-        result = self.curs.execute("SELECT * FROM songs WHERE song_id = ? ", (song_id,)).fetchone()
+        #result = self.curs.execute("SELECT * FROM songs WHERE song_id = ? ", (song_id,)).fetchone()
+        result = self.curs.execute("SELECT stream_url FROM songs WHERE song_id = ? ", (song_id,)).fetchone()
         self.conn.close()
         return result
 
@@ -166,31 +167,32 @@ class GoogleMusicStorage():
 
         def songs():
           for api_song in api_songs:
+              get = api_song.get
               yield {
-                  'song_id': (api_song["id"] if "id" in api_song else api_song['storeId']), 
-                  'comment': (api_song["comment"] if "comment" in api_song else ''),
-                  'rating': (api_song["rating"] if "rating" in api_song else 0),
-                  'last_played': (api_song["lastPlayed"] if "lastPlayed" in api_song else api_song.get("recentTimestamp",None)),
-                  'disc': (api_song["disc"] if "disc" in api_song else api_song.get("discNumber",None)),
-                  'composer': (api_song["composer"] if "composer" in api_song else 0),
-                  'year': (api_song["year"] if "year" in api_song else 0),
-                  'album': (api_song["album"] if "album" in api_song and api_song["album"] else '-Unknown-'),
-                  'title': api_song["title"],
-                  'album_artist': (api_song["albumArtist"] if "albumArtist" in api_song else '-Unknown-'),
-                  'type': (api_song["type"] if "type" in api_song else 0),
-                  'track': (api_song["track"] if "track" in api_song else api_song.get("trackNumber",None)),
-                  'total_tracks': (api_song["total_tracks"] if "total_tracks" in api_song else api_song.get("totalTrackCount",None)),
-                  'beats_per_minute': (api_song["beatsPerMinute"] if "beatsPerMinute" in api_song else 0),
-                  'genre': (api_song["genre"] if "genre" in api_song and api_song["genre"] else '-Unknown-'),
-                  'play_count': (api_song["playCount"] if "playCount" in api_song else 0),
-                  'creation_date': (api_song["creationDate"] if "creationDate" in api_song else api_song.get("creationTimestamp", 0)),
-                  'name': (api_song["name"] if "name" in api_song else api_song["title"]),
-                  'artist': (api_song["artist"] if "artist" in api_song and api_song["artist"] else '-Unknown-'),
-                  'url': api_song.get("url", None),
-                  'total_discs': (api_song["total_discs"] if "total_discs" in api_song else api_song.get("totalDiscCount",None)),
-                  'duration': int(api_song["durationMillis"])/1000,
+                  'song_id':       get("id", get("storeId", get("trackId"))), #+str(i),
+                  'comment':       get("comment", ""),
+                  'rating':        get("rating", 0),
+                  'last_played':   get("lastPlayed", get("recentTimestamp", 0)),
+                  'disc':          get("disc", get("discNumber", 0)),
+                  'composer':      get("composer", 0),
+                  'year':          get("year", 0),
+                  'album':         api_song["album"] if api_song["album"] else '-Unknown-',
+                  'title':         api_song["title"],
+                  'album_artist':  get("albumArtist") if get("albumArtist") else api_song["artist"] if api_song["artist"] else '-Unknown-',
+                  'type':          get("type", 0),
+                  'track':         get("track", get("trackNumber" ,0)),
+                  'total_tracks':  get("total_tracks", get("totalTrackCount", 0)),
+                  'beats_per_minute': get("beatsPerMinute", 0),
+                  'genre':         api_song["genre"] if api_song["genre"] else '-Unknown-',
+                  'play_count':    get("playCount", 0),
+                  'creation_date': get("creationDate", get("creationTimestamp", 0)),
+                  'name':          get("name", api_song["title"]),
+                  'artist':        api_song["artist"] if api_song["artist"] else '-Unknown-',
+                  'url':           get("url", None),
+                  'total_discs':   get("total_discs", get("totalDiscCount", 0)),
+                  'duration':      int(api_song["durationMillis"])/1000,
                   'album_art_url': self._getAlbumArtUrl(api_song),
-                  'display_name': self._getSongDisplayName(api_song),
+                  'display_name':  self._getSongDisplayName(api_song),
               }
 
         self.curs.executemany("INSERT OR REPLACE INTO songs VALUES ("+
