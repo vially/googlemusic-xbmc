@@ -231,20 +231,6 @@ class GoogleMusicStorage():
 
         return stream_url
 
-    def isPlaylistFetched(self, playlist_id):
-        fetched = False
-        if playlist_id == 'all_songs':
-            if self.settings.getSetting("fetched_all_songs"):
-                fetched = (self.settings.getSetting("fetched_all_songs") != "0")
-                #print "Fetched "+repr(fetched)+" "+self.settings.getSetting("fetched_all_songs")
-        else:
-            self._connect()
-            playlist = self.curs.execute("SELECT fetched FROM playlists WHERE playlist_id = ?", (playlist_id,)).fetchone()
-            fetched = bool(playlist[0])
-            self.conn.close()
-
-        return fetched
-
     def incrementSongPlayCount(self, song_id):
         self._connect()
         self.curs.execute("UPDATE songs SET play_count = play_count+1 WHERE song_id = ?", (song_id,))

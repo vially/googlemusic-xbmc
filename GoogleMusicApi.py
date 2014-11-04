@@ -29,12 +29,11 @@ class GoogleMusicApi():
                 
     def getPlaylistSongs(self, playlist_id, forceRenew=False):
         if playlist_id in ('thumbsup','lastadded','mostplayed','freepurchased','feellucky'):
-            return self.storage.getAutoPlaylistSongs(playlist_id)
-
-        if not self.storage.isPlaylistFetched(playlist_id) or forceRenew:
-            self.updatePlaylistSongs(playlist_id)
-
-        songs = self.storage.getPlaylistSongs(playlist_id)
+            songs = self.storage.getAutoPlaylistSongs(playlist_id)
+        else:
+            if forceRenew:
+                self.updatePlaylistSongs()
+            songs = self.storage.getPlaylistSongs(playlist_id)
 
         return songs
 
@@ -44,14 +43,9 @@ class GoogleMusicApi():
                     ['freepurchased','Free and Purchased'],['mostplayed','Most Played']]
 
         if forceRenew:
-            self.updatePlaylists(playlist_type)
+            self.updatePlaylistSongs()
 
-        playlists = self.storage.getPlaylists()
-        if len(playlists) == 0 and not forceRenew:
-            self.updatePlaylists(playlist_type)
-            playlists = self.storage.getPlaylists()
-
-        return playlists
+        return self.storage.getPlaylists()
 
     def getSong(self, song_id):
         return self.storage.getSong(song_id)
@@ -69,10 +63,9 @@ class GoogleMusicApi():
         #self.main.log("First Song: "+repr(api_songs[0]))
         self.storage.storeApiSongs(api_songs, 'all_songs')
 
-    def updatePlaylistSongs(self, playlist_id):
-        self.storage.storePlaylistSongs(self.getApi().get_all_user_playlist_contents())
+        self.updatePlaylistSongs()
 
-    def updatePlaylists(self, playlist_type):
+    def updatePlaylistSongs(self):
         self.storage.storePlaylistSongs(self.getApi().get_all_user_playlist_contents())
 
     def getSongStreamUrl(self, song_id):

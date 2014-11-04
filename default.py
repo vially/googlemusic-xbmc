@@ -70,7 +70,7 @@ if (__name__ == "__main__" ):
             login.initDevice()
 
             # check if library needs to be loaded
-            if not storage.isPlaylistFetched('all_songs'):
+            if settings.getSetting('fetched_all_songs') == '0':
                 import xbmc
                 xbmc.executebuiltin("XBMC.Notification("+plugin+",'Loading library',5000,"+settings.getAddonInfo('icon')+")")
                 log('Loading library')
