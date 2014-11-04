@@ -126,12 +126,12 @@ class GoogleMusicStorage():
         api_songs = []
 
         for playlist in playlists_songs:
-            print playlist['name']+' id:'+playlist['id']+' tracks:'+str(len(playlist['tracks']))
+            #print playlist['name']+' id:'+playlist['id']+' tracks:'+str(len(playlist['tracks']))
             playlistId = playlist['id']
             if len(playlist['name']) > 0:
                 self.curs.execute("INSERT INTO playlists (name, playlist_id, type, fetched) VALUES (?, ?, 'user', 1)", (playlist['name'], playlistId) )
                 for entry in playlist['tracks']:
-                    self.curs.execute("INSERT INTO playlists_songs (playlist_id, song_id) VALUES (?, ?)", (playlistId, entry['trackId']))
+                    self.curs.execute("INSERT INTO playlists_songs (playlist_id, song_id, entry_id ) VALUES (?, ?, ?)", (playlistId, entry['trackId'], entry['id']))
                     if entry.has_key('track'):
                         api_songs.append(entry['track'])
 
@@ -250,7 +250,21 @@ class GoogleMusicStorage():
         self.curs.execute("UPDATE songs SET play_count = play_count+1 WHERE song_id = ?", (song_id,))
         self.conn.commit()
         self.conn.close()
-        
+
+    def addToPlaylist(self, playlist_id, song_id, entry_id):
+        self._connect()
+        self.curs.execute("INSERT OR REPLACE INTO playlists_songs(playlist_id, song_id, entry_id) VALUES (?,?,?)", (playlist_id, song_id, entry_id))
+        self.conn.commit()
+        self.conn.close()
+
+    def delFromPlaylist(self, playlist_id, song_id):
+        self._connect()
+        entry_id = self.curs.execute("SELECT entry_id FROM playlists_songs WHERE playlist_id=? and song_id=?", (playlist_id, song_id)).fetchone()
+        self.curs.execute("DELETE from playlists_songs WHERE entry_id=?", (entry_id[0], ))
+        self.conn.commit()
+        self.conn.close()
+        return entry_id[0]
+
     def updateSongStreamUrl(self, song_id, stream_url):
         self._connect()
         self.curs.execute("UPDATE songs SET stream_url = ? WHERE song_id = ?", (stream_url, song_id))
@@ -303,6 +317,7 @@ class GoogleMusicStorage():
         self.curs.execute('''CREATE TABLE IF NOT EXISTS playlists_songs (
                 playlist_id VARCHAR,
                 song_id VARCHAR,
+                entry_id VARCHAR,
                 FOREIGN KEY(playlist_id) REFERENCES playlists(playlist_id) ON DELETE CASCADE,
                 FOREIGN KEY(song_id) REFERENCES songs(song_id) ON DELETE CASCADE
         )''')

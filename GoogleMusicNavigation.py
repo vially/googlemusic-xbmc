@@ -106,6 +106,13 @@ class GoogleMusicNavigation():
             self.api.clearCookie()
         elif (action == "add_favourite"):
             self.addFavourite(params.pop("title"),params)
+        elif (action == "add_library"):
+            self.api.addAAtrack(params["song_id"])
+            self.api.clearCache()
+        elif (action == "add_playlist"):
+            self.addToPlaylist(params["song_id"])
+        elif (action == "del_from_playlist"):
+            self.api.delFromPlaylist(params["playlist_id"], params["song_id"])
         elif (action == "update_library"):
             self.api.clearCache()
             xbmc.executebuiltin("XBMC.RunPlugin(%s)" % sys.argv[0])
@@ -121,9 +128,11 @@ class GoogleMusicNavigation():
     def listPlaylistSongs(self, playlist_id):
         self.main.log("Loading playlist: " + playlist_id)
         songs = self.api.getPlaylistSongs(playlist_id)
-        return self.addSongsFromLibrary(songs)
+        if playlist_id in ('thumbsup','lastadded','mostplayed','freepurchased','feellucky','all_songs'):
+            return self.addSongsFromLibrary(songs, 'library')
+        return self.addSongsFromLibrary(songs, 'playlist'+playlist_id)
 
-    def addSongsFromLibrary(self, library):
+    def addSongsFromLibrary(self, library, song_type):
         listItems = []
         append = listItems.append
         createItem = self.createItem
@@ -131,12 +140,12 @@ class GoogleMusicNavigation():
         # add album name when showing all artist songs
         if self.path == 'artist_allsongs':
             for song in library:
-                songItem = createItem(song)
+                songItem = createItem(song, song_type)
                 songItem.setLabel("".join(['[',song[7],'] ',song[8]]))
                 append([url % (song[0], song[8], song[18]), songItem])
         else:
             for song in library:
-                append([url % (song[0], song[8], song[18]), createItem(song)])
+                append([url % (song[0], song[8], song[18]), createItem(song, song_type)])
         return listItems
 
     def getPlaylists(self, playlist_type):
@@ -146,13 +155,11 @@ class GoogleMusicNavigation():
         playlists = self.api.getPlaylistsByType(playlist_type)
         return self.addPlaylistsItems(playlists)
 
-    def listFilterSongs(self, filter_type, filter_criteria, artist=''):
-        if filter_criteria:
-            filter_criteria = urllib.unquote_plus(filter_criteria)
-        if artist:
-            artist = urllib.unquote_plus(artist)
-        songs = self.api.getFilterSongs(filter_type, filter_criteria, artist)
-        return self.addSongsFromLibrary(songs)
+    def listFilterSongs(self, filter_type, filter_criteria, albums=''):
+        #self.main.log("FILTER: "+repr(filter_type)+" "+repr(filter_criteria)+" "+repr(albums))
+        if albums: albums = urllib.unquote_plus(albums)
+        songs = self.api.getFilterSongs(filter_type, urllib.unquote_plus(filter_criteria), albums )
+        return self.addSongsFromLibrary(songs, 'library')
 
     def getCriteria(self, criteria, artist=''):
         listItems = []
@@ -197,14 +204,14 @@ class GoogleMusicNavigation():
 
         song_url = sys.argv[0]+"?action=play_song&song_id=%s&title=%s&artist=%s"
         for song in songs:
-            playlist.add(song_url % (song[0], song[8], song[18]), self.createItem(song))
+            playlist.add(song_url % (song[0], song[8], song[18]), self.createItem(song, ''))
 
         if (get("shuffle")):
             playlist.shuffle()
 
         xbmc.executebuiltin('playlist.playoffset(music , 0)')
 
-    def createItem(self, song):
+    def createItem(self, song, song_type):
         infoLabels = {
             'tracknumber': song[11], 'duration': song[21],
             'year': song[6],         'genre': song[14],
@@ -213,6 +220,7 @@ class GoogleMusicNavigation():
         }
 
         li = self.xbmcgui.ListItem(song[23])
+        li.addContextMenuItems(self.getSongContextMenu(song[0], song_type))
 
         try:
             li.setThumbnailImage(song[22])
@@ -224,6 +232,16 @@ class GoogleMusicNavigation():
         li.setInfo(type='music', infoLabels=infoLabels)
 
         return li
+
+    def getSongContextMenu(self, song_id, song_type):
+        cm = []
+        if song_type == 'library':
+            cm.append(("Add to playlist","XBMC.RunPlugin(%s?action=add_playlist&song_id=%s)" % (sys.argv[0],song_id)))
+        elif song_type.startswith('playlist'):
+            cm.append(("Remove from playlist", "XBMC.RunPlugin(%s?action=del_from_playlist&song_id=%s&playlist_id=%s)" % (sys.argv[0], song_id, song_type[8:])))
+        if song_id.startswith('T'):
+            cm.append(("Add to library", "XBMC.RunPlugin(%s?action=add_library&song_id=%s)" % (sys.argv[0],song_id)))
+        return cm
 
     def getPlayAllContextMenuItems(self, name, playlist):
         cm = []
@@ -300,3 +318,15 @@ class GoogleMusicNavigation():
             if line.startswith('</favourites>'):
                 print fav
             print line,
+
+    def addToPlaylist (self, song_id):
+        list = []
+        playlists = self.api.getPlaylistsByType('user')
+        for playlist_id, playlist_name in playlists:
+            list.append(playlist_name)
+        dialog = self.xbmcgui.Dialog()
+        selected = dialog.select('Add to Playlist..', list)
+        if selected > 0:
+            playlist_id = playlists[selected][0]
+            self.main.log(repr(playlist_id))
+            self.api.addToPlaylist(playlist_id, song_id)

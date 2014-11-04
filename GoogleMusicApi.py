@@ -151,3 +151,14 @@ class GoogleMusicApi():
         except Exception as e:
             self.main.log("*** NO TRACKS *** "+repr(e))
         return tracks
+
+    def addAAtrack(self, song_id):
+        self.getApi().add_aa_track(song_id)
+
+    def addToPlaylist(self, playlist_id, song_id):
+        entry_id = self.getApi().add_songs_to_playlist(playlist_id, song_id)
+        self.storage.addToPlaylist(playlist_id, song_id, entry_id[0])
+
+    def delFromPlaylist(self, playlist_id, song_id):
+        entry_id = self.storage.delFromPlaylist(playlist_id, song_id)
+        self.getApi().remove_entries_from_playlist(entry_id)
