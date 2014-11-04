@@ -91,7 +91,7 @@ class GoogleMusicStorage():
         return playlists
 
     def getAutoPlaylistSongs(self,playlist):
-        querys = {'thumbsup':'SELECT * FROM songs WHERE rating = 5 ORDER BY display_name',
+        querys = {'thumbsup':'SELECT * FROM songs WHERE rating > 3 ORDER BY display_name',
                   'lastadded':'SELECT * FROM songs ORDER BY creation_date desc LIMIT 500',
                   'mostplayed':'SELECT * FROM songs ORDER BY play_count desc LIMIT 500',
                   'freepurchased':'SELECT * FROM songs WHERE type = 0 OR type = 1',

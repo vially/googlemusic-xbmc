@@ -30,6 +30,14 @@ class GoogleMusicApi():
     def getPlaylistSongs(self, playlist_id, forceRenew=False):
         if playlist_id in ('thumbsup','lastadded','mostplayed','freepurchased','feellucky'):
             songs = self.storage.getAutoPlaylistSongs(playlist_id)
+            if playlist_id == 'thumbsup':
+                """ Try to fetch all access thumbs up songs """
+                for track in self.getApi().get_thumbs_up_songs():
+                    songs.append([track['nid'],'',0,0,track['discNumber'],'',0,track['album'],
+                           track['title'],track['albumArtist'],track['trackType'],
+                           track['trackNumber'],0,0,'',track.get('playCount', 0),0,track['title'],
+                           track['artist'],'',0,int(track['durationMillis'])/1000,
+                           track['albumArtRef'][0]['url'],track['artist']+" - "+track['title'],''])
         else:
             if forceRenew:
                 self.updatePlaylistSongs()
