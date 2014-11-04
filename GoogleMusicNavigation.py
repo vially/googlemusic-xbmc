@@ -63,6 +63,8 @@ class GoogleMusicNavigation():
                 self.main.log("No query specified. Showing main menu")
                 listItems = self.getMenuItems(self.main_menu)
                 updateListing = True
+        elif self.path == "search_result":
+            listItems = self.getSearch(get('query'),True)
         else:
             self.main.log("Invalid path: " + get("path"))
 
@@ -241,8 +243,18 @@ class GoogleMusicNavigation():
         cm.append(('Add to favourites', "XBMC.RunPlugin(%s?action=add_favourite&path=playlists&playlist_type=%s&title=%s)" % (sys.argv[0], playlist_type, name)))
         return cm
 
-    def getSearch(self, query):
-        return self.addSongsFromLibrary(self.api.getSearch(query))
+    def getSearch(self, query, onlytracks=False):
+        result = self.api.getSearch(query)
+        listItems = self.addSongsFromLibrary(result['tracksLib'], 'library')
+        listItems.extend(self.addSongsFromLibrary(result['tracksAA'], 'library'))
+
+        if not onlytracks:
+            for album in result['albums']:
+                listItems.append(self.addFolderListItem(album[0],{'path':"search_result",'query':album[0]+' '+album[1]}))
+            for artist in result['artists']:
+                listItems.append(self.addFolderListItem(artist,{'path':"search_result",'query':artist}))
+
+        return listItems
 
     def getStations(self):
         listItems = []

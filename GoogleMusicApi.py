@@ -99,19 +99,32 @@ class GoogleMusicApi():
         return self.storage.getCriteria(criteria,artist)
 
     def getSearch(self, query):
-        result = self.storage.getSearch(query)
+        tracksAA = []
+        tracksLib = self.storage.getSearch(query)
+        albums = []
+        artists = []
+        result = {}
         try:
             aaresult = self.getApi().search_all_access(query)
             for song in aaresult['song_hits']:
                 track = song['track']
                 self.main.log("RESULT: "+track['artist']+" - "+track['title'])
-                result.append([track['nid'],'',0,0,track['discNumber'],'',0,track['album'],
+                tracksAA.append([track['nid'],'',0,0,track['discNumber'],'',0,track['album'],
                                track['title'],track['albumArtist'],track['trackType'],
                                track['trackNumber'],0,0,'',track.get('playCount', 0),0,track['title'],
                                track['artist'],'',0,int(track['durationMillis'])/1000,
-                               track['albumArtRef'][0]['url'],track['artist']+" - "+track['title']+" **",''])
+                               track['albumArtRef'][0]['url'],track['artist']+" - "+track['title'],''])
+            for album in aaresult['album_hits']:
+                albums.append([album['album']['name'],album['album']['artist']])
+            for artist in aaresult['artist_hits']:
+                artists.append(artist['artist']['name'])
         except Exception as e:
             self.main.log("*** NO ALL ACCESS RESULT IN SEARCH *** "+repr(e))
+            #tracksAA = self.storage.getAutoPlaylistSongs('thumbsup')
+        result['tracksAA'] = tracksAA
+        result['tracksLib'] = tracksLib
+        result['albums'] = albums
+        result['artists']= artists
         return result
 
     def clearCache(self):
