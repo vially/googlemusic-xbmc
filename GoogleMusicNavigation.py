@@ -87,10 +87,10 @@ class GoogleMusicNavigation():
             elif 'playlist_type' in params:
                 cm = self.getPlaylistsContextMenuItems(menu_item['title'], params['playlist_type'])
             elif params['path'] == 'library':
-                cm.append(('Update Library', "XBMC.RunPlugin(%s?action=update_library)" % sys.argv[0]))
-                cm.append(('Add to favourites', "XBMC.RunPlugin(%s?action=add_favourite&path=library&title=%s)" % (sys.argv[0],menu_item['title'])))
+                cm.append((self.language(30305), "XBMC.RunPlugin(%s?action=update_library)" % sys.argv[0]))
+                cm.append((self.language(30306), "XBMC.RunPlugin(%s?action=add_favourite&path=library&title=%s)" % (sys.argv[0],menu_item['title'])))
             elif 'criteria' in params:
-                cm.append(('Add to favourites', "XBMC.RunPlugin(%s?action=add_favourite&path=filter&criteria=%s&title=%s)" % (sys.argv[0],params['criteria'],menu_item['title'])))
+                cm.append((self.language(30306), "XBMC.RunPlugin(%s?action=add_favourite&path=filter&criteria=%s&title=%s)" % (sys.argv[0],params['criteria'],menu_item['title'])))
             menuItems.append(self.addFolderListItem(menu_item['title'], params, cm))
         return menuItems
 
@@ -250,20 +250,20 @@ class GoogleMusicNavigation():
         cm.append((self.language(30301), "XBMC.RunPlugin(%s?action=play_all&playlist_id=%s)" % (sys.argv[0], playlist)))
         cm.append((self.language(30302), "XBMC.RunPlugin(%s?action=play_all&playlist_id=%s&shuffle=true)" % (sys.argv[0], playlist)))
         cm.append((self.language(30303), "XBMC.RunPlugin(%s?action=update_playlist&playlist_id=%s)" % (sys.argv[0], playlist)))
-        cm.append(('Add to favourites', "XBMC.RunPlugin(%s?action=add_favourite&path=playlist&playlist_id=%s&title=%s)" % (sys.argv[0], playlist, name)))
+        cm.append((self.language(30306), "XBMC.RunPlugin(%s?action=add_favourite&path=playlist&playlist_id=%s&title=%s)" % (sys.argv[0], playlist, name)))
         return cm
 
     def getFilterContextMenuItems(self, filter_type, filter_criteria):
         cm = []
         cm.append((self.language(30301), "XBMC.RunPlugin(%s?action=play_all&filter_type=%s&filter_criteria=%s)" % (sys.argv[0], filter_type, filter_criteria)))
         cm.append((self.language(30302), "XBMC.RunPlugin(%s?action=play_all&filter_type=%s&filter_criteria=%s&shuffle=true)" % (sys.argv[0], filter_type, filter_criteria)))
-        cm.append(('Add to favourites', "XBMC.RunPlugin(%s?action=add_favourite&path=%s&name=%s&title=%s)" % (sys.argv[0], filter_type, filter_criteria, filter_criteria)))
+        cm.append((self.language(30306), "XBMC.RunPlugin(%s?action=add_favourite&path=%s&name=%s&title=%s)" % (sys.argv[0], filter_type, filter_criteria, filter_criteria)))
         return cm
 
     def getPlaylistsContextMenuItems(self, name, playlist_type):
         cm = []
         cm.append((self.language(30304), "XBMC.RunPlugin(%s?action=update_playlists&playlist_type=%s)" % (sys.argv[0], playlist_type)))
-        cm.append(('Add to favourites', "XBMC.RunPlugin(%s?action=add_favourite&path=playlists&playlist_type=%s&title=%s)" % (sys.argv[0], playlist_type, name)))
+        cm.append((self.language(30306), "XBMC.RunPlugin(%s?action=add_favourite&path=playlists&playlist_type=%s&title=%s)" % (sys.argv[0], playlist_type, name)))
         return cm
 
     def getSearch(self, query, onlytracks=False):
