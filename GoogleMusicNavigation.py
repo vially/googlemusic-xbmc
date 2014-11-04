@@ -12,6 +12,7 @@ class GoogleMusicNavigation():
         self.api = GoogleMusicApi.GoogleMusicApi()
 
         self.main_menu = (
+            {'title':"I'm feeling lucky mix", 'params':{'path':"ifl"}},
             {'title':self.language(30209), 'params':{'path':"library"}},
             {'title':self.language(30204), 'params':{'path':"playlists", 'playlist_type':"auto"}},
             {'title':self.language(30202), 'params':{'path':"playlists", 'playlist_type':"user"}},
@@ -36,6 +37,8 @@ class GoogleMusicNavigation():
             listItems = self.getMenuItems(self.main_menu)
             if self.api.getDevice():
                 listItems.insert(1,self.addFolderListItem(self.language(30203),{'path':"playlists",'playlist_type':"radio"}))
+        elif self.path == "ifl":
+            listItems = self.getStationTracks("IFL")
         elif self.path == "library":
             listItems = self.getMenuItems(self.lib_menu)
         elif self.path == "playlist":
