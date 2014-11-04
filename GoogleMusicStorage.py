@@ -48,38 +48,40 @@ class GoogleMusicStorage():
 
         return songs
 
-    def getFilterSongs(self, filter_type, filter_criteria, artist):
-        #print "storage getfiltersongs: "+filter_type+" "+repr(filter_criteria)+" "+repr(artist)
-        
-        if filter_type == 'album':
-            if artist:
-                query = "select * from songs where album = :filter and artist = :artist order by disc asc, track asc"
-            else:
-                query = "select * from songs where album = :filter order by disc asc, track asc"
+    def getFilterSongs(self, filter_type, filter_criteria, albumArtist):
+        #print "### storage getfiltersongs: "+repr(filter_type)+" "+repr(filter_criteria)+" "+repr(albumArtist)
+
+        if albumArtist:
+            query = "select * from songs where album = :filter and album_artist = :albumArtist order by disc asc, track asc"
+        elif filter_type == 'album':
+            query = "select * from songs where album = :filter order by disc asc, track asc"
         elif filter_type == 'artist':
             query = "select * from songs where artist = :filter order by album asc, disc asc, track asc"
-        else:
-            query = "select * from songs where genre = :filter order by title asc"
-            
+        elif filter_type == 'genre':
+            query = "select * from songs where genre = :filter order by album asc, disc asc, track asc, title asc"
+        elif filter_type == 'composer':
+            query = "select * from songs where composer = :filter order by album asc, disc asc, track asc, title asc"
+
         self._connect()
-        songs = self.curs.execute(query,{'filter':filter_criteria if filter_criteria else '','artist':artist}).fetchall()
+        songs = self.curs.execute(query,{'filter':filter_criteria if filter_criteria else '','albumArtist':albumArtist}).fetchall()
         self.conn.close()
 
         return songs
 
-    def getCriteria(self, criteria, artist_name):
-        self._connect()
-        if (criteria == 'artist'):
-            result = self.curs.execute("select artist,  max(album_art_url) from songs group by artist")
-        elif (criteria == 'album'):
-            if artist_name:
-               result = self.curs.execute("select album_artist, album, year, max(album_art_url) from songs where artist=? group by album_artist, album",(artist_name.decode('utf8'),))
-            else:
-               result = self.curs.execute("select album_artist, album, year, max(album_art_url) from songs group by album_artist, album")
-        else:
-            result = self.curs.execute("select genre from songs group by genre")
+    def getCriteria(self, criteria, name):
+        #print "### storage getcriteria: "+repr(criteria)+" "+repr(name)
 
-        criterias = result.fetchall()
+        if criteria == 'album':
+            query = "select album_artist, album, year, max(album_art_url) from songs group by album_artist, album"
+        else:
+            if criteria == 'artist': criteria = 'album_artist'
+            if name:
+               query = "select album_artist, album, year, max(album_art_url) from songs where %s=:name group by album_artist, album" % criteria
+            else:
+               query = "select %s from songs group by %s" % (criteria, criteria)
+
+        self._connect()
+        criterias = self.curs.execute(query,{'name':name.decode('utf8')}).fetchall()
         self.conn.close()
 
         return criterias
@@ -174,23 +176,23 @@ class GoogleMusicStorage():
                   'rating':        get("rating", 0),
                   'last_played':   get("lastPlayed", get("recentTimestamp", 0)),
                   'disc':          get("disc", get("discNumber", 0)),
-                  'composer':      get("composer", 0),
+                  'composer':      get("composer") if get("composer") else '-Unknown-',
                   'year':          get("year", 0),
-                  'album':         api_song["album"] if api_song["album"] else '-Unknown-',
+                  'album':         get("album") if get("album") else '-Unknown-',
                   'title':         api_song["title"],
-                  'album_artist':  get("albumArtist") if get("albumArtist") else api_song["artist"] if api_song["artist"] else '-Unknown-',
+                  'album_artist':  get("albumArtist")if get("albumArtist") else get("artist") if get("artist") else '-Unknown-',
                   'type':          get("type", 0),
                   'track':         get("track", get("trackNumber" ,0)),
                   'total_tracks':  get("total_tracks", get("totalTrackCount", 0)),
                   'beats_per_minute': get("beatsPerMinute", 0),
-                  'genre':         api_song["genre"] if api_song["genre"] else '-Unknown-',
+                  'genre':         get("genre") if get("genre") else '-Unknown-',
                   'play_count':    get("playCount", 0),
                   'creation_date': get("creationDate", get("creationTimestamp", 0)),
                   'name':          get("name", api_song["title"]),
-                  'artist':        api_song["artist"] if api_song["artist"] else '-Unknown-',
+                  'artist':        get("artist") if get("artist") else '-Unknown-',
                   'url':           get("url", None),
                   'total_discs':   get("total_discs", get("totalDiscCount", 0)),
-                  'duration':      int(api_song["durationMillis"])/1000,
+                  'duration':      int(get("durationMillis",0))/1000,
                   'album_art_url': self._getAlbumArtUrl(api_song),
                   'display_name':  self._getSongDisplayName(api_song),
               }
