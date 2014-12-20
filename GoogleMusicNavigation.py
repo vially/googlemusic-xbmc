@@ -195,7 +195,7 @@ class GoogleMusicNavigation():
             self.main.log("Loading playlist: " + playlist_id)
             songs = self.api.getPlaylistSongs(playlist_id)
         else:
-            songs = self.api.getFilterSongs(get('filter_type'), get('filter_criteria'))
+            songs = self.api.getFilterSongs(get('filter_type'), get('filter_criteria'), albums='')
 
         player = xbmc.Player()
         if (player.isPlaying()):
