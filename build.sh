@@ -15,6 +15,7 @@ cp icon.png $dest/
 cp "icon and thumbnail licensing.txt" $dest/
 cp *.py $dest/
 cp -r resources $dest/
+cp -r gmusicapi $dest/
 
 if [ -f $dest-$version.zip ]; then
     rm $dest-$version.zip
