@@ -1,14 +1,10 @@
 import sys, xbmcaddon, xbmcgui, xbmcplugin
 
-# plugin constants
-version = "0.8.x"
-plugin = "GoogleMusic-" + version
-
 # xbmc hooks
-settings = xbmcaddon.Addon(id='plugin.audio.googlemusic')
-
+settings = xbmcaddon.Addon(id='plugin.audio.googlemusic.exp')
+# plugin constants
+plugin = "GoogleMusic-" + settings.getAddonInfo('version')
 dbg = settings.getSetting( "debug" ) == "true"
-dbglevel = 3
 
 # plugin variables
 storage = ""
@@ -42,26 +38,30 @@ if (__name__ == "__main__" ):
     song = GoogleMusicPlaySong.GoogleMusicPlaySong()
 
     params = parameters_string_to_dict(sys.argv[2])
-    get = params.get
+    action = params.pop('action','')
 
-    if (get("action") == "play_song"):
+    if action == 'play_song':
         song.play(params)
     else:
 
         import GoogleMusicNavigation
         navigation = GoogleMusicNavigation.GoogleMusicNavigation()
 
-        if (not params):
- 
+        if action:
+            navigation.executeAction(action, params)
+        elif params.get('path'):
+            navigation.listMenu(params)
+        elif not params:
+
             import GoogleMusicLogin
             login = GoogleMusicLogin.GoogleMusicLogin()
 
             # if version changed clear cache
-            if not settings.getSetting('version') or settings.getSetting('version') != version:
+            if not settings.getSetting('version') or settings.getSetting('version') != settings.getAddonInfo('version'):
                storage.clearCache()
                login.clearCookie()
-               settings.setSetting('version',version)
-               
+               settings.setSetting('version',settings.getAddonInfo('version'))
+
             # check for initing cookies, db and library only on main menu
             storage.checkDbInit()
 
@@ -78,10 +78,6 @@ if (__name__ == "__main__" ):
 
             navigation.listMenu()
 
-        elif (get("action")):
-            navigation.executeAction(params)
-        elif (get("path")):
-            navigation.listMenu(params)
         else:
             print plugin + " ARGV Nothing done.. verify params " + repr(params)
-            
+

@@ -12,6 +12,7 @@
 
     <!-- Advanced -->
     <category label="30051">
+        <setting id="overrideview" type="bool" label="30065" default="true" />
         <setting id="debug" type="bool" label="30061" default="true" />
         <setting id="clear_cookie" type="action" label="30063" option="close" action="RunPlugin(plugin://plugin.audio.googlemusic.exp/?action=clear_cookie)" />
         <setting id="clear_cache" type="action" label="30062" option="close" action="RunPlugin(plugin://plugin.audio.googlemusic.exp/?action=clear_cache)" />

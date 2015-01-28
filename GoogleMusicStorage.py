@@ -24,7 +24,7 @@ class GoogleMusicStorage():
                     self.clearCache()
                 elif updatelib == 3 and difftime > 60 * 60: # hour
                     self.clearCache()
-                
+
         # Make sure to initialize database when it does not exist.
         if not os.path.isfile(self.path):
             self.initializeDatabase()
@@ -40,12 +40,11 @@ class GoogleMusicStorage():
         if playlist_id == 'all_songs':
             result = self.curs.execute("SELECT * FROM songs ORDER BY display_name")
         else:
-            result = self.curs.execute("SELECT * FROM songs INNER JOIN playlists_songs ON songs.song_id = playlists_songs.song_id "+
+            result = self.curs.execute("SELECT * FROM songs "+
+                                       "INNER JOIN playlists_songs ON songs.song_id = playlists_songs.song_id "+
                                        "WHERE playlists_songs.playlist_id = ?", (playlist_id,))
-
         songs = result.fetchall()
         self.conn.close()
-
         return songs
 
     def getFilterSongs(self, filter_type, filter_criteria, albumArtist):
@@ -72,13 +71,15 @@ class GoogleMusicStorage():
         #print "### storage getcriteria: "+repr(criteria)+" "+repr(name)
 
         if criteria == 'album':
-            query = "select album_artist, album, year, max(album_art_url) from songs group by album_artist, album"
+            query = "select album_artist, album, year, max(album_art_url) from songs where album <> '-Unknown-' group by album_artist, album"
         else:
-            if criteria == 'artist': criteria = 'album_artist'
-            if name:
+            #if criteria == 'artist': criteria = 'album_artist'
+            if criteria == 'artist' and not name:
+               query = "select artist, max(artist_art_url) from songs group by artist"
+            elif name:
                query = "select album_artist, album, year, max(album_art_url) from songs where %s=:name group by album_artist, album" % criteria
             else:
-               query = "select %s from songs group by %s" % (criteria, criteria)
+               query = "select %s from songs group by lower(%s)" % (criteria, criteria)
 
         self._connect()
         criterias = self.curs.execute(query,{'name':name.decode('utf8')}).fetchall()
@@ -106,15 +107,18 @@ class GoogleMusicStorage():
 
     def getSong(self, song_id):
         self._connect()
-        #result = self.curs.execute("SELECT * FROM songs WHERE song_id = ? ", (song_id,)).fetchone()
-        result = self.curs.execute("SELECT stream_url FROM songs WHERE song_id = ? ", (song_id,)).fetchone()
+        result = self.curs.execute("SELECT * FROM songs WHERE song_id = ? ", (song_id,)).fetchone()
+        #result = self.curs.execute("SELECT stream_url FROM songs WHERE song_id = ? ", (song_id,)).fetchone()
         self.conn.close()
         return result
 
     def getSearch(self, query):
         query = '%'+ query.replace('%','') + '%'
         self._connect()
-        result = self.curs.execute("SELECT * FROM songs WHERE name like ? OR artist like ? ORDER BY display_name", (query,query,)).fetchall()
+        result = {}
+        result['artists'] = self.curs.execute("SELECT artist, max(artist_art_url) FROM songs WHERE artist like ? GROUP BY artist", (query,)).fetchall()
+        result['tracks'] = self.curs.execute("SELECT * FROM songs WHERE display_name like ? ORDER BY display_name", (query,)).fetchall()
+        result['albums'] = self.curs.execute("SELECT album, artist, max(album_art_url) FROM songs WHERE album like ? GROUP BY album, artist", (query,)).fetchall()
         self.conn.close()
         return result
 
@@ -195,12 +199,13 @@ class GoogleMusicStorage():
                   'duration':      int(get("durationMillis",0))/1000,
                   'album_art_url': self._getAlbumArtUrl(api_song),
                   'display_name':  self._getSongDisplayName(api_song),
+                  'artist_art_url':get("artistArtRef")[0]['url'] if get("artistArtRef") else self._getAlbumArtUrl(api_song),
               }
 
         self.curs.executemany("INSERT OR REPLACE INTO songs VALUES ("+
                               ":song_id, :comment, :rating, :last_played, :disc, :composer, :year, :album, :title, :album_artist,"+
                               ":type, :track, :total_tracks, :beats_per_minute, :genre, :play_count, :creation_date, :name, :artist, "+
-                              ":url, :total_discs, :duration, :album_art_url, :display_name, NULL)", songs())
+                              ":url, :total_discs, :duration, :album_art_url, :display_name, NULL, :artist_art_url)", songs())
 
         self.conn.commit()
         self.conn.close()
@@ -230,7 +235,6 @@ class GoogleMusicStorage():
         song = self.curs.execute("SELECT stream_url FROM songs WHERE song_id = ?", (song_id,)).fetchone()
         stream_url = song[0]
         self.conn.close()
-
         return stream_url
 
     def incrementSongPlayCount(self, song_id):
@@ -292,7 +296,8 @@ class GoogleMusicStorage():
                 duration INTEGER,                               --# 21
                 album_art_url VARCHAR,                          --# 22
                 display_name VARCHAR,                           --# 23
-                stream_url VARCHAR                              --# 24
+                stream_url VARCHAR,                             --# 24
+                artist_art_url VARCHAR                          --# 25
         )''')
 
         self.curs.execute('''CREATE TABLE IF NOT EXISTS playlists (
@@ -331,9 +336,8 @@ class GoogleMusicStorage():
         return displayName
 
     def _getAlbumArtUrl(self, api_song):
-        url = ""
-        if "albumArtUrl" in api_song:
-            url = "http:"+api_song["albumArtUrl"]
-        elif "albumArtRef" in api_song:
-            url = api_song["albumArtRef"][0]["url"]
-        return url
+        if "albumArtRef" in api_song:
+            return api_song["albumArtRef"][0]["url"]
+        elif "albumArtUrl" in api_song:
+            return "http:"+api_song["albumArtUrl"]
+        return ""

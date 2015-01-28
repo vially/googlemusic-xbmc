@@ -10,7 +10,7 @@ class GoogleMusicLogin():
         self.main      = sys.modules["__main__"]
         self.xbmcgui   = self.main.xbmcgui
         self.settings  = self.main.settings
-        self.gmusicapi = Mobileclient(debug_logging=False,validate=False,verify_ssl=False)
+        self.gmusicapi = Mobileclient(debug_logging=False,validate=False,verify_ssl=True)
 
     def checkCookie(self):
         # Remove cookie data if it is older then 7 days
@@ -30,7 +30,11 @@ class GoogleMusicLogin():
         self.main.log("getStreamUrl songid: %s device: %s"%(song_id,device_id))
 
         if device_id:
-            stream_url = self.gmusicapi.get_stream_url(song_id, device_id)
+            #retrieve stream quality from settings
+            quality = { '0':'hi','1':'med','2':'low' } [self.settings.getSetting('quality')]
+            self.main.log("getStreamUrl quality: %s"%quality)
+
+            stream_url = self.gmusicapi.get_stream_url(song_id, device_id, quality)
         else:
             self.main.log("NO DEVICE, using WEBCLIENT to stream")
             self.gmusicapi = Webclient(debug_logging=False,validate=False,verify_ssl=False)
@@ -38,7 +42,7 @@ class GoogleMusicLogin():
             streams = self.gmusicapi.get_stream_urls(song_id)
             if len(streams) > 1:
                 import xbmc
-                xbmc.executebuiltin("XBMC.Notification("+plugin+",'All Access track not playable')")
+                xbmc.executebuiltin("XBMC.Notification("+self.main.plugin+",'All Access track not playable')")
                 raise Exception('All Access track not playable, no mobile device found in account!')
             stream_url = streams[0]
 
