@@ -10,6 +10,7 @@
     <string id="30064">SQLite database</string>
     <string id="30065">Override View</string>
     <string id="30066">Pre-fetch URL</string>
+    <string id="30052">Export Path</string>
 
     <!-- auto update -->
     <string id="30067">Auto Update Library</string>
@@ -27,7 +28,7 @@
     <!-- menu items -->
     <string id="30201">All songs</string>
     <string id="30202">Playlists</string>
-    <string id="30203">Instant Mixes</string>
+    <string id="30203">Radio</string>
     <string id="30204">Auto Playlists</string>
     <string id="30205">Artists</string>
     <string id="30206">Albums</string>
@@ -35,6 +36,9 @@
     <string id="30208">Search</string>
     <string id="30209">My Library</string>
     <string id="30210">Shuffle My Library</string>
+    <string id="30211">I'm feeling luck mix</string>
+    <string id="30212">Composers</string>
+    <string id="30213">Songs</string>
 
     <!-- context menu items -->
     <string id="30301">Play all</string>
@@ -43,8 +47,27 @@
     <string id="30304">Update playlists</string>
     <string id="30305">Update library</string>
     <string id="30306">Add to favourites</string>
+    <string id="30307">Add to playlist</string>
+    <string id="30308">Remove from playlist</string>
+    <string id="30309">Add to library</string>
+    <string id="30310">Start Radio</string>
+    <string id="30311">Search in Youtube</string>
 
     <!-- messages -->
     <string id="30101">Login failed</string>
     <string id="30102">Invalid credentials</string>
+    <string id="30103">Library update needed</string>
+    <string id="30104">All Access track not playable</string>
+    <string id="30105">Loading Library</string>
+    <string id="30106">Cache in use - try later</string>
+    <string id="30107">Export completed</string>
+    <string id="30108">Export path not defined</string>
+    <string id="30109">Error calling Youtube Addon</string>
+
+    <!-- dialogs -->
+    <string id="30401">Add to Playlist...</string>
+    <string id="30402">Radio Name</string>
+    <string id="30403">Exporting Library</string>
+    <string id="30404">Please wait</string>
+
 </strings>

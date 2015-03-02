@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<strings>
+    <string id="30001">Allgemein</string>
+    <string id="30051">Fortgeschritten</string>
+    <string id="30011">Benutzername</string>
+    <string id="30012">Passwort</string>
+    <string id="30061">Debugging</string>
+    <string id="30062">Cache leeren</string>
+    <string id="30063">Cookies löschen</string>
+    <string id="30064">SQLite-Datenbank</string>
+    <string id="30065">Ansicht überschreiben</string>
+    <string id="30066">URL vorgreifen</string>
+
+    <!-- auto update -->
+    <string id="30067">Bibliothek automatisch aktualisieren</string>
+    <string id="30068">Nie</string>
+    <string id="30069">Wöchentlich</string>
+    <string id="30070">Täglich</string>
+    <string id="30071">Stündlich</string>
+
+    <!-- stream quality -->
+    <string id="30072">Stream-Qualität</string>
+    <string id="30073">Hoch</string>
+    <string id="30074">Mittel</string>
+    <string id="30075">Niedrig</string>
+
+    <!-- menu items -->
+    <string id="30201">Alle Titel</string>
+    <string id="30202">Playlists</string>
+    <string id="30203">Schnellmixe</string>
+    <string id="30204">Automatische Playlists</string>
+    <string id="30205">Interpreten</string>
+    <string id="30206">Alben</string>
+    <string id="30207">Genres</string>
+    <string id="30208">Suche</string>
+    <string id="30209">Meine Musik</string>
+    <string id="30210">Meine Musik zufällig wiedergeben</string>
+    <string id="30211">Auf gut Glück-Mix</string>
+    <string id="30212">Komponisten</string>
+    <string id="30213">Titel</string>
+
+    <!-- context menu items -->
+    <string id="30301">Alle wiedergeben</string>
+    <string id="30302">Alle zufällig wiedergeben</string>
+    <string id="30303">Playlist aktualisieren</string>
+    <string id="30304">Playlists aktualisieren</string>
+    <string id="30305">Bibliothek aktualisieren</string>
+    <string id="30306">Zu Favoriten hinzufügen</string>
+    <string id="30307">Zu Playlist hinzufügen</string>
+    <string id="30308">Aus Playlist entfernen</string>
+    <string id="30309">Zur Bibliothek hinzufügen</string>
+
+    <!-- messages -->
+    <string id="30101">Login gescheitert</string>
+    <string id="30102">Ungültige Anmeldedaten</string>
+    <string id="30103">Aktualisierung der Bibliothek wird benötigt</string>
+    <string id="30104">All Access-Titel kann nicht wiedergegeben werden</string>
+    <string id="30105">Bibliothek wird geladen</string>
+    
+    <!-- dialogs -->
+    <string id="30401">Zu Playlist hinzufügen...</string>
+</strings>
