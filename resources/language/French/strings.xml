@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<strings>
+<string id="30001">Général</string>
+<string id="30051">Avancé</string>
+<string id="30011">Identifiant</string>
+<string id="30012">Mot de passe</string>
+<string id="30061">Débogage</string>
+<string id="30062">Vider le cache</string>
+<string id="30063">Effacer les cookies</string>
+<string id="30064">database SQLite</string>
+<string id="30065">Surcharger la vue</string>
+<string id="30066">Pre-fetch URL</string>
+<string id="30052">Chemin d'exportation</string>
+<!-- auto update -->
+<string id="30067">Mise à jour automatique de la bibliothèque</string>
+<string id="30068">Jamais</string>
+<string id="30069">Hebdo</string>
+<string id="30070">Quotidienne</string>
+<string id="30071">Horaire</string>
+<!-- stream quality -->
+<string id="30072">Quality du streaming</string>
+<string id="30073">Haute</string>
+<string id="30074">Moyenne</string>
+<string id="30075">Basse</string>
+<!-- menu items -->
+<string id="30201">Toutes les chansons</string>
+<string id="30202">Playlists</string>
+<string id="30203">Radio</string>
+<string id="30204">Playlists automatiques</string>
+<string id="30205">Artistes</string>
+<string id="30206">Albums</string>
+<string id="30207">Genres</string>
+<string id="30208">Chercher</string>
+<string id="30209">Ma bibliothèque</string>
+<string id="30210"Lecture aléatoire de ma bibliothèque</string>
+<string id="30211">Mix J'ai de la chance</string>
+<string id="30212">Compositeurs</string>
+<string id="30213">Chansons</string>
+<!-- context menu items -->
+<string id="30301">Tout jouer</string>
+<string id="30302">Tout jouer dans le désordre</string>
+<string id="30303">Actualiser la playlist</string>
+<string id="30304">Actualiser les playlists</string>
+<string id="30305">Actualiser la bibliothèque</string>
+<string id="30306">Ajouter aux favoris</string>
+<string id="30307">Ajouter à une playlist</string>
+<string id="30308">Retirer d'une playlist</string>
+<string id="30309">Ajouter à la bilbiothèque</string>
+<string id="30310">Démarrer une Radio</string>
+<string id="30311">Chercher sur Youtube</string>
+<!-- messages -->
+<string id="30101">La connexion a échoué</string>
+<string id="30102">Identification non valide</string>
+<string id="30103">Mise à jour de bibliothèque nécessaire</string>
+<string id="30104">La piste n'est pas jouable en Accès Illimité</string>
+<string id="30105">Chargement de la bibliothèque</string>
+<string id="30106">Le cache est en cours d'utilisation - essayez plus tard</string>
+<string id="30107">Exportation terminée</string>
+<string id="30108">Chemin d'exportation non défini</string>
+<string id="30109">Erreur en appelant l'extension Youtube</string>
+<!-- dialogs -->
+<string id="30401">Ajouter à la playlist...</string>
+<string id="30402">Nom de la radio</string>
+<string id="30403">Exportation de la bibliothèque</string>
+<string id="30404">Patientez</string>
+</strings>
