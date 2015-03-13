@@ -11,6 +11,7 @@
     <string id="30065">Override View</string>
     <string id="30066">Pre-fetch URL</string>
     <string id="30052">Export Path</string>
+    <string id="30053">Always export after library update</string>
 
     <!-- auto update -->
     <string id="30067">Auto Update Library</string>
@@ -52,10 +53,13 @@
     <string id="30309">Add to library</string>
     <string id="30310">Start Radio</string>
     <string id="30311">Search in Youtube</string>
+    <string id="30312">Play all in Youtube</string>
+    <string id="30313">Play in Youtube</string>
+    <string id="30314">Export</string>
 
     <!-- messages -->
     <string id="30101">Login failed</string>
-    <string id="30102">Invalid credentials</string>
+    <string id="30102">Invalid credentials or connectivity problems</string>
     <string id="30103">Library update needed</string>
     <string id="30104">All Access track not playable</string>
     <string id="30105">Loading Library</string>
