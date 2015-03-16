@@ -20,9 +20,24 @@ from gmusicapi.protocol.shared import Call, authtypes
 from gmusicapi.utils import utils
 
 # URL for sj service
-sj_url = 'https://www.googleapis.com/sj/v1.5/'
+sj_url = 'https://mclients.googleapis.com/sj/v1.10/'
 
 # shared schemas
+sj_video = {
+    'type': 'object',
+    'additionalProperties': False,
+    'properties': {
+        'kind': {'type': 'string'},
+        'id': {'type': 'string'},
+        'thumbnails': {'type': 'array',
+                       'items': {'type': 'object', 'properties': {
+                           'url': {'type': 'string'},
+                           'width': {'type': 'integer'},
+                           'height': {'type': 'integer'},
+                       }}},
+    }
+}
+
 sj_track = {
     'type': 'object',
     'additionalProperties': False,
@@ -58,8 +73,11 @@ sj_track = {
         'genre': {'type': 'string', 'required': False},
         'trackAvailableForSubscription': {'type': 'boolean'},
         'contentType': {'type': 'string'},
+        'lastRatingChangeTimestamp': {'type': 'string', 'required': False},
+        'primaryVideo': sj_video.copy(),
     }
 }
+sj_track['properties']['primaryVideo']['required'] = False
 
 sj_playlist = {
     'type': 'object',
@@ -117,6 +135,17 @@ sj_plentry = {
 
 sj_plentry['properties']['track']['required'] = False
 
+sj_attribution = {
+    'type': 'object',
+    'additionalProperties': False,
+    'properties': {
+        'kind': {'type': 'string'},
+        'license_url': {'type': 'string', 'required': False},
+        'license_title': {'type': 'string', 'required': False},
+        'source_title': {'type': 'string', 'blank': True},
+        'source_url': {'type': 'string', 'blank': True, 'required': False},
+    }
+}
 
 sj_album = {
     'type': 'object',
@@ -125,15 +154,17 @@ sj_album = {
         'kind': {'type': 'string'},
         'name': {'type': 'string'},
         'albumArtist': {'type': 'string'},
-        'albumArtRef': {'type': 'string'},
+        'albumArtRef': {'type': 'string', 'required': False},
         'albumId': {'type': 'string'},
         'artist': {'type': 'string'},
         'artistId': {'type': 'array', 'items': {'type': 'string', 'blank': True}},
         'year': {'type': 'integer', 'required': False},
         'tracks': {'type': 'array', 'items': sj_track, 'required': False},
         'description': {'type': 'string', 'required': False},
+        'description_attribution': sj_attribution.copy(),
     }
 }
+sj_album['properties']['description_attribution']['required'] = False
 
 sj_artist = {
     'type': 'object',
@@ -148,9 +179,11 @@ sj_artist = {
         'topTracks': {'type': 'array', 'items': sj_track, 'required': False},
         'total_albums': {'type': 'integer', 'required': False},
         'artistBio': {'type': 'string', 'required': False},
+        'artist_bio_attribution': sj_attribution.copy(),
     }
 }
 
+sj_artist['properties']['artist_bio_attribution']['required'] = False
 sj_artist['properties']['related_artists'] = {
     'type': 'array',
     'items': sj_artist,  # note the recursion
@@ -374,7 +407,8 @@ class Search(McCall):
             'kind': {'type': 'string'},
             'entries': {'type': 'array',
                         'items': sj_result,
-                        'required': False}
+                        'required': False},
+            'suggestedQuery': {'type': 'string', 'required': False}
         },
     }
 
@@ -390,20 +424,6 @@ class ListTracks(McListCall):
     static_method = 'POST'
     static_url = sj_url + 'trackfeed'
 
-class GetDevices(McCall):
-    #required_auth = authtypes(xt=True, sso=True)
-
-    #static_headers = {'Content-Type': 'application/json'}
-    #static_params = {'alt': 'json'}
-    static_method = 'POST'
-    static_url = 'https://android.clients.google.com/music/services/loadsettings'
-
-    @classmethod
-    def dynamic_params(cls, xt, sjsaid):
-        params = { 'xt':xt,
-                   'sjsaid':sjsaid
-                 }
-        return params
 
 class GetStreamUrl(McCall):
     static_method = 'GET'
@@ -442,7 +462,6 @@ class GetStreamUrl(McCall):
     def dynamic_params(cls, song_id, device_id, quality):
         sig, salt = cls.get_signature(song_id)
 
-        # TODO which of these should get exposed?
         params = {'opt': quality,
                   'net': 'mob',
                   'pt': 'e',
@@ -674,7 +693,41 @@ class BatchMutatePlaylistEntries(McBatchMutateCall):
         return mutations
 
 
-class ListThumbsUpTracks(McListCall):
+class GetDeviceManagementInfo(McCall):
+    """Get registered device information."""
+
+    static_method = 'GET'
+    static_url = sj_url + "devicemanagementinfo"
+    static_params = {'alt': 'json'}
+
+    _device_schema = {
+        'type': 'object',
+        'additionalProperties': False,
+        'properties': {
+            'id': {'type': 'string'},
+            'friendlyName': {'type': 'string', 'blank': True},
+            'type': {'type': 'string'},
+            'lastAccessedTimeMs': {'type': 'integer'},
+
+            # only for mobile devices
+            'smartPhone': {'type': 'boolean', 'required': False},
+        }
+    }
+
+    _res_schema = {
+        'type': 'object',
+        'additionalProperties': False,
+        'properties': {
+            'kind': {'type': 'string'},
+            'data': {'type': 'object',
+                     'items': {'type': 'array', 'items': _device_schema},
+                     'required': False,
+                     },
+        },
+    }
+
+
+class ListPromotedTracks(McListCall):
     item_schema = sj_track
     filter_text = 'tracks'
 
@@ -807,7 +860,8 @@ class BatchMutateTracks(McBatchMutateCall):
                     'albumAvailableForPurchase', 'albumArtRef',
                     'artistId',
                     ):
-            del track_dict[key]
+            if key in track_dict:
+                del track_dict[key]
 
         for key, default in {
             'playCount': 0,
