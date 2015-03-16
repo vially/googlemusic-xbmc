@@ -53,6 +53,9 @@ if (__name__ == "__main__" ):
             xbmc.executebuiltin("XBMC.Notification(%s,%s,5000,%s)" % (utils.plugin, addon.getLocalizedString(30105) ,addon.getAddonInfo('icon')))
             utils.log('Loading library')
             navigation.api.loadLibrary()
+            if addon.getSetting('auto_export') and addon.getSetting('export_path'):
+                import GoogleMusicActions
+                GoogleMusicActions.GoogleMusicActions().exportLibrary(addon.getSetting('export_path'))
 
         navigation.listMenu()
 
