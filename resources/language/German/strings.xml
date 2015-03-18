@@ -10,6 +10,8 @@
     <string id="30064">SQLite-Datenbank</string>
     <string id="30065">Ansicht überschreiben</string>
     <string id="30066">URL vorgreifen</string>
+    <string id="30052">Export-Pfad</string>
+    <string id="30053">Nach einer Aktualisierung der Bibliothek immer exportieren</string>
 
     <!-- auto update -->
     <string id="30067">Bibliothek automatisch aktualisieren</string>
@@ -49,14 +51,26 @@
     <string id="30307">Zu Playlist hinzufügen</string>
     <string id="30308">Aus Playlist entfernen</string>
     <string id="30309">Zur Bibliothek hinzufügen</string>
+    <string id="30310">Radio starten</string>
+    <string id="30311">In Youtube suchen</string>
+    <string id="30312">Alle in YouTube wiedergeben</string>
+    <string id="30313">In YouTube wiedergeben</string>
+    <string id="30314">Exportieren</string>
 
     <!-- messages -->
     <string id="30101">Login gescheitert</string>
-    <string id="30102">Ungültige Anmeldedaten</string>
+    <string id="30102">Ungültige Anmeldedaten oder Verbindungsprobleme</string>
     <string id="30103">Aktualisierung der Bibliothek wird benötigt</string>
     <string id="30104">All Access-Titel kann nicht wiedergegeben werden</string>
     <string id="30105">Bibliothek wird geladen</string>
+    <string id="30106">Cache wird gerade benutzt - später erneut versuchen</string>
+    <string id="30107">Export fertiggestellt</string>
+    <string id="30108">Kein Export-Pfad definiert</string>
+    <string id="30109">Fehler beim Aufrufen des YouTube-Addons</string>
     
     <!-- dialogs -->
     <string id="30401">Zu Playlist hinzufügen...</string>
+    <string id="30402">Radio-Name</string>
+    <string id="30403">Bibliothek wird exportiert</string>
+    <string id="30404">Bitte warten</string>
 </strings>
