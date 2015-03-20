@@ -193,7 +193,7 @@ class GoogleMusicNavigation():
             'year': song[6],         'genre': song[14],
             'album': song[7],        'artist': song[18],
             'title': song[8],        'playcount': song[15],
-            'rating': song[2]
+            'rating': song[2],       'discnumber': song[4]
         }
 
         li = utils.createItem(song[23], song[22])
