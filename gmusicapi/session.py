@@ -13,7 +13,7 @@ from gmusicapi.exceptions import (
     AlreadyLoggedIn, NotLoggedIn, CallFailure
 )
 from gmusicapi.protocol.shared import ClientLogin
-from gmusicapi.protocol import webclient
+#from gmusicapi.protocol import webclient
 from gmusicapi.utils import utils
 
 log = utils.DynamicClientLogger(__name__)
@@ -28,7 +28,7 @@ class _Base(object):
         self._rsession = requests.Session()
 
         if rsession_setup is None:
-            rsession_setup = lambda x: x
+            rsession_setup = lambda x: x  # noqa
         self._rsession_setup = rsession_setup
         self._rsession_setup(self._rsession)
 
@@ -125,9 +125,6 @@ class Webclient(_Base):
 
         return self.is_authenticated
 
-    def getCookies(self):
-        webclient.Init.perform(self, False)
-        
     def _send_with_auth(self, req_kwargs, desired_auth, rsession):
         if desired_auth.sso:
             req_kwargs.setdefault('headers', {})
@@ -141,7 +138,7 @@ class Webclient(_Base):
 
             req_kwargs['params'].update({'u': 0, 'xt': rsession.cookies['xt']})
 
-        return rsession.request(timeout=10,**req_kwargs)
+        return rsession.request(**req_kwargs)
 
 
 class Mobileclient(Webclient):

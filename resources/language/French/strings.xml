@@ -11,6 +11,7 @@
 <string id="30065">Surcharger la vue</string>
 <string id="30066">Pre-fetch URL</string>
 <string id="30052">Chemin d'exportation</string>
+<string id="30053">Toujours exporter la bibliothèque après une mise à jour</string>
 <!-- auto update -->
 <string id="30067">Mise à jour automatique de la bibliothèque</string>
 <string id="30068">Jamais</string>
@@ -48,9 +49,12 @@
 <string id="30309">Ajouter à la bilbiothèque</string>
 <string id="30310">Démarrer une Radio</string>
 <string id="30311">Chercher sur Youtube</string>
+<string id="30312">Tout jouer sur Youtube</string>
+<string id="30313">Jouer sur Youtube</string>
+<string id="30314">Exporter</string>
 <!-- messages -->
 <string id="30101">La connexion a échoué</string>
-<string id="30102">Identification non valide</string>
+<string id="30102">Identification non valide ou problème de connexion</string>
 <string id="30103">Mise à jour de bibliothèque nécessaire</string>
 <string id="30104">La piste n'est pas jouable en Accès Illimité</string>
 <string id="30105">Chargement de la bibliothèque</string>

@@ -11,6 +11,7 @@ import re
 import subprocess
 import time
 import traceback
+import warnings
 
 from decorator import decorator
 try:
@@ -31,7 +32,7 @@ try:
 except: pass
 from gmusicapi import __version__
 from gmusicapi.compat import my_appdirs
-from gmusicapi.exceptions import CallFailure
+from gmusicapi.exceptions import CallFailure, GmusicapiWarning
 
 # this controls the crazy logging setup that checks the callstack;
 #  it should be monkey-patched to False after importing to disable it.
@@ -224,8 +225,8 @@ def dual_decorator(func):
     """
     @functools.wraps(func)
     def inner(*args, **kw):
-        if ((len(args) == 1 and not kw and callable(args[0])
-             and not (type(args[0]) == type and issubclass(args[0], BaseException)))):
+        if ((len(args) == 1 and not kw and callable(args[0]) and
+             not (type(args[0]) == type and issubclass(args[0], BaseException)))):
             return func()(args[0])
         else:
             return func(*args, **kw)
@@ -245,7 +246,7 @@ def enforce_id_param(position=1):
 
         if not isinstance(args[position], basestring):
             raise ValueError("Invalid param type in position %s;"
-                             " expected a song id (did you pass a song dictionary?)" % position)
+                             " expected an id (did you pass a dictionary?)" % position)
 
         return function(*args, **kw)
 
@@ -266,7 +267,7 @@ def enforce_ids_param(position=1):
         if ((not isinstance(args[position], (list, tuple)) or
              not all([isinstance(e, basestring) for e in args[position]]))):
             raise ValueError("Invalid param type in position %s;"
-                             " expected song ids (did you pass song dictionaries?)" % position)
+                             " expected ids (did you pass dictionaries?)" % position)
 
         return function(*args, **kw)
 
@@ -298,7 +299,7 @@ def configure_debug_log_handlers(logger):
     logger.addHandler(important_handler)
 
     if not printed_log_start_message:
-        #print out startup message without verbose formatting
+        # print out startup message without verbose formatting
         logger.info("!-- begin debug log --!")
         logger.info("version: " + __version__)
         if logging_to_file:
@@ -314,7 +315,7 @@ def configure_debug_log_handlers(logger):
 
 
 @dual_decorator
-def retry(retry_exception=None, tries=6, delay=2, backoff=2, logger=None):
+def retry(retry_exception=None, tries=5, delay=2, backoff=2, logger=None):
     """Retry calling the decorated function using an exponential backoff.
 
     An exception from a final attempt will propogate.
@@ -364,12 +365,12 @@ def pb_set(msg, field_name, val):
     :param val
     """
 
-    #Find the proper type.
+    # Find the proper type.
     field_desc = msg.DESCRIPTOR.fields_by_name[field_name]
     proper_type = cpp_type_to_python[field_desc.cpp_type]
 
-    #Try with the given type first.
-    #Their set hooks will automatically coerce.
+    # Try with the given type first.
+    # Their set hooks will automatically coerce.
     try_types = (type(val), proper_type)
 
     for t in try_types:
@@ -391,12 +392,14 @@ def transcode_to_mp3(filepath, quality=3, slice_start=None, slice_duration=None)
     An ID3 header is not included in the result.
 
     :param filepath: location of file
-    :param quality: if int, pass to avconv -qscale. if string, pass to avconv -ab
-                    -qscale roughly corresponds to libmp3lame -V0, -V1...
+    :param quality: if int, pass to -q:a. if string, pass to -b:a
+                    -q:a roughly corresponds to libmp3lame -V0, -V1...
     :param slice_start: (optional) transcode a slice, starting at this many seconds
     :param slice_duration: (optional) when used with slice_start, the number of seconds in the slice
 
-    Raise IOError on transcoding problems, or ValueError on param problems.
+    Raise:
+      * IOError: problems during transcoding
+      * ValueError: invalid params, transcoder not found
     """
 
     err_output = None
@@ -408,9 +411,9 @@ def transcode_to_mp3(filepath, quality=3, slice_start=None, slice_duration=None)
         cmd.extend(['-ss', str(slice_start)])
 
     if isinstance(quality, int):
-        cmd.extend(['-qscale', str(quality)])
+        cmd.extend(['-q:a', str(quality)])
     elif isinstance(quality, basestring):
-        cmd.extend(['-ab', quality])
+        cmd.extend(['-b:a', quality])
     else:
         raise ValueError("quality must be int or string, but received %r" % quality)
 
@@ -431,14 +434,16 @@ def transcode_to_mp3(filepath, quality=3, slice_start=None, slice_duration=None)
             raise IOError  # handle errors in except
 
     except (OSError, IOError) as e:
-        log.exception('transcoding failure')
 
-        err_msg = "transcoding failed: %s. " % e
+        err_msg = "transcoding command (%s) failed: %s. " % (' '.join(cmd), e)
+
+        if 'No such file or directory' in str(e):
+            err_msg += '\nffmpeg or avconv must be installed and in the system path.'
 
         if err_output is not None:
-            err_msg += "stderr: '%s'" % err_output
+            err_msg += "\nstderr: '%s'" % err_output
 
-        log.debug('full failure output: %s', err_output)
+        log.exception('transcoding failure:\n%s', err_msg)
 
         raise IOError(err_msg)
 
@@ -451,7 +456,7 @@ def truncate(x, max_els=100, recurse_levels=0):
     recurse_levels is only valid for homogeneous lists/tuples.
     max_els ignored for song dictionaries."""
 
-    #Coerce tuple to list to ease truncation.
+    # Coerce tuple to list to ease truncation.
     is_tuple = False
     if isinstance(x, tuple):
         is_tuple = True
@@ -464,7 +469,7 @@ def truncate(x, max_els=100, recurse_levels=0):
 
             if isinstance(x, dict):
                 if 'id' in x and 'titleNorm' in x:
-                    #assume to be a song dict
+                    # assume to be a song dict
                     trunc = dict((k, x.get(k)) for k in ['title', 'artist', 'album'])
                     trunc['...'] = '...'
                     return trunc
@@ -480,7 +485,7 @@ def truncate(x, max_els=100, recurse_levels=0):
                 return trunc
 
     except TypeError:
-        #does not have len
+        # does not have len
         pass
 
     return x
@@ -495,18 +500,18 @@ def empty_arg_shortcircuit(return_code='[]', position=1):
     :param position: (optional) the position of the expected list - default is 1.
     """
 
-    #The normal pattern when making a collection an optional arg is to use
+    # The normal pattern when making a collection an optional arg is to use
     # a sentinel (like None). Otherwise, you run the risk of the collection
     # being mutated - there's only one, not a new one on each call.
-    #Here we've got multiple things we'd like to
+    # Here we've got multiple things we'd like to
     # return, so we can't do that. Rather than make some kind of enum for
     # 'accepted return values' I'm just allowing freedom to return anything.
-    #Less safe? Yes. More convenient? Definitely.
+    # Less safe? Yes. More convenient? Definitely.
 
     @decorator
     def wrapper(function, *args, **kw):
         if len(args[position]) == 0:
-            #avoid polluting our namespace
+            # avoid polluting our namespace
             ns = {}
             exec 'retval = ' + return_code in ns
             return ns['retval']
@@ -529,7 +534,7 @@ def accept_singleton(expected_type, position=1):
     def wrapper(function, *args, **kw):
 
         if isinstance(args[position], expected_type):
-            #args are a tuple, can't assign into them
+            # args are a tuple, can't assign into them
             args = list(args)
             args[position] = [args[position]]
             args = tuple(args)
@@ -539,7 +544,7 @@ def accept_singleton(expected_type, position=1):
     return wrapper
 
 
-#Used to mark a field as unimplemented.
+# Used to mark a field as unimplemented.
 @property
 def NotImplementedField(self):
     raise NotImplementedError

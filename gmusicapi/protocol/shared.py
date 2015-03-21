@@ -43,17 +43,17 @@ class BuildRequestMeta(type):
     """Metaclass to create build_request from static/dynamic config."""
 
     def __new__(cls, name, bases, dct):
-        #To not mess with mro and inheritance, build the class first.
+        # To not mess with mro and inheritance, build the class first.
         new_cls = super(BuildRequestMeta, cls).__new__(cls, name, bases, dct)
 
         merge_keys = ('headers', 'params')
         all_keys = ('method', 'url', 'files', 'data', 'verify', 'allow_redirects') + merge_keys
 
         config = {}  # stores key: val for static or f(*args, **kwargs) -> val for dyn
-        dyn = lambda key: 'dynamic_' + key
-        stat = lambda key: 'static_' + key
-        has_key = lambda key: hasattr(new_cls, key)
-        get_key = lambda key: getattr(new_cls, key)
+        dyn = lambda key: 'dynamic_' + key  # noqa
+        stat = lambda key: 'static_' + key  # noqa
+        has_key = lambda key: hasattr(new_cls, key)  # noqa
+        get_key = lambda key: getattr(new_cls, key)  # noqa
 
         for key in all_keys:
             if not has_key(dyn(key)) and not has_key(stat(key)):
@@ -65,7 +65,7 @@ class BuildRequestMeta(type):
                 config[key] = get_key(stat(key))
 
         for key in merge_keys:
-            #merge case: dyn took precedence above, but stat also exists
+            # merge case: dyn took precedence above, but stat also exists
             if has_key(dyn(key)) and has_key(stat(key)):
                 def key_closure(stat_val=get_key(stat(key)), dyn_func=get_key(dyn(key))):
                     def build_key(*args, **kwargs):
@@ -76,10 +76,10 @@ class BuildRequestMeta(type):
                     return build_key
                 config[key] = key_closure()
 
-        #To explain some of the funkiness wrt closures, see:
+        # To explain some of the funkiness wrt closures, see:
         # http://stackoverflow.com/questions/233673/lexical-closures-in-python
 
-        #create the actual build_request method
+        # create the actual build_request method
         def req_closure(config=config):
             def build_request(cls, *args, **kwargs):
                 req_kwargs = {}
@@ -152,6 +152,7 @@ class Call(object):
     __metaclass__ = BuildRequestMeta
 
     gets_logged = True
+    fail_on_non_200 = True
 
     required_auth = authtypes()  # all false by default
 
@@ -191,7 +192,7 @@ class Call(object):
         :param session: a PlaySession used to send this request.
         :param validate: if False, do not validate
         """
-        #TODO link up these docs
+        # TODO link up these docs
 
         call_name = cls.__name__
 
@@ -207,23 +208,23 @@ class Call(object):
         req_kwargs = cls.build_request(*args, **kwargs)
 
         response = session.send(req_kwargs, cls.required_auth)
-        #TODO trim the logged response if it's huge?
+        # TODO trim the logged response if it's huge?
 
         safe_req_kwargs = req_kwargs.copy()
         if safe_req_kwargs.get('headers', {}).get('Authorization', None) is not None:
             safe_req_kwargs['headers']['Authorization'] = '<omitted>'
 
-        # check response code
-        try:
-            response.raise_for_status()
-        except requests.HTTPError as e:
-            err_msg = str(e)
+        if cls.fail_on_non_200:
+            try:
+                response.raise_for_status()
+            except requests.HTTPError as e:
+                err_msg = str(e)
 
-            if cls.gets_logged:
-                err_msg += "\n(requests kwargs: %r)" % (safe_req_kwargs)
-                err_msg += "\n(response was: %r)" % response.content
+                if cls.gets_logged:
+                    err_msg += "\n(requests kwargs: %r)" % (safe_req_kwargs)
+                    err_msg += "\n(response was: %r)" % response.content
 
-            raise CallFailure(err_msg, call_name)
+                raise CallFailure(err_msg, call_name)
 
         try:
             parsed_response = cls.parse_response(response)
@@ -243,7 +244,7 @@ class Call(object):
             log.debug(cls.filter_response(parsed_response))
 
         try:
-            #order is important; validate only has a schema for a successful response
+            # order is important; validate only has a schema for a successful response
             cls.check_success(response, parsed_response)
             if validate:
                 cls.validate(response, parsed_response)
@@ -262,7 +263,7 @@ class Call(object):
             raise CallFailure(err_msg, e.callname), None, trace
 
         except ValidationException as e:
-            #TODO shouldn't be using formatting
+            # TODO shouldn't be using formatting
             err_msg = "the response format for %s was not recognized." % call_name
             err_msg += "\n\n%s\n" % e
 
@@ -301,20 +302,20 @@ class Call(object):
 
         fields = filtered.ListFields()
 
-        #eg of filtering a specific field
-        #if any(fd.name == 'field_name' for fd, val in fields):
+        # eg of filtering a specific field
+        # if any(fd.name == 'field_name' for fd, val in fields):
         #    filtered.field_name = '<name>'
 
-        #Filter all byte fields.
+        # Filter all byte fields.
         for field_name, val in ((fd.name, val) for fd, val in fields
                                 if fd.type == FieldDescriptor.TYPE_BYTES):
             setattr(filtered, field_name, "<%s bytes>" % len(val))
 
-        #Filter submessages.
+        # Filter submessages.
         for field in (val for fd, val in fields
                       if fd.type == FieldDescriptor.TYPE_MESSAGE):
 
-            #protobuf repeated api is bad for reflection
+            # protobuf repeated api is bad for reflection
             is_repeated = hasattr(field, '__len__')
 
             if not is_repeated:
@@ -322,7 +323,7 @@ class Call(object):
 
             else:
                 for i in range(len(field)):
-                    #repeatedComposite does not allow setting
+                    # repeatedComposite does not allow setting
                     old_fields = [f for f in field]
                     del field[:]
 
@@ -338,8 +339,13 @@ class ClientLogin(Call):
 
     gets_logged = False
 
+    fail_on_non_200 = False
+    # The protocol does return 200 and 403 when it makes sense,
+    # but shortcircuiting on non-200s won't allow us to attach error
+    # context in check_success.
+
     static_method = 'POST'
-    #static_headers = {'User-agent': 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1'}
+    # static_headers = {'User-agent': 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1'}
     static_url = 'https://www.google.com/accounts/ClientLogin'
 
     @classmethod
@@ -380,7 +386,7 @@ class ClientLogin(Call):
         #    Error=CaptchaRequired
         #    CaptchaToken=DQAAAGgA...dkI1LK9
         #    CaptchaUrl=Captcha?ctoken=HiteT...
-
+        #print response.text
         ret = {}
         for line in response.text.split('\n'):
             if '=' in line:
@@ -390,6 +396,15 @@ class ClientLogin(Call):
         return ret
 
     @classmethod
-    def check_succes(cls, response, msg):
-        if response.status_code == 200:
-            raise CallFailure("status code %s != 200" % response.status_code, cls.__name__)
+    def check_success(cls, response, msg):
+        if response.status_code != 200:
+            if msg == {'Error': 'BadAuthentication'}:
+                raise CallFailure('Invalid login credentials', cls.__name__)
+
+            log.warning("Received strange login response: %r"
+                        "\n\nYou may need to enable less secure logins:\n"
+                        "  https://www.google.com/settings/security/lesssecureapps", msg)
+
+            raise CallFailure(
+                "status code %s != 200, full response: %r " % (response.status_code, msg),
+                cls.__name__)
