@@ -71,11 +71,13 @@ class GoogleMusicStorage():
         else:
             #if criteria == 'artist': criteria = 'album_artist'
             if criteria == 'artist' and not name:
-               query = "select artist, max(artist_art_url) from songs group by artist"
+                query = "select artist, max(artist_art_url) from songs group by artist"
+            elif criteria == 'artist' and name:
+                query = "select album_artist, album, year, max(album_art_url) from songs where (artist=:name or album_artist=:name) group by lower(album_artist), lower(album)"
             elif name:
-               query = "select album_artist, album, year, max(album_art_url) from songs where %s=:name group by album_artist, album" % criteria
+                query = "select album_artist, album, year, max(album_art_url) from songs where %s=:name group by album_artist, album" % criteria
             else:
-               query = "select %s from songs group by lower(%s)" % (criteria, criteria)
+                query = "select %s from songs group by lower(%s)" % (criteria, criteria)
 
         #self._connect()
         criterias = self.curs.execute(query,{'name':name.decode('utf8')}).fetchall()
