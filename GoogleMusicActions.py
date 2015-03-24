@@ -1,4 +1,4 @@
-import os, xbmc, utils
+import os, xbmc, xbmcgui, utils
 import GoogleMusicApi
 
 class GoogleMusicActions():
@@ -11,6 +11,9 @@ class GoogleMusicActions():
     def executeAction(self, action, params):
         if (action == "play_all"):
             self.playAll(params)
+        elif (action == "play_all_yt"):
+            titles = [song[23] for song in self._getSongs(params)]
+            self.playYoutube(titles)
         elif (action == "update_playlist"):
             self.api.getPlaylistSongs(params["playlist_id"], True)
         elif (action == "update_playlists"):
@@ -32,12 +35,11 @@ class GoogleMusicActions():
         elif (action == "del_from_playlist"):
             self.api.delFromPlaylist(params["playlist_id"], params["song_id"])
         elif (action == "update_library"):
-            try:
-                self.api.clearCache()
-                xbmc.executebuiltin("XBMC.RunPlugin(%s)" % utils.addon_url)
+            try: self.api.clearCache()
             except Exception as e:
                 utils.log(repr(e))
                 self.notify(self.lang(30106))
+            xbmc.executebuiltin("XBMC.RunPlugin(%s)" % utils.addon_url)
         elif (action == "export_library"):
             if utils.addon.getSetting('export_path'):
                 self.exportLibrary(utils.addon.getSetting('export_path'))
@@ -52,11 +54,12 @@ class GoogleMusicActions():
                 self.playAll({'radio_id': self.api.startRadio(keyboard.getText(), params["song_id"])})
                 xbmc.executebuiltin("ActivateWindow(10500)")
                 #xbmc.executebuiltin("XBMC.RunPlugin(%s?path=station&id=%s)" % (sys.argv[0],radio_id))
-        elif (action == "youtube"):
-            try:
-                xbmc.executebuiltin("ActivateWindow(10025,plugin://plugin.video.youtube/kodion/search/query/?q=%s)" % params['title'])
-            except:
-                self.notify(self.lang(30109))
+        elif (action == "search_yt"):
+            xbmc.executebuiltin("ActivateWindow(10025,plugin://plugin.video.youtube/kodion/search/query/?q=%s)" % params['title'])
+        elif (action == "play_yt"):
+            self.playYoutube([params.get('title')])
+        elif (action == "search"):
+            xbmc.executebuiltin("ActivateWindow(10501,%s/?path=search_result&query=%s)" % (utils.addon_url, params.get('filter_criteria')))
         else:
             utils.log("Invalid action: " + action)
 
@@ -64,26 +67,7 @@ class GoogleMusicActions():
         xbmc.executebuiltin("XBMC.Notification(%s,%s,5000,%s)" % (utils.plugin, text, self.icon))
 
     def playAll(self, params={}):
-        get = params.get
-
-        if get('playlist_id'):
-            utils.log("Loading playlist: " + get('playlist_id'))
-            songs = self.api.getPlaylistSongs(get('playlist_id'))
-        elif get('album_id'):
-            utils.log("Loading album: " + get('album_id'))
-            songs = self.api.getAlbum(get('album_id'))
-        elif get('share_token'):
-            import urllib
-            utils.log("Loading shared playlist: " + get('share_token'))
-            songs = self.api.getSharedPlaylist(urllib.unquote_plus(get('share_token')))
-        elif get('artist_id'):
-            utils.log("Loading artist top tracks: " + get('artist_id'))
-            songs = self.api.getArtist(get('artist_id'))
-        elif get('radio_id'):
-            utils.log("Loading radio: " + get('radio_id'))
-            songs = self.api.getStationTracks(get('radio_id'))
-        else:
-            songs = self.api.getFilterSongs(get('filter_type'), get('filter_criteria'), albums='')
+        songs = self._getSongs(params)
 
         player = xbmc.Player()
         if (player.isPlaying()):
@@ -100,8 +84,28 @@ class GoogleMusicActions():
 
         xbmc.executebuiltin('playlist.playoffset(music , 0)')
 
+    def playYoutube(self, titles):
+        #print repr(titles)
+
+        player = xbmc.Player()
+        if (player.isPlaying()):
+            player.stop()
+
+        playlist = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
+        playlist.clear()
+
+        dp = None
+        if len(titles) > 1:
+            dp = xbmcgui.DialogProgress();
+            dp.create('Fetching video IDs', str(len(titles))+' '+self.lang(30213).lower(), self.lang(30404))
+
+        ytaddonurl = "plugin://plugin.video.youtube/play/?video_id=%s"
+        for videoid, title in self._getVideoIDs(titles, dp):
+            playlist.add(ytaddonurl % videoid, xbmcgui.ListItem(title))
+
+        xbmc.executebuiltin('playlist.playoffset(video , 0)')
+
     def addToPlaylist (self, song_id):
-        import xbmcgui
         playlists = self.api.getPlaylistsByType('user')
         plist = [pl_name for pl_id, pl_name in playlists]
         selected = xbmcgui.Dialog().select(self.lang(30401) , plist)
@@ -125,7 +129,6 @@ class GoogleMusicActions():
             print line,
 
     def exportLibrary(self, path):
-        import xbmcgui
         songs = self.api.getPlaylistSongs('all_songs')
         dp = xbmcgui.DialogProgress();
         dp.create(self.lang(30403), str(len(songs))+' '+self.lang(30213).lower(), self.lang(30404))
@@ -155,5 +158,53 @@ class GoogleMusicActions():
     def _sanitizePath(self, name):
         name = "".join(i for i in name if i not in "\/:*?<>|,;$%\"\'.`")
         if len(name) > 50: name = name[:50]
-        return unicode(name.decode('utf8')).strip()
-        #return ("".join([i if i.isalnum() else " " for i in name.strip()])).strip()
+        return utils.tryEncode(name).strip()
+
+    def _getSongs(self, params):
+        get = params.get
+
+        if get('playlist_id'):
+            utils.log("Loading playlist: " + get('playlist_id'))
+            songs = self.api.getPlaylistSongs(get('playlist_id'))
+        elif get('album_id'):
+            utils.log("Loading album: " + get('album_id'))
+            songs = self.api.getAlbum(get('album_id'))
+        elif get('share_token'):
+            import urllib
+            utils.log("Loading shared playlist: " + get('share_token'))
+            songs = self.api.getSharedPlaylist(urllib.unquote_plus(get('share_token')))
+        elif get('artist_id'):
+            utils.log("Loading artist top tracks: " + get('artist_id'))
+            songs = self.api.getArtist(get('artist_id'))
+        elif get('radio_id'):
+            utils.log("Loading radio: " + get('radio_id'))
+            songs = self.api.getStationTracks(get('radio_id'))
+        else:
+            songs = self.api.getFilterSongs(get('filter_type'), get('filter_criteria'), albums='')
+
+        return songs
+
+    def _getVideoIDs(self, titles, progress_dialog=None):
+        import urllib, urllib2, re
+
+        videoids = []
+        opener = urllib2.build_opener()
+        userAgent = "Mozilla/5.0 (Windows NT 6.1; rv:30.0) Gecko/20100101 Firefox/30.0"
+        opener.addheaders = [('User-Agent', userAgent)]
+        url = "http://gdata.youtube.com/feeds/api/videos?q=%s+-interview+-cover+-remix+-album&category=Music&max-results=1&start-index=1&orderby=relevance&time=all_time&v=2"
+
+        count = 0
+        for title in titles:
+            if progress_dialog:
+                if progress_dialog.iscanceled():
+                    progress_dialog.close()
+                    return videoids
+                count = count +1
+                progress_dialog.update(int(count * 100 / len(titles)))
+            content = opener.open(url % urllib.quote_plus(utils.tryEncode(title.lower()))).read()
+            match=re.compile('<yt:videoid>(.+?)</yt:videoid>', re.DOTALL).findall(content)
+            if match:
+                #print match[0]+' '+repr(title)
+                videoids.append([match[0], title])
+
+        return videoids
