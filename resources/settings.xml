@@ -21,6 +21,6 @@
         <setting id="clear_cache" type="action" label="30062" option="close" action="RunPlugin(plugin://plugin.audio.googlemusic.exp/?action=clear_cache)" />
         <setting type="sep" />
         <setting id="sqlite_db" type="text" label="30064" default="googlemusic.db"/>
-        <setting id="device_id" type="text" label="Device ID" default="" />
+        <setting id="device_id" type="text" label="Device ID" default="" enable="false"/>
     </category>
 </settings>

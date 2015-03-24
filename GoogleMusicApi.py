@@ -31,7 +31,7 @@ class GoogleMusicApi():
             songs = storage.getAutoPlaylistSongs(playlist_id)
             if playlist_id == 'thumbsup':
                 """ Try to fetch all access thumbs up songs """
-                for track in self.getApi().get_thumbs_up_songs():
+                for track in self.getApi().get_promoted_songs():
                     songs.append(self._convertAATrack(track))
         else:
             if forceRenew:
@@ -73,7 +73,6 @@ class GoogleMusicApi():
 
     def getSongStreamUrl(self, song_id):
         stream_url = self.getLogin().getStreamUrl(song_id)
-        #storage.updateSongStreamUrl(song_id, stream_url)
         return stream_url
 
     def incrementSongPlayCount(self, song_id):
