@@ -5,11 +5,11 @@
     <string id="30011">Utilizador</string>
     <string id="30012">Palavra-passe</string>
     <string id="30061">Depurar</string>
-    <string id="30062">Limpar cache</string>
-    <string id="30063">Limpar cookie</string>
+    <string id="30062">Limpar armazenamento temporário ("cache")</string>
+    <string id="30063">Limpar "cookie"</string>
     <string id="30064">Base de dados SQLite</string>
     <string id="30065">Substituir vista</string>
-    <string id="30066">Pre-carregar URL</string>
+    <string id="30066">Pré-carregar URL</string>
     <string id="30052">Caminho de exportação</string>
     <string id="30053">Exportar sempre após atualização da biblioteca</string>
 
