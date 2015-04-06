@@ -177,7 +177,7 @@ class GoogleMusicNavigation():
         if criteria == 'album' or (albums and criteria in ('genre','artist','composer')):
             for item in items:
                 #folder = addFolder('[%s] %s'%(item[0],item[1]),{'path':criteria,'album':item[1],'artist':item[0]},getCm(criteria,item[1]),item[-1])
-                folder = addFolder(item[1],{'path':criteria,'album':item[1],'artist':item[0]},getCm(criteria,item[1]),item[-1],item[0])
+                folder = addFolder(item[1],{'path':criteria,'album':item[1],'artist':item[0]},getCm(criteria,item[1]),item[3],item[0])
                 folder[1].setInfo(type='music', infoLabels={'year':item[2],'artist':item[0],'album':item[1],
                     'date':time.strftime('%d.%m.%Y', time.gmtime(item[4]/1000000))})
                 #utils.log("folder[1].setInfo('year':" + str(item[2]) +
