@@ -1,5 +1,6 @@
 import xbmc, xbmcplugin, utils
 import GoogleMusicApi
+import time
 from urllib import unquote_plus, urlencode
 from xbmcgui import ListItem
 
@@ -58,12 +59,18 @@ class GoogleMusicNavigation():
         elif self.path == "filter":
             listItems = self.getCriteria(get('criteria'))
             sortMethods = [xbmcplugin.SORT_METHOD_LABEL_IGNORE_THE]
+            if ('album' == get('criteria')):
+                sortMethods = [xbmcplugin.SORT_METHOD_ALBUM_IGNORE_THE, xbmcplugin.SORT_METHOD_VIDEO_YEAR, 
+                               xbmcplugin.SORT_METHOD_ARTIST, xbmcplugin.SORT_METHOD_ALBUM,
+                               xbmcplugin.SORT_METHOD_DATE]
             view_mode_id = 500
         elif self.path in ["artist", "genre"] and get('albums'):
             albums = unquote_plus(get('albums'))
             listItems = self.getCriteria(self.path, albums)
             listItems.insert(0,self.createFolder('* '+self.lang(30201),{'path':"allsongs",'criteria':self.path,'albums':albums}))
-            sortMethods = [xbmcplugin.SORT_METHOD_ALBUM_IGNORE_THE, xbmcplugin.SORT_METHOD_VIDEO_YEAR]
+            sortMethods = [xbmcplugin.SORT_METHOD_ALBUM_IGNORE_THE, xbmcplugin.SORT_METHOD_VIDEO_YEAR, 
+                           xbmcplugin.SORT_METHOD_ARTIST, xbmcplugin.SORT_METHOD_ALBUM,
+                           xbmcplugin.SORT_METHOD_DATE]
             content = "albums"
             view_mode_id = 500
         elif self.path == "allsongs":
@@ -170,8 +177,13 @@ class GoogleMusicNavigation():
         if criteria == 'album' or (albums and criteria in ('genre','artist','composer')):
             for item in items:
                 #folder = addFolder('[%s] %s'%(item[0],item[1]),{'path':criteria,'album':item[1],'artist':item[0]},getCm(criteria,item[1]),item[-1])
-                folder = addFolder(item[1],{'path':criteria,'album':item[1],'artist':item[0]},getCm(criteria,item[1]),item[-1],item[0])
-                folder[1].setInfo(type='music', infoLabels={'year':item[2],'artist':item[0],'album':item[1]})
+                folder = addFolder(item[1],{'path':criteria,'album':item[1],'artist':item[0]},getCm(criteria,item[1]),item[3],item[0])
+                folder[1].setInfo(type='music', infoLabels={'year':item[2],'artist':item[0],'album':item[1],
+                    'date':time.strftime('%d.%m.%Y', time.gmtime(item[4]/1000000))})
+                #utils.log("folder[1].setInfo('year':" + str(item[2]) +
+                #    ",'artist':" + item[0] +
+                #    ",'album':" + item[1] +
+                #    ", date: " + time.strftime('%d.%m.%Y', time.gmtime(item[4]/1000000))+")")
                 append(folder)
         elif criteria == 'artist':
             for item in items:

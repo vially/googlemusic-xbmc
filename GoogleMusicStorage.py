@@ -63,15 +63,15 @@ class GoogleMusicStorage():
         #print "### storage getcriteria: "+repr(criteria)+" "+repr(name)
 
         if criteria == 'album':
-            query = "select album_artist, album, year, max(album_art_url) from songs where album <> '-Unknown-' group by lower(album_artist), lower(album)"
+            query = "select album_artist, album, year, max(album_art_url), max(creation_date) from songs where album <> '-Unknown-' group by lower(album_artist), lower(album)"
         else:
             #if criteria == 'artist': criteria = 'album_artist'
             if criteria == 'artist' and not name:
                 query = "select album_artist, max(artist_art_url) from songs group by lower(album_artist)"
             elif criteria == 'artist' and name:
-                query = "select album_artist, album, year, max(album_art_url) from songs where (artist=:name or album_artist=:name) group by lower(album_artist), lower(album)"
+                query = "select album_artist, album, year, max(album_art_url), max(creation_date) from songs where (artist=:name or album_artist=:name) group by lower(album_artist), lower(album)"
             elif name:
-                query = "select album_artist, album, year, max(album_art_url) from songs where %s=:name group by lower(album_artist), lower(album)" % criteria
+                query = "select album_artist, album, year, max(album_art_url), max(creation_date) from songs where %s=:name group by lower(album_artist), lower(album)" % criteria
             else:
                 query = "select %s from songs group by lower(%s)" % (criteria, criteria)
 
