@@ -4,7 +4,7 @@ from gmusicapi import Mobileclient
 
 class GoogleMusicLogin():
     def __init__(self):
-        self.gmusicapi = Mobileclient(debug_logging=False, validate=False, verify_ssl=False)
+        self.gmusicapi = Mobileclient(debug_logging=False, validate=False, verify_ssl=True)
 
     def checkCookie(self):
         # Remove cookie data if it is older then 7 days
