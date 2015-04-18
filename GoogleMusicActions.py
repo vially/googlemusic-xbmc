@@ -79,7 +79,7 @@ class GoogleMusicActions():
         for song in songs:
             playlist.add(self.song_url % (song[0], song[8], song[18], song[22]), utils.createItem(song[23], song[22]))
 
-        if get("shuffle"):
+        if params.get("shuffle"):
             playlist.shuffle()
 
         xbmc.executebuiltin('playlist.playoffset(music , 0)')
