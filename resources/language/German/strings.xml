@@ -40,7 +40,8 @@
     <string id="30211">Auf gut Glück-Mix</string>
     <string id="30212">Komponisten</string>
     <string id="30213">Titel</string>
-
+    <string id="30214">Zufall Alben</string>
+    
     <!-- context menu items -->
     <string id="30301">Alle wiedergeben</string>
     <string id="30302">Alle zufällig wiedergeben</string>

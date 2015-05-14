@@ -21,6 +21,7 @@ class GoogleMusicNavigation():
         )
         self.lib_menu = (
             {'title':self.lang(30210), 'params':{'path':"playlist", 'playlist_id':"feellucky"}},
+            {'title':self.lang(30214), 'params':{'path':"playlist", 'playlist_id':"shuffled_albums"}},
             {'title':self.lang(30201), 'params':{'path':"playlist", 'playlist_id':"all_songs"}},
             {'title':self.lang(30205), 'params':{'path':"filter", 'criteria':"artist"}},
             {'title':self.lang(30206), 'params':{'path':"filter", 'criteria':"album"}},
@@ -124,7 +125,7 @@ class GoogleMusicNavigation():
     def listPlaylistSongs(self, playlist_id):
         utils.log("Loading playlist: " + playlist_id)
         songs = self.api.getPlaylistSongs(playlist_id)
-        if playlist_id in ('thumbsup','lastadded','mostplayed','freepurchased','feellucky','all_songs'):
+        if playlist_id in ('thumbsup','lastadded','mostplayed','freepurchased','feellucky','all_songs','shuffled_albums'):
             return self.addSongsFromLibrary(songs, 'library')
         return self.addSongsFromLibrary(songs, 'playlist'+playlist_id)
 
