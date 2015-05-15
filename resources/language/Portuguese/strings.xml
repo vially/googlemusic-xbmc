@@ -40,7 +40,8 @@
     <string id="30211">Mistura "Sinto-me com sorte"</string>
     <string id="30212">Compositores</string>
     <string id="30213">Músicas</string>
-
+    <string id="30214">álbuns de reprodução aleatória</string>
+    
     <!-- context menu items -->
     <string id="30301">Tocar tudo</string>
     <string id="30302">Tocar tudo aleatoriamente</string>
