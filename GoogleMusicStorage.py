@@ -35,8 +35,9 @@ class GoogleMusicStorage():
         if playlist_id == 'all_songs':
             result = self.curs.execute("SELECT * FROM songs ORDER BY display_name")
         elif playlist_id == 'shuffled_albums':
-            result = self.curs.execute("WITH albums AS (SELECT DISTINCT album FROM songs ORDER BY RANDOM())"+
-                                       "SELECT songs.* FROM albums LEFT JOIN songs ON songs.album = albums.album")
+            result = self.curs.execute("WITH albums AS (SELECT DISTINCT album, album_artist FROM songs ORDER BY RANDOM()) "+
+                                       "SELECT songs.* FROM albums LEFT JOIN songs ON songs.album = albums.album AND songs.album_artist = albums.album_artist "+
+									   "ORDER BY albums.rowid, songs.disc, songs.track")
         else:
             result = self.curs.execute("SELECT * FROM songs "+
                                        "INNER JOIN playlists_songs ON songs.song_id = playlists_songs.song_id "+
