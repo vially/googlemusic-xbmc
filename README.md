@@ -6,7 +6,7 @@
 
 ##Installation
 
-To install this add-on you must download it from [here](http://forum.xbmc.org/showthread.php?tid=134783&pid=1134966#pid1134966)
+To install this add-on you must download it from [here](http://forum.kodi.tv/showthread.php?tid=200640)
 and install it using the Add-on Manager from within XBMC by going to:
 
 1. Settings
