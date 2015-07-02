@@ -155,6 +155,12 @@ class GoogleMusicNavigation():
             for rs in self.api.getStations():
                 cm = self.getRadioContextMenuItems(rs['name'], rs['id'])
                 append(addFolder(rs['name'], {'path':"station",'id':rs['id']}, cm, album_art_url=rs.get('imageUrl', icon)))
+        elif playlist_type == 'auto':
+            auto = [['thumbsup',self.lang(30215)],['lastadded',self.lang(30216)],
+                    ['freepurchased',self.lang(30217)],['mostplayed',self.lang(30218)]]
+            for pl_id, pl_name in auto:
+                cm = self.getPlayAllContextMenuItems(pl_name, pl_id)
+                append(addFolder(pl_name, {'path':"playlist", 'playlist_id':pl_id}, cm))
         else:
             for pl_id, pl_name in self.api.getPlaylistsByType(playlist_type):
                 cm = self.getPlayAllContextMenuItems(pl_name, pl_id)

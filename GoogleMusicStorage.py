@@ -88,7 +88,7 @@ class GoogleMusicStorage():
         querys = {'thumbsup':'SELECT * FROM songs WHERE rating > 3 ORDER BY display_name',
                   'lastadded':'SELECT * FROM songs ORDER BY creation_date desc LIMIT 500',
                   'mostplayed':'SELECT * FROM songs ORDER BY play_count desc LIMIT 500',
-                  'freepurchased':'SELECT * FROM songs WHERE type = 0 OR type = 1',
+                  'freepurchased':'SELECT * FROM songs WHERE type <> 0 order by creation_date desc',
                   'feellucky':'SELECT * FROM songs ORDER BY random() LIMIT 500',
                  }
         return self.curs.execute(querys[playlist]).fetchall()
@@ -162,7 +162,7 @@ class GoogleMusicStorage():
                   'album':         get("album") if get("album") else '-Unknown-',
                   'title':         api_song["title"],
                   'album_artist':  get("albumArtist")if get("albumArtist") else get("artist") if get("artist") else '-Unknown-',
-                  'type':          get("type", 0),
+                  'type':          get("trackType", 0),
                   'track':         get("track", get("trackNumber" ,0)),
                   'total_tracks':  get("total_tracks", get("totalTrackCount", 0)),
                   'beats_per_minute': get("beatsPerMinute", 0),

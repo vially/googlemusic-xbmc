@@ -41,10 +41,6 @@ class GoogleMusicApi():
         return songs
 
     def getPlaylistsByType(self, playlist_type, forceRenew=False):
-        if playlist_type == 'auto':
-            return [['thumbsup','Highly Rated'],['lastadded','Last Added'],
-                    ['freepurchased','Free and Purchased'],['mostplayed','Most Played']]
-
         if forceRenew:
             self.updatePlaylistSongs()
 
