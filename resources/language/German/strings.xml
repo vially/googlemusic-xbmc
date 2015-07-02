@@ -41,7 +41,11 @@
     <string id="30212">Komponisten</string>
     <string id="30213">Titel</string>
     <string id="30214">Zufall Alben</string>
-    
+    <string id="30215">Mag ich</string>
+    <string id="30216">Zuletzt hinzugefügt</string>
+    <string id="30217">Kostenlos & gekauft</string>
+    <string id="30218">Meist gespielt</string>
+
     <!-- context menu items -->
     <string id="30301">Alle wiedergeben</string>
     <string id="30302">Alle zufällig wiedergeben</string>
@@ -68,7 +72,7 @@
     <string id="30107">Export fertiggestellt</string>
     <string id="30108">Kein Export-Pfad definiert</string>
     <string id="30109">Fehler beim Aufrufen des YouTube-Addons</string>
-    
+
     <!-- dialogs -->
     <string id="30401">Zu Playlist hinzufügen...</string>
     <string id="30402">Radio-Name</string>

@@ -29,7 +29,7 @@
     <!-- menu items -->
     <string id="30201">Todas as músicas</string>
     <string id="30202">Listas de reprodução</string>
-    <string id="30203">Rádio</string>
+    <string id="30203">Mixes instantâneos</string>
     <string id="30204">Listas de reprodução automáticas</string>
     <string id="30205">Artistas</string>
     <string id="30206">Álbuns</string>
@@ -40,8 +40,12 @@
     <string id="30211">Mistura "Sinto-me com sorte"</string>
     <string id="30212">Compositores</string>
     <string id="30213">Músicas</string>
-    <string id="30214">álbuns de reprodução aleatória</string>
-    
+    <string id="30214">Reproduzir aleatoriamente meus álbuns</string>
+    <string id="30215">Gostei</string>
+    <string id="30216">Últimas adicionadas</string>
+    <string id="30217">Gratuitas e compradas</string>
+    <string id="30218">Mais acessadas</string>
+
     <!-- context menu items -->
     <string id="30301">Tocar tudo</string>
     <string id="30302">Tocar tudo aleatoriamente</string>
