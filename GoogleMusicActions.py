@@ -55,7 +55,7 @@ class GoogleMusicActions():
                 xbmc.executebuiltin("ActivateWindow(10500)")
                 #xbmc.executebuiltin("XBMC.RunPlugin(%s?path=station&id=%s)" % (sys.argv[0],radio_id))
         elif (action == "search_yt"):
-            xbmc.executebuiltin("ActivateWindow(10025,plugin://plugin.video.youtube/kodion/search/query/?q=%s)" % params['title'])
+            xbmc.executebuiltin("ActivateWindow(10025,plugin://plugin.video.youtube/search/?q=%s)" % params['title'])
         elif (action == "play_yt"):
             self.playYoutube([params.get('title')])
         elif (action == "search"):
@@ -185,14 +185,21 @@ class GoogleMusicActions():
         return songs
 
     def _getVideoIDs(self, titles, progress_dialog=None):
-        import urllib, urllib2, re
+        import urllib, urllib2
+        import gmusicapi.compat as compat
+        loadJson = compat.json.loads
 
+        headers = {'Host': 'www.googleapis.com',
+                   'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.36 Safari/537.36',
+                   #'Authorization': 'Bearer %s' % utils.addon.getSetting('mastertoken')
+                   }
+        params = {'part': 'id',
+                  'maxResults': 1,
+                  'type': 'video', #'order': 'rating', 'regionCode':'us',
+                  'key': 'AIzaSyCpYQnhH6BA_wGBB79agx_32kuoq7WwTZg'
+                  }
         videoids = []
-        opener = urllib2.build_opener()
-        userAgent = "Mozilla/5.0 (Windows NT 6.1; rv:30.0) Gecko/20100101 Firefox/30.0"
-        opener.addheaders = [('User-Agent', userAgent)]
-        url = "http://gdata.youtube.com/feeds/api/videos?q=%s+-interview+-cover+-remix+-album&category=Music&max-results=1&start-index=1&orderby=relevance&time=all_time&v=2"
-
+        url = 'https://www.googleapis.com/youtube/v3/search?%s'
         count = 0
         for title in titles:
             if progress_dialog:
@@ -201,10 +208,12 @@ class GoogleMusicActions():
                     return videoids
                 count = count +1
                 progress_dialog.update(int(count * 100 / len(titles)))
-            content = opener.open(url % urllib.quote_plus(utils.tryEncode(title.lower()))).read()
-            match=re.compile('<yt:videoid>(.+?)</yt:videoid>', re.DOTALL).findall(content)
-            if match:
-                #print match[0]+' '+repr(title)
-                videoids.append([match[0], title])
+            params['q'] = '%s -interview -cover -remix -album' % title.lower()
+            req = urllib2.Request(url % urllib.urlencode(params), headers=headers)
+            response = urllib2.urlopen(req).read()
+            print repr(response)
+            searchresults = loadJson(response)['items']
+            if searchresults:
+                videoids.append([searchresults[0]['id']['videoId'], title])
 
         return videoids
