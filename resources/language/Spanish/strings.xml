@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<strings>
+    <string id="30001">General</string>
+    <string id="30051">Avanzado</string>
+    <string id="30011">Nombre de usuario</string>
+    <string id="30012">Contraseña</string>
+    <string id="30061">Depuración</string>
+    <string id="30062">Borrar cache</string>
+    <string id="30063">Borrar cookies</string>
+    <string id="30064">Base de datos SQLite</string>
+    <string id="30065">Sustituir vista</string>
+    <string id="30066">Pre-cargar URL</string>
+    <string id="30052">Ruta de exportación</string>
+    <string id="30053">Exportar siempre luego de actualizar biblioteca</string>
+
+    <!-- auto update -->
+    <string id="30067">Actualizar biblioteca automáticamente</string>
+    <string id="30068">Nunca</string>
+    <string id="30069">Todas las semanas</string>
+    <string id="30070">Todos los días</string>
+    <string id="30071">Todas las horas</string>
+
+    <!-- stream quality -->
+    <string id="30072">Calidad de transferencia</string>
+    <string id="30073">Alta</string>
+    <string id="30074">Media</string>
+    <string id="30075">Baja</string>
+
+    <!-- menu items -->
+    <string id="30201">Todas las canciones</string>
+    <string id="30202">Playlists</string>
+    <string id="30203">Mixes instantáneos</string>
+    <string id="30204">Playlists automáticas</string>
+    <string id="30205">Artistas</string>
+    <string id="30206">Álbumes</string>
+    <string id="30207">Géneros</string>
+    <string id="30208">Búsqueda</string>
+    <string id="30209">Mi música</string>
+    <string id="30210">Reproducir aleatoriamente mi música</string>
+    <string id="30211">Mix "Voy a tener suerte"</string>
+    <string id="30212">Compositores</string>
+    <string id="30213">Canciones</string>
+    <string id="30214">Reproducir albumes aleatoriamente</string>
+    <string id="30215">Me gusta</string>
+    <string id="30216">Añadidas recientemente</string>
+    <string id="30217">Gratuitas y compradas</string>
+    <string id="30218">Más escuchados</string>
+
+    <!-- context menu items -->
+    <string id="30301">Reproducir todo</string>
+    <string id="30302">Reproducir todo aleatoriamente</string>
+    <string id="30303">Actualizar playlist</string>
+    <string id="30304">Actualizar playlists</string>
+    <string id="30305">Actualizar biblioteca</string>
+    <string id="30306">Añadir a favoritos</string>
+    <string id="30307">Añadir a playlist</string>
+    <string id="30308">Remover de playlist</string>
+    <string id="30309">Añadir a biblioteca</string>
+    <string id="30310">Empezar radio</string>
+    <string id="30311">Buscar en YouTube</string>
+    <string id="30312">Reproducir todo en Youtube</string>
+    <string id="30313">Reproducir en Youtube</string>
+    <string id="30314">Exportar</string>
+
+    <!-- messages -->
+    <string id="30101">Falló el inicio de sesión</string>
+    <string id="30102">Credenciales inválidas o problema de conectividad</string>
+    <string id="30103">Es necesario actualizar la biblioteca</string>
+    <string id="30104">No es posible reproducir la pista de Acceso Ilimitado</string>
+    <string id="30105">Cargando biblioteca</string>
+    <string id="30106">Cache en uso - intente más tarde</string>
+    <string id="30107">Exportación completa</string>
+    <string id="30108">Ruta de exportación no definida</string>
+    <string id="30109">Error al llamar add-on de Youtube</string>
+
+    <!-- dialogs -->
+    <string id="30401">Añadir a Playlist...</string>
+    <string id="30402">Nombre de la Radio</string>
+    <string id="30403">Exportando biblioteca</string>
+    <string id="30404">Por favor espere</string>
+
+</strings>
