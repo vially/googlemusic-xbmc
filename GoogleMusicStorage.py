@@ -101,7 +101,7 @@ class GoogleMusicStorage():
         result = {}
         result['artists'] = self.curs.execute("SELECT artist, max(artist_art_url) FROM songs WHERE artist like ? GROUP BY artist", (query,)).fetchall()
         result['tracks'] = self.curs.execute("SELECT * FROM songs WHERE display_name like ? ORDER BY display_name", (query,)).fetchall()
-        result['albums'] = self.curs.execute("SELECT album, artist, max(album_art_url) FROM songs WHERE album like ? GROUP BY album, artist", (query,)).fetchall()
+        result['albums'] = self.curs.execute("SELECT album, artist, max(album_art_url) FROM songs WHERE album like ? or album_artist like ? GROUP BY album, artist", (query,query)).fetchall()
         return result
 
     def storePlaylistSongs(self, playlists_songs):
