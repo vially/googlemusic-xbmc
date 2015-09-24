@@ -155,34 +155,32 @@ class GoogleMusicStorage():
                   'song_id':       get("id", get("storeId", get("trackId"))), #+str(i),
                   'comment':       get("comment", ""),
                   'rating':        get("rating", 0),
-                  'last_played':   get("lastPlayed", get("recentTimestamp", 0)),
-                  'disc':          get("disc", get("discNumber", 0)),
-                  'composer':      get("composer") if get("composer") else '-Unknown-',
+                  'last_played':   get("recentTimestamp", 0),
+                  'disc':          get("discNumber", 0),
+                  'composer':      get("composer", '-Unknown-'),
                   'year':          get("year", 0),
-                  'album':         get("album") if get("album") else '-Unknown-',
-                  'title':         api_song["title"],
-                  'album_artist':  get("albumArtist")if get("albumArtist") else get("artist") if get("artist") else '-Unknown-',
+                  'album':         get("album", '-Unknown-'),
+                  'title':         get("title", get("name","")),
+                  'album_artist':  get("albumArtist", get("artist", '-Unknown-')),
                   'type':          get("trackType", 0),
-                  'track':         get("track", get("trackNumber" ,0)),
-                  'total_tracks':  get("total_tracks", get("totalTrackCount", 0)),
-                  'beats_per_minute': get("beatsPerMinute", 0),
-                  'genre':         get("genre") if get("genre") else '-Unknown-',
+                  'track':         get("trackNumber" ,0),
+                  'total_tracks':  get("totalTrackCount", 0),
+                  'genre':         get("genre", '-Unknown-'),
                   'play_count':    get("playCount", 0),
-                  'creation_date': get("creationDate", get("creationTimestamp", 0)),
-                  'name':          get("name", api_song["title"]),
-                  'artist':        get("artist") if get("artist") else get("albumArtist") if get("albumArtist") else '-Unknown-',
-                  'url':           get("url", None),
-                  'total_discs':   get("total_discs", get("totalDiscCount", 0)),
+                  'creation_date': get("creationTimestamp", 0),
+                  'name':          get("name", get("title","")),
+                  'artist':        get("artist", get("albumArtist", '-Unknown-')),
+                  'total_discs':   get("totalDiscCount", 0),
                   'duration':      int(get("durationMillis",0))/1000,
-                  'album_art_url': self._getAlbumArtUrl(api_song),
+                  'album_art_url': get("albumArtRef")[0]['url'] if get("albumArtRef") else utils.addon.getAddonInfo('icon'),
                   'display_name':  self._getSongDisplayName(api_song),
                   'artist_art_url':get("artistArtRef")[0]['url'] if get("artistArtRef") else utils.addon.getAddonInfo('fanart'),
               }
 
         self.curs.executemany("INSERT OR REPLACE INTO songs VALUES ("+
                               ":song_id, :comment, :rating, :last_played, :disc, :composer, :year, :album, :title, :album_artist,"+
-                              ":type, :track, :total_tracks, :beats_per_minute, :genre, :play_count, :creation_date, :name, :artist, "+
-                              ":url, :total_discs, :duration, :album_art_url, :display_name, NULL, :artist_art_url)", songs())
+                              ":type, :track, :total_tracks, NULL, :genre, :play_count, :creation_date, :name, :artist, "+
+                              "NULL, :total_discs, :duration, :album_art_url, :display_name, NULL, :artist_art_url)", songs())
 
         self.conn.commit()
 
@@ -297,13 +295,5 @@ class GoogleMusicStorage():
             displayName = song_name.strip()
 
         return displayName
-
-    def _getAlbumArtUrl(self, api_song):
-        if "albumArtRef" in api_song:
-            return api_song["albumArtRef"][0]["url"]
-        elif "albumArtUrl" in api_song:
-            return "http:"+api_song["albumArtUrl"]
-        return utils.addon.getAddonInfo('icon')
-
 
 storage = GoogleMusicStorage()
