@@ -30,6 +30,10 @@ class GoogleMusicActions():
         elif (action == "add_library"):
             self.api.addAAtrack(params["song_id"])
             self.notify(self.lang(30103))
+        elif (action == "add_album_library"):
+            for track in self.api.getAlbum(params["album_id"]):
+                self.api.addAAtrack(track[0])
+            self.notify(self.lang(30103))
         elif (action == "add_playlist"):
             self.addToPlaylist(params["song_id"])
         elif (action == "del_from_playlist"):

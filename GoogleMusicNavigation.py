@@ -94,6 +94,10 @@ class GoogleMusicNavigation():
             utils.log("SEARCH_RESULT: "+get('query'))
             listItems = self.getSearch(params)
             content = "songs"
+        elif self.path == "aa_album":
+            utils.log("ALBUM: "+get('albumid'))
+            listItems = self.addSongsFromLibrary(self.api.getAlbum(get('albumid')), 'library')
+            content = "songs"
         else:
             utils.log("Invalid path: " + get("path"))
             return
@@ -200,6 +204,16 @@ class GoogleMusicNavigation():
                 append( addFolder(item[0], {'path':criteria,'album':item[0]}, getCm(criteria,item[0])))
         return listItems
 
+    def createAlbumFolder(self, items):
+        listItems = []
+        for item in items:
+            params = {'path':'aa_album', 'albumid':item[3]}
+            cm = [(self.lang(30301), "XBMC.RunPlugin(%s?action=play_all&album_id=%s)" % (utils.addon_url, item[3])),
+                  (self.lang(30309), "XBMC.RunPlugin(%s?action=add_album_library&album_id=%s)" % (utils.addon_url, item[3]))]
+            listItems.append(self.createFolder("[%s] %s"%(item[1], item[0]), params, cm, item[2]))
+        #print repr(items)
+        return listItems
+
     def createFolder(self, name, params, contextMenu=[], album_art_url='', name2='*'):
         li = ListItem(label=name, label2=name2, thumbnailImage=album_art_url)
         li.addContextMenuItems(contextMenu, replaceItems=True)
@@ -272,13 +286,12 @@ class GoogleMusicNavigation():
 
         def listAlbumsResults():
             listItems.append(self.createFolder('[COLOR orange]*** '+self.lang(30206)+' ***[/COLOR]',{'path':'none'}))
-            cm = []
             for album in result['albums']:
-                params = {'path':"search_result",'query':utils.tryEncode(album[0])}
                 if len(album) > 3:
-                    cm = [(self.lang(30301), "XBMC.RunPlugin(%s?action=play_all&album_id=%s)" % (utils.addon_url, album[3]))]
-                    params['albumid'] = album[3]
-                listItems.append(self.createFolder("[%s] %s"%(album[1], album[0]), params, cm, album[2]))
+                    listItems.extend(self.createAlbumFolder([[album[0],album[1],album[2],album[3]]]))
+                else:
+                    params = {'path':"search_result",'query':utils.tryEncode(album[0])}
+                    listItems.append(self.createFolder("[%s] %s"%(album[1], album[0]), params, [], album[2]))
 
         if isinstance(query,basestring):
             result = self.api.getSearch(query)
@@ -300,8 +313,6 @@ class GoogleMusicNavigation():
             if result['albums']: listAlbumsResults()
             listItems.append(self.createFolder('[COLOR orange]*** '+self.lang(30213)+' ***[/COLOR]',{'path':'none'}))
             listItems.extend(self.addSongsFromLibrary(self.api.getArtist(query['artistid']), 'library'))
-        elif 'albumid' in query:
-            listItems.extend(self.addSongsFromLibrary(self.api.getAlbum(query['albumid']), 'library'))
         else:
             #listItems.extend(self.addSongsFromLibrary(self.api.getSearch(unquote_plus(query['query']))['tracks'], 'library'))
             listItems.extend(self.getSearch(unquote_plus(query['query'])))
