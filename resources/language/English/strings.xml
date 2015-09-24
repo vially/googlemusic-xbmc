@@ -25,11 +25,14 @@
     <string id="30073">High</string>
     <string id="30074">Medium</string>
     <string id="30075">Low</string>
+    <string id="30076">Youtube Video Quality</string>
+    <string id="30077">Any</string>
+
 
     <!-- menu items -->
     <string id="30201">All Songs</string>
     <string id="30202">Playlists</string>
-    <string id="30203">Instant Mixes</string>
+    <string id="30203">Stations</string>
     <string id="30204">Auto Playlists</string>
     <string id="30205">Artists</string>
     <string id="30206">Albums</string>
@@ -45,6 +48,10 @@
     <string id="30216">Last added</string>
     <string id="30217">Free and purchased</string>
     <string id="30218">Most played</string>
+    <string id="30219">Listen Now</string>
+    <string id="30220">Top charts</string>
+    <string id="30221">New Releases</string>
+    <string id="30222">Browse stations</string>
 
     <!-- context menu items -->
     <string id="30301">Play all</string>

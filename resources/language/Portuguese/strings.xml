@@ -25,6 +25,8 @@
     <string id="30073">Alta</string>
     <string id="30074">Média</string>
     <string id="30075">Baixa</string>
+    <string id="30076">Qualidade de vídeo no Youtube</string>
+    <string id="30077">Qualquer</string>
 
     <!-- menu items -->
     <string id="30201">Todas as músicas</string>
@@ -45,6 +47,10 @@
     <string id="30216">Últimas adicionadas</string>
     <string id="30217">Gratuitas e compradas</string>
     <string id="30218">Mais acessadas</string>
+    <string id="30219">Ouça Agora</string>
+    <string id="30220">Mais tocadas</string>
+    <string id="30221">Lançamentos</string>
+    <string id="30222">Procurar estações</string>
 
     <!-- context menu items -->
     <string id="30301">Tocar tudo</string>

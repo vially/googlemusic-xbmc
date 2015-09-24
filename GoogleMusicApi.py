@@ -179,6 +179,29 @@ class GoogleMusicApi():
         entry_id = storage.delFromPlaylist(playlist_id, song_id)
         self.getApi().remove_entries_from_playlist(entry_id)
 
+    def getTopcharts(self, content_type='tracks'):
+        content = self.getApi().get_top_chart()
+        if content_type == 'tracks':
+            print repr(content['tracks'])
+            songs = []
+            for item in content['tracks']:
+                songs.append(self._convertAATrack(item))
+            return songs
+        if content_type == 'albums':
+            albums = []
+            for item in content['albums']:
+                albums.append([item['name'],item['artist'],item.get('albumArtRef',''),item['albumId']])
+            return albums
+
+    def getNewreleases(self):
+        albums = []
+        content = self.getApi().get_new_releases()
+        for item in content:
+            print repr(item)
+            album = item['album']
+            albums.append([album['name'],album['artist'],album.get('albumArtRef',''),album['albumId']])
+        return albums
+
     def _convertAATrack(self, aaTrack):
         return [aaTrack.get('id') or aaTrack['storeId'],'',0,0,0,'',0,aaTrack.get('album'),
                 aaTrack['title'],aaTrack['albumArtist'],0,

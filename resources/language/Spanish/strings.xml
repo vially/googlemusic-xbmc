@@ -25,6 +25,8 @@
     <string id="30073">Alta</string>
     <string id="30074">Media</string>
     <string id="30075">Baja</string>
+    <string id="30076">Calidad del video</string>
+    <string id="30077">Cualquier</string>
 
     <!-- menu items -->
     <string id="30201">Todas las canciones</string>
@@ -45,6 +47,10 @@
     <string id="30216">Añadidas recientemente</string>
     <string id="30217">Gratuitas y compradas</string>
     <string id="30218">Más escuchados</string>
+    <string id="30219">Escuchar ahora</string>
+    <string id="30220">Top éxitos</string>
+    <string id="30221">Novedades</string>
+    <string id="30222">Explorar emisoras</string>
 
     <!-- context menu items -->
     <string id="30301">Reproducir todo</string>

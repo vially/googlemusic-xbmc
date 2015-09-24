@@ -96,6 +96,13 @@ class GoogleMusicLogin():
                 utils.addon.setSetting('logged_in-mobile', "1")
                 utils.addon.setSetting('authtoken-mobile', self.gmusicapi.session._authtoken)
                 utils.addon.setSetting('cookie-date', str(datetime.now()))
+                try:
+                    self.gmusicapi.get_listen_now()
+                    utils.addon.setSetting('all-access', "1")
+                except:
+                    utils.addon.setSetting('all-access', "0")
+
+
         else:
 
             utils.log("Loading auth from cache")

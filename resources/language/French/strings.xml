@@ -23,6 +23,8 @@
 <string id="30073">Haute</string>
 <string id="30074">Moyenne</string>
 <string id="30075">Basse</string>
+<string id="30076">Youtube Qualité de vidéo</string>
+<string id="30077">Quelconque<string id="30077">
 <!-- menu items -->
 <string id="30201">Toutes les chansons</string>
 <string id="30202">Playlists</string>
@@ -42,6 +44,10 @@
 <string id="30216">Derniers ajouts</string>
 <string id="30217">Titres gratuits et achetés</string>
 <string id="30218">Les plus joués</string>
+<string id="30219">À écouter</string>
+<string id="30220">Populaires</string>
+<string id="30221">Nouveautés</string>
+<string id="30222">Parcourir les radios</string>
 <!-- context menu items -->
 <string id="30301">Tout jouer</string>
 <string id="30302">Tout jouer dans le désordre</string>

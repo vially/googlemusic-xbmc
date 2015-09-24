@@ -12,7 +12,18 @@ class GoogleMusicNavigation():
 
         self.song_url  = utils.addon_url+"?action=play_song&song_id=%s&title=%s&artist=%s&albumart=%s"
 
-        self.main_menu = (
+        self.main_menu_aa = (
+            {'title':self.lang(30211), 'params':{'path':"ifl"}},
+            {'title':self.lang(30219), 'params':{'path':"listennow"}},
+            {'title':self.lang(30220), 'params':{'path':"topcharts"}},
+            {'title':self.lang(30221), 'params':{'path':"newreleases"}},
+            {'title':self.lang(30209), 'params':{'path':"library"}},
+            {'title':self.lang(30222), 'params':{'path':"browsestations"}},
+            {'title':self.lang(30204), 'params':{'path':"playlists", 'playlist_type':"auto"}},
+            {'title':self.lang(30202), 'params':{'path':"playlists", 'playlist_type':"user"}},
+            {'title':self.lang(30208), 'params':{'path':"search"}}
+        )
+        self.main_menu_noaa = (
             {'title':self.lang(30211), 'params':{'path':"ifl"}},
             {'title':self.lang(30209), 'params':{'path':"library"}},
             {'title':self.lang(30204), 'params':{'path':"playlists", 'playlist_type':"auto"}},
@@ -20,6 +31,7 @@ class GoogleMusicNavigation():
             {'title':self.lang(30208), 'params':{'path':"search"}}
         )
         self.lib_menu = (
+            {'title':self.lang(30203), 'params':{'path':"playlists",'playlist_type':"radio"}},
             {'title':self.lang(30210), 'params':{'path':"playlist", 'playlist_id':"feellucky"}},
             {'title':self.lang(30214), 'params':{'path':"playlist", 'playlist_id':"shuffled_albums"}},
             {'title':self.lang(30201), 'params':{'path':"playlist", 'playlist_id':"all_songs"}},
@@ -39,9 +51,11 @@ class GoogleMusicNavigation():
         sortMethods = [xbmcplugin.SORT_METHOD_UNSORTED]
 
         if self.path == "root":
-            listItems = self.getMenuItems(self.main_menu)
-            if self.api.getDevice():
-                listItems.insert(1,self.createFolder(self.lang(30203),{'path':"playlists",'playlist_type':"radio"}))
+            if eval(utils.addon.getSetting('all-access')):
+                listItems = self.getMenuItems(self.main_menu_aa)
+            else:
+                utils.log("NO ALL ACCESS ACCOUNT")
+                listItems = self.getMenuItems(self.main_menu_noaa)
         elif self.path == "ifl":
             listItems = self.addSongsFromLibrary(self.api.getStationTracks("IFL"), 'library')
             content = "songs"
@@ -94,6 +108,35 @@ class GoogleMusicNavigation():
             utils.log("SEARCH_RESULT: "+get('query'))
             listItems = self.getSearch(params)
             content = "songs"
+        elif self.path == "listennow":
+            listItems = self.getListennow(self.api.getApi().get_listen_now())
+            content = "albums"
+            view_mode_id = 500
+        elif self.path == "topcharts":
+            listItems.append(self.createFolder(self.lang(30206),{'path':'topcharts_albums'}))
+            listItems.append(self.createFolder(self.lang(30213),{'path':'topcharts_songs'}))
+        elif self.path == "topcharts_songs":
+            listItems = self.addSongsFromLibrary(self.api.getTopcharts(), 'library')
+            content = "songs"
+        elif self.path == "topcharts_albums":
+            listItems = self.createAlbumFolder(self.api.getTopcharts(content_type='albums'))
+            content = "albums"
+            view_mode_id = 500
+        elif self.path == "newreleases":
+            listItems = self.createAlbumFolder(self.api.getNewreleases())
+            content = "albums"
+            view_mode_id = 500
+        elif self.path == "browsestations":
+            listItems = self.browseStations(get('category'))
+        elif self.path == "get_stations":
+            listItems = self.getStations(get('subcategory'))
+            view_mode_id = 500
+        elif self.path == "create_station":
+            station = self.api.getApi().create_station(unquote_plus(get('name')), artist_id=get('artistid'), genre_id=get('genreid'), curated_station_id=get('curatedid'))
+            listItems = self.addSongsFromLibrary(self.api.getStationTracks(station), 'library')
+            content = "songs"
+        elif self.path == "genres":
+            listItems = self.getGenres(self.api.getApi().get_top_chart_genres())
         elif self.path == "aa_album":
             utils.log("ALBUM: "+get('albumid'))
             listItems = self.addSongsFromLibrary(self.api.getAlbum(get('albumid')), 'library')
@@ -202,6 +245,53 @@ class GoogleMusicNavigation():
         else:
             for item in items:
                 append( addFolder(item[0], {'path':criteria,'album':item[0]}, getCm(criteria,item[0])))
+        return listItems
+
+    def getListennow(self, items):
+        listItems = []
+        for item in items:
+            suggestion = item.get('suggestion_text')
+            image = item['images'][0]['url'] if 'images' in item else None
+            #print repr(item)
+            if item['type'] == '1':
+                album = item['album']
+                albumid = album['id']['metajamCompactKey']
+                title = album['title']+" ("+suggestion+")"
+                listItems.extend(self.createAlbumFolder([[title,album['artist_name'],image,albumid]]))
+            elif item['type'] == '3':
+                radio = item['radio_station']
+                params = {'path':'create_station', 'name':utils.tryEncode('Radio %s (%s)'%(radio['title'], suggestion))}
+                seed = radio['id']['seeds'][0]
+                if seed['seedType'] == '3':
+                   params['artistid'] = seed['artistId']
+                elif seed['seedType'] == '5':
+                   params['genreid'] = seed['genreId']
+                else: utils.log("ERROR seedtype unknown "+repr(seed['seedType']))
+                listItems.append(self.createFolder(params['name'], params, album_art_url=image))
+            else: utils.log("ERROR item type unknown "+repr(item['type']))
+
+        return listItems
+
+    def browseStations(self, index=None):
+        listItems = []
+        items = self.api.getApi().get_station_categories()
+        if index:
+            items = items[int(index)]['subcategories']
+            params = {'path':'get_stations'}
+        else:
+            params = {'path':'browsestations'}
+        for item in items:
+            params['category'] = items.index(item)
+            params['subcategory'] = item['id']
+            listItems.append(self.createFolder(item['display_name'], params))
+        return listItems
+
+    def getStations(self, stationId):
+        listItems = []
+        items = self.api.getApi().get_stations(stationId)
+        for item in items:
+            params = {'path':'create_station','curatedid':item['seed']['curatedStationId'], 'name':utils.tryEncode(item['name'])}
+            listItems.append(self.createFolder(item['name'],params,album_art_url=item['compositeArtRefs'][0]['url']))
         return listItems
 
     def createAlbumFolder(self, items):

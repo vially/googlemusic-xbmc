@@ -25,6 +25,8 @@
     <string id="30073">Hoch</string>
     <string id="30074">Mittel</string>
     <string id="30075">Niedrig</string>
+    <string id="30076">Youtube Video Qualität</string>
+    <string id="30077">Irgendein</string>
 
     <!-- menu items -->
     <string id="30201">Alle Titel</string>
@@ -45,6 +47,10 @@
     <string id="30216">Zuletzt hinzugefügt</string>
     <string id="30217">Kostenlos & gekauft</string>
     <string id="30218">Meist gespielt</string>
+    <string id="30219">Jetzt anhören</string>
+    <string id="30220">Top-Charts</string>
+    <string id="30221">Neuerscheinungen</string>
+    <string id="30222">Sender durchsuchen</string>
 
     <!-- context menu items -->
     <string id="30301">Alle wiedergeben</string>
