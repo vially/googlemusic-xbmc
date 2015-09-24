@@ -14,8 +14,6 @@ class GoogleMusicActions():
         elif (action == "play_all_yt"):
             titles = [song[23] for song in self._getSongs(params)]
             self.playYoutube(titles)
-        elif (action == "update_playlist"):
-            self.api.getPlaylistSongs(params["playlist_id"], True)
         elif (action == "update_playlists"):
             self.api.getPlaylistsByType(params["playlist_type"], True)
         elif (action == "clear_cache"):

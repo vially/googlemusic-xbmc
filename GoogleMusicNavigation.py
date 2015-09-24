@@ -262,7 +262,6 @@ class GoogleMusicNavigation():
         cm.append((self.lang(30301), "XBMC.RunPlugin(%s?action=play_all&playlist_id=%s)" % (utils.addon_url, playlist)))
         cm.append((self.lang(30302), "XBMC.RunPlugin(%s?action=play_all&playlist_id=%s&shuffle=true)" % (utils.addon_url, playlist)))
         cm.append((self.lang(30312), "XBMC.RunPlugin(%s?action=play_all_yt&playlist_id=%s)" % (utils.addon_url, playlist)))
-        cm.append((self.lang(30303), "XBMC.RunPlugin(%s?action=update_playlist&playlist_id=%s)" % (utils.addon_url, playlist)))
         cm.append((self.lang(30306), "XBMC.RunPlugin(%s?action=add_favourite&path=playlist&playlist_id=%s&title=%s)" % (utils.addon_url, playlist, name)))
         return cm
 
