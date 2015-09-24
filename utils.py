@@ -51,13 +51,14 @@ def setDirectory(listItems, content, sortMethods):
 
     xbmcplugin.endOfDirectory(handle, succeeded=True)
 
-def tryEncode(text, encoding='utf8'):
+def tryEncode(text, encoding='utf-8'):
     try:
-        text = text.decode(encoding)
-        return unicode(text)
+        if sys.platform.startswith('linux'):
+           return text.decode(encoding).encode('latin1')
+        return unicode(text.decode(encoding))
     except: pass
     try:
-        return text.encode(encoding)
+        return text.encode(encoding, errors='ignore')
     except:
         log(" ENCODING FAIL!!! "+encoding+" "+repr(text))
     return repr(text)

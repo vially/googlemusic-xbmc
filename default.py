@@ -43,7 +43,6 @@ if (__name__ == "__main__" ):
 
         # check for initing cookies, db and library only on main menu
         storage.checkDbInit()
-
         login.checkCredentials()
         login.checkCookie()
         login.initDevice()
@@ -51,7 +50,7 @@ if (__name__ == "__main__" ):
         # check if library needs to be loaded
         if addon.getSetting('fetched_all_songs') == '0':
 
-            xbmc.executebuiltin("XBMC.Notification(%s,%s,5000,%s)" % (utils.plugin, addon.getLocalizedString(30105) ,addon.getAddonInfo('icon')))
+            xbmc.executebuiltin("XBMC.Notification(%s,%s,5000,%s)" % (utils.plugin, utils.tryEncode(addon.getLocalizedString(30105)) ,addon.getAddonInfo('icon')))
             utils.log('Loading library')
             navigation.api.loadLibrary()
 

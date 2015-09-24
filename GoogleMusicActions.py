@@ -64,7 +64,7 @@ class GoogleMusicActions():
             utils.log("Invalid action: " + action)
 
     def notify(self, text):
-        xbmc.executebuiltin("XBMC.Notification(%s,%s,5000,%s)" % (utils.plugin, text, self.icon))
+        xbmc.executebuiltin("XBMC.Notification(%s,%s,5000,%s)" % (utils.plugin, utils.tryEncode(text), self.icon))
 
     def playAll(self, params={}):
         songs = self._getSongs(params)
