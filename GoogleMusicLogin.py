@@ -46,7 +46,7 @@ class GoogleMusicLogin():
                 devices = self.gmusicapi.get_registered_devices()
                 if len(devices) == 10:
                     utils.log("WARNING: 10 devices already registered!")
-                utils.log(repr(devices))
+                utils.log('Devices: '+repr(devices))
                 for device in devices:
                     if device["type"] in ("ANDROID","PHONE","IOS"):
                         device_id = str(device["id"])
@@ -58,11 +58,6 @@ class GoogleMusicLogin():
                 if device_id.lower().startswith('0x'): device_id = device_id[2:]
                 utils.addon.setSetting('device_id', device_id)
                 utils.log('Found device_id: '+device_id)
-            else:
-                #utils.log('No device found, using default.')
-                #device_id = "333c60412226c96f"
-                raise Exception('No devices found, registered mobile device required!')
-
 
     def clearCookie(self):
         utils.addon.setSetting('logged_in-mobile', "")
@@ -82,7 +77,9 @@ class GoogleMusicLogin():
             password = base64.b64decode(utils.addon.getSetting('encpassword'))
 
             try:
-                self.gmusicapi.login(username, password)
+                self.gmusicapi.login(username, password, utils.addon.getSetting('device_id'))
+                if not self.gmusicapi.is_authenticated():
+                    self.gmusicapi.login(username, password, Mobileclient.FROM_MAC_ADDRESS)
             except Exception as e:
                 utils.log(repr(e))
 
