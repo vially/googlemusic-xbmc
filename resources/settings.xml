@@ -10,6 +10,7 @@
         <setting id="auto_export" type="bool" label="30053" default="false" enable="!eq(-1,)" />
         <setting id="updatelib" type="enum" label="30067" lvalues="30068|30069|30070|30071" default="1" />
         <setting id="quality" type="enum" label="30072" lvalues="30073|30074|30075" default="0" />
+        <setting id="youtube.video.quality" type="enum" label="30076" lvalues="30073|30075|30077" default="2" />
         <setting id="prefetch" type="bool" label="30066" default="false" />
     </category>
 

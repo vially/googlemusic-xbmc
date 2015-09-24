@@ -199,7 +199,8 @@ class GoogleMusicActions():
                    }
         params = {'part': 'id',
                   'maxResults': 1,
-                  'type': 'video', #'order': 'rating', 'regionCode':'us',
+                  'type': 'video', #'order': 'rating', #'regionCode':'us',
+                  'videoDefinition': { '0':'high','1':'standard','2':'any' } [utils.addon.getSetting('youtube.video.quality')],
                   'key': 'AIzaSyCpYQnhH6BA_wGBB79agx_32kuoq7WwTZg'
                   }
         videoids = []
