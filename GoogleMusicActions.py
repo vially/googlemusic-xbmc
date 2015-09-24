@@ -44,6 +44,8 @@ class GoogleMusicActions():
                 utils.log(repr(e))
                 self.notify(self.lang(30106))
             xbmc.executebuiltin("XBMC.RunPlugin(%s)" % utils.addon_url)
+        elif (action == "reload_library"):
+            self.api.loadLibrary();
         elif (action == "export_library"):
             if utils.addon.getSetting('export_path'):
                 self.exportLibrary(utils.addon.getSetting('export_path'))
