@@ -43,6 +43,7 @@ class GoogleMusicPlaySong():
                 params['title'] = song[17]
                 params['artist'] = song[18]
                 params['albumart'] = song[22]
+            # if url in library check if not expired before returning
             if song[24]:
                 import time
                 if int(utils.paramsToDict(song[24]).get('expire')) > time.time():

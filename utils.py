@@ -41,7 +41,6 @@ def setResolvedUrl(listItem):
     xbmcplugin.setResolvedUrl(handle=handle, succeeded=True, listitem=listItem)
 
 def setDirectory(listItems, content, sortMethods):
-    #if handle < 0: return
     xbmcplugin.addDirectoryItems(handle, listItems)
     if handle > 0:
         xbmcplugin.setContent(handle, content)

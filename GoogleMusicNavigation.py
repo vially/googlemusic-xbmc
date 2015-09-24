@@ -44,6 +44,7 @@ class GoogleMusicNavigation():
     def listMenu(self, params={}):
         get = params.get
         self.path = get("path", "root")
+        utils.log("PATH: "+self.path)
 
         listItems = []
         view_mode_id = 0
@@ -75,7 +76,7 @@ class GoogleMusicNavigation():
             listItems = self.getCriteria(get('criteria'))
             sortMethods = [xbmcplugin.SORT_METHOD_LABEL_IGNORE_THE]
             if ('album' == get('criteria')):
-                sortMethods = [xbmcplugin.SORT_METHOD_ALBUM_IGNORE_THE, xbmcplugin.SORT_METHOD_VIDEO_YEAR, 
+                sortMethods = [xbmcplugin.SORT_METHOD_ALBUM_IGNORE_THE, xbmcplugin.SORT_METHOD_VIDEO_YEAR,
                                xbmcplugin.SORT_METHOD_ARTIST, xbmcplugin.SORT_METHOD_ALBUM,
                                xbmcplugin.SORT_METHOD_DATE]
             view_mode_id = 500
@@ -83,7 +84,7 @@ class GoogleMusicNavigation():
             albums = unquote_plus(get('albums'))
             listItems = self.getCriteria(self.path, albums)
             listItems.insert(0,self.createFolder('* '+self.lang(30201),{'path':"allsongs",'criteria':self.path,'albums':albums}))
-            sortMethods = [xbmcplugin.SORT_METHOD_ALBUM_IGNORE_THE, xbmcplugin.SORT_METHOD_VIDEO_YEAR, 
+            sortMethods = [xbmcplugin.SORT_METHOD_ALBUM_IGNORE_THE, xbmcplugin.SORT_METHOD_VIDEO_YEAR,
                            xbmcplugin.SORT_METHOD_ARTIST, xbmcplugin.SORT_METHOD_ALBUM,
                            xbmcplugin.SORT_METHOD_DATE]
             content = "albums"
@@ -308,8 +309,7 @@ class GoogleMusicNavigation():
         li = ListItem(label=name, label2=name2, thumbnailImage=album_art_url)
         li.addContextMenuItems(contextMenu, replaceItems=True)
         li.setProperty('fanart_image', self.fanart)
-        url = "?".join([utils.addon_url, urlencode(params)])
-        return url, li, "true"
+        return "?".join([utils.addon_url, urlencode(params)]), li, "true"
 
     def createItem(self, song, song_type):
         infoLabels = {
