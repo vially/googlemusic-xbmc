@@ -181,7 +181,7 @@ class GoogleMusicApi():
 
     def _convertAATrack(self, aaTrack):
         return [aaTrack.get('id') or aaTrack['storeId'],'',0,0,0,'',0,aaTrack.get('album'),
-                aaTrack['artist']+" - "+aaTrack['title'],aaTrack['albumArtist'],0,
+                aaTrack['title'],aaTrack['albumArtist'],0,
                 aaTrack['trackNumber'],0,0,'',aaTrack.get('playCount', 0),0,aaTrack['title'],
                 aaTrack['artist'],'',0,int(aaTrack['durationMillis'])/1000,
                 aaTrack['albumArtRef'][0]['url'] if aaTrack.get('albumArtRef') else utils.addon.getAddonInfo('icon'),
