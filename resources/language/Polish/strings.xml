@@ -25,6 +25,8 @@
     <string id="30073">Wysoka</string>
     <string id="30074">Średnia</string>
     <string id="30075">Niska</string>
+    <string id="30076">Jakość wideo Youtube</string>
+    <string id="30077">Dowolna</string>
 
     <!-- menu items -->
     <string id="30201">Wszystkie utwory</string>
@@ -45,6 +47,10 @@
     <string id="30216">Ostatnio dodane</string>
     <string id="30217">Darmowe i kupione</string>
     <string id="30218">Najczęściej odtwarzane</string>
+    <string id="30219">Listen Now</string>
+    <string id="30220">Top listy</string>
+    <string id="30221">Nowości</string>
+    <string id="30222">Przeglądaj stacje</string>
 
     <!-- context menu items -->
     <string id="30301">Odtwarzaj wszystko</string>
