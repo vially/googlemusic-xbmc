@@ -50,9 +50,14 @@ class GoogleMusicApi():
         return storage.getSong(song_id)
 
     def loadLibrary(self):
-        api_songs = self.getApi().get_all_songs()
-        utils.log("Library Size: "+repr(len(api_songs)))
-        storage.storeApiSongs(api_songs, 'all_songs')
+        gen = self.getApi().get_all_songs(incremental=True)
+
+        for chunk in gen:
+            utils.log("Chunk Size: "+repr(len(chunk)))
+            api_songs = []
+            for song in chunk:
+                api_songs.append(song)
+            storage.storeApiSongs(api_songs)
 
         self.updatePlaylistSongs()
 
