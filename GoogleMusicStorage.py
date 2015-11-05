@@ -125,23 +125,9 @@ class GoogleMusicStorage():
         self.conn.commit()
         self.storeInAllSongs(api_songs)
 
-    def storeApiSongs(self, api_songs, playlist_id = 'all_songs'):
-        self.curs.execute("PRAGMA foreign_keys = OFF")
-
-        if playlist_id == 'all_songs':
-            self.curs.execute("DELETE FROM songs")
-        else:
-            self.curs.execute("DELETE FROM songs WHERE song_id IN (SELECT song_id FROM playlists_songs WHERE playlist_id = ?)", (playlist_id,))
-            self.curs.execute("DELETE FROM playlists_songs WHERE playlist_id = ?", (playlist_id,))
-            self.curs.executemany("INSERT INTO playlists_songs (playlist_id, song_id) VALUES (?, ?)", [(playlist_id, s["track_id"]) for s in api_songs])
-
-        if playlist_id == 'all_songs':
-            import time
-            utils.addon.setSetting("fetched_all_songs", str(time.time()))
-        else:
-            self.curs.execute("UPDATE playlists SET fetched = 1 WHERE playlist_id = ?", (playlist_id,))
-
-        self.conn.commit()
+    def storeApiSongs(self, api_songs):
+        import time
+        utils.addon.setSetting("fetched_all_songs", str(time.time()))
         self.storeInAllSongs(api_songs)
 
     def storeInAllSongs(self, api_songs):
@@ -184,23 +170,6 @@ class GoogleMusicStorage():
 
         self.conn.commit()
 
-    def storePlaylists(self, playlists, playlist_type):
-        self.curs.execute("PRAGMA foreign_keys = OFF")
-
-        # (deletes will not cascade due to pragma)
-        self.curs.execute("DELETE FROM playlists WHERE type = ?", (playlist_type,))
-
-        # rebuild table
-        def playlist_rows():
-          for playlist_name, playlist_ids in playlists.iteritems():
-             for playlist_id in playlist_ids:
-                yield (playlist_name, playlist_id, playlist_type)
-
-        self.curs.executemany("INSERT INTO playlists (name, playlist_id, type, fetched) VALUES (?, ?, ?, 0)", playlist_rows())
-
-        # clean up dangling songs
-        self.curs.execute("DELETE FROM playlists_songs WHERE playlist_id NOT IN (SELECT playlist_id FROM playlists)")
-        self.conn.commit()
 
     def getSongStreamUrl(self, song_id):
         song = self.curs.execute("SELECT stream_url FROM songs WHERE song_id = ?", (song_id,)).fetchone()
