@@ -24,6 +24,9 @@ if (__name__ == "__main__" ):
 
     elif not params:
 
+        reload(sys)
+        sys.setdefaultencoding("utf-8")
+
         import GoogleMusicStorage
         storage = GoogleMusicStorage.storage
 
