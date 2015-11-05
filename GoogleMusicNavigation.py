@@ -240,7 +240,7 @@ class GoogleMusicNavigation():
                 #    ",'album':" + item[1] +
                 #    ", date: " + time.strftime('%d.%m.%Y', time.gmtime(item[4]/1000000))+")")
                 append(folder)
-        elif criteria == 'artist':
+        elif criteria in ('artist','genre'):
             for item in items:
                 append( addFolder(item[0], {'path':criteria,'albums':item[0]}, getCm(criteria,item[0]), item[1]))
         else:

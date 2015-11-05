@@ -74,6 +74,10 @@ class GoogleMusicStorage():
                 query = "select album_artist, max(artist_art_url) from songs group by lower(album_artist)"
             elif criteria == 'artist' and name:
                 query = "select album_artist, album, year, max(album_art_url), max(creation_date) from songs where (artist=:name or album_artist=:name) group by lower(album_artist), lower(album)"
+            elif criteria == 'genre' and not name:
+                query = "select genre, max(artist_art_url) from songs group by lower(genre)"
+            elif criteria == 'genre' and name:
+                query = "select genre, album, year, max(album_art_url), max(creation_date) from songs where genre=:name group by lower(genre), lower(album)"
             elif name:
                 query = "select album_artist, album, year, max(album_art_url), max(creation_date) from songs where %s=:name group by lower(album_artist), lower(album)" % criteria
             else:
