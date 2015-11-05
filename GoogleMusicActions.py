@@ -11,6 +11,8 @@ class GoogleMusicActions():
     def executeAction(self, action, params):
         if (action == "play_all"):
             self.playAll(params)
+        elif (action == "add_to_queue"):
+            self.addToQueue(params)
         elif (action == "play_all_yt"):
             titles = [song[23] for song in self._getSongs(params)]
             self.playYoutube(titles)
@@ -87,6 +89,15 @@ class GoogleMusicActions():
             playlist.shuffle()
 
         xbmc.executebuiltin('playlist.playoffset(music , 0)')
+
+    def addToQueue(self, params={}):
+        songs = self._getSongs(params)
+
+        playlist = xbmc.PlayList(xbmc.PLAYLIST_MUSIC)
+
+        for song in songs:
+            playlist.add(self.song_url % (song[0], song[8], song[18], song[22]), utils.createItem(song[23], song[22]))
+
 
     def playYoutube(self, titles):
         #print repr(titles)
