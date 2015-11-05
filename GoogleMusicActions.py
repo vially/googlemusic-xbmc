@@ -53,6 +53,8 @@ class GoogleMusicActions():
             else:
                 self.notify(self.lang(30108))
                 utils.addon.openSettings()
+        elif (action == "export_playlist"):
+            self.exportPlaylist(params.get('title'), params.get('playlist_id'))
         elif (action == "start_radio"):
             keyboard = xbmc.Keyboard(self.api.getSong(params["song_id"])[8], self.lang(30402))
             keyboard.doModal()
@@ -142,6 +144,18 @@ class GoogleMusicActions():
             if line.startswith('</favourites>'):
                 print fav
             print line,
+
+    def exportPlaylist(self, title, playlist_id):
+        utils.log("Loading playlist: " + playlist_id)
+        songs = self.api.getPlaylistSongs(playlist_id)
+        path = xbmc.makeLegalFilename(os.path.join(xbmc.translatePath("special://profile/playlists/music"), title+".m3u"))
+        utils.log("PATH: "+path)
+        with open(path, "w") as m3u:
+            m3u.write("#EXTM3U\n")
+            for song in songs:
+                m3u.write("\n")
+                m3u.write("#EXTINF:%s, %s - %s\n" % (song[21],song[18],song[8]))
+                m3u.write("plugin://plugin.audio.googlemusic.exp/?action=play_song&song_id=%s\n" % song[0])
 
     def exportLibrary(self, path):
         songs = self.api.getPlaylistSongs('all_songs')
