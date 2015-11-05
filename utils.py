@@ -1,4 +1,4 @@
-import sys, xbmcplugin, xbmcaddon
+import sys, xbmcplugin, xbmcaddon, xbmc
 from xbmcgui import ListItem
 
 # xbmc hooks
@@ -13,7 +13,7 @@ handle    = int(sys.argv[1])
 # utility functions
 def log(message):
     if dbg:
-        print "[%s] %s" % (plugin, message)
+        xbmc.log("[%s] %s" % (plugin, message))
 
 def paramsToDict(parameters):
     ''' Convert parameters encoded in a URL to a dict. '''
