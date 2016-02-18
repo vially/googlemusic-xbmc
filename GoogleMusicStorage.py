@@ -77,7 +77,7 @@ class GoogleMusicStorage():
             elif criteria == 'genre' and not name:
                 query = "select genre, max(artist_art_url) from songs group by lower(genre)"
             elif criteria == 'genre' and name:
-                query = "select genre, album, year, max(album_art_url), max(creation_date) from songs where genre=:name group by lower(genre), lower(album)"
+                query = "select album_artist, album, year, max(album_art_url), max(creation_date) from songs where album <> '-Unknown-' and genre=:name group by lower(album_artist), lower(album)"
             elif name:
                 query = "select album_artist, album, year, max(album_art_url), max(creation_date) from songs where %s=:name group by lower(album_artist), lower(album)" % criteria
             else:
@@ -147,11 +147,11 @@ class GoogleMusicStorage():
                   'rating':        get("rating", 0),
                   'last_played':   get("recentTimestamp", 0),
                   'disc':          get("discNumber", 0),
-                  'composer':      get("composer", '-Unknown-'),
+                  'composer':      get("composer", '-Unknown-') if get("composer") else '-Unknown-',
                   'year':          get("year", 0),
-                  'album':         get("album", '-Unknown-'),
+                  'album':         get("album") if get("album") else '-Unknown-',
                   'title':         get("title", get("name","")),
-                  'album_artist':  get("albumArtist", get("artist", '-Unknown-')),
+                  'album_artist':  get("albumArtist") if get("albumArtist") else get("artist") if get("artist") else '-Unknown-',
                   'type':          get("trackType", 0),
                   'track':         get("trackNumber" ,0),
                   'total_tracks':  get("totalTrackCount", 0),
@@ -159,7 +159,7 @@ class GoogleMusicStorage():
                   'play_count':    get("playCount", 0),
                   'creation_date': get("creationTimestamp", 0),
                   'name':          get("name", get("title","")),
-                  'artist':        get("artist", get("albumArtist", '-Unknown-')),
+                  'artist':        get("artist") if get("artist") else get("albumArtist") if get("albumArtist") else '-Unknown-',
                   'total_discs':   get("totalDiscCount", 0),
                   'duration':      int(get("durationMillis",0))/1000,
                   'album_art_url': get("albumArtRef")[0]['url'] if get("albumArtRef") else utils.addon.getAddonInfo('icon'),
