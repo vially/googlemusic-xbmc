@@ -12,6 +12,7 @@
     <string id="30066">Pre-fetch URL</string>
     <string id="30052">Export Path</string>
     <string id="30053">Always export after library update</string>
+    <string id="30054">Load local music library (requires library update)</string>
 
     <!-- auto update -->
     <string id="30067">Auto Update Library</string>

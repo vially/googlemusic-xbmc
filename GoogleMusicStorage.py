@@ -269,4 +269,83 @@ class GoogleMusicStorage():
 
         return displayName
 
+    def loadKodiLib(self):
+
+        # find last kodi music file db
+        import glob
+        lastVersionDb = None
+        for file in glob.glob(os.path.join(xbmc.translatePath("special://database"), 'MyMusic*.db')):
+            if not lastVersionDb:
+                lastVersionDb = file
+            elif int(file[-5:-3]) > int(lastVersionDb[-5:-3]):
+                lastVersionDb = file
+            #utils.log("File: %s , LastDB: %s" % (file, lastVersionDb))
+
+        # load all songs from kodi library
+        conn = sqlite3.connect(lastVersionDb)
+        conn.text_factory = str
+
+        query = '''select 'kodi'||idSong as song_id, '*'||comment, rating, lastplayed as last_played, 0 as disc, '' as composer,
+                song.iYear as year, strAlbum as album, strTitle as title, album.strArtists as album_artist,
+                '99' as type, iTrack as trackNumber, 0 as total_tracks, 0 as beats_per_minute,
+                song.strGenres as genre, iTimesPlayed as play_count, album.dateAdded as creation_date,
+                strTitle as name, song.strArtists as artist, '' as url, 0 as total_discs, iDuration as duration,
+                a1.url, strArtist||' - '||strTitle as display_name, strPath||strFileName as stream_url, a2.url
+                from song, artist, album, path
+                left join art a1 on album.idAlbum = a1.media_id and a1.media_type = 'album'
+                left join art a2 on artist.idArtist = a2.media_id and a2.media_type = 'artist'
+                where song.idalbum = album.idalbum and song.strArtists = artist.strArtist and song.idPath = path.idPath'''
+
+        kodiSongs = conn.cursor().execute(query).fetchall()
+
+        # check for repeated songs (same title, artist and album)
+        uniqSongs = []
+        for song in kodiSongs:
+            exists = self.curs.execute("select 1 from songs where title = ? and artist = ? and album = ?",(song[8],song[18],song[7])).fetchall()
+            #utils.log(repr(exists))
+            if not exists:
+                utils.log(repr(song))
+                uniqSongs.append(song)
+        utils.log("%d songs imported from Kodi library" % len(uniqSongs))
+
+        def songs():
+            for song in uniqSongs:
+                yield {
+                  'song_id':          song[0],
+                  'comment':          song[1],
+                  'rating':           song[2],
+                  'last_played':      song[3],
+                  'disc':             song[4],
+                  'composer':         song[5],
+                  'year':             song[6],
+                  'album':            song[7],
+                  'title':            song[8],
+                  'album_artist':     song[9],
+                  'type':             song[10],
+                  'track':            song[11],
+                  'total_tracks':     song[12],
+                  'beats_per_minute': song[13],
+                  'genre':            song[14],
+                  'play_count':       song[15],
+                  'creation_date':    song[16] if song[16] else 0,
+                  'name':             song[17],
+                  'artist':           song[18],
+                  'url':              song[19],
+                  'total_discs':      song[20],
+                  'duration':         song[21],
+                  'album_art_url':    song[22],
+                  'display_name':     song[23],
+                  'stream_url':       song[24],
+                  'artist_art_url':   song[25]
+                }
+
+        self.curs.executemany("INSERT OR REPLACE INTO songs VALUES ("+
+                              ":song_id, :comment, :rating, :last_played, :disc, :composer, :year, :album, :title, :album_artist,"+
+                              ":type, :track, :total_tracks, :beats_per_minute, :genre, :play_count, :creation_date, :name, :artist, "+
+                              ":url, :total_discs, :duration, :album_art_url, :display_name, :stream_url, :artist_art_url)", songs())
+
+        self.conn.commit()
+
+
+
 storage = GoogleMusicStorage()

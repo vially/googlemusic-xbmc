@@ -43,12 +43,17 @@ class GoogleMusicPlaySong():
                 params['title'] = song[17]
                 params['artist'] = song[18]
                 params['albumart'] = song[22]
-            # if url in library check if not expired before returning
+            # if url in library check if local library or if not expired before returning
             if song[24]:
-                import time
-                if int(utils.paramsToDict(song[24]).get('expire')) > time.time():
+                if song_id[0:4] == 'kodi':
                     params['url'] = song[24]
-                    return params
+                else:
+                    import time
+                    if int(utils.paramsToDict(song[24]).get('expire',0)) > time.time():
+                        params['url'] = song[24]
+        if 'url' in params:
+            return params
+
         # try to fetch from web
         params['url'] = self.api.getSongStreamUrl(song_id)
         # if no metadata
@@ -89,6 +94,9 @@ class GoogleMusicPlaySong():
             return
 
         song_id_next = utils.paramsToDict(playlistItems['result']['items'][position+1]['file']).get("song_id")
+        if song_id_next[0:4] == 'kodi':
+            return
+
         stream_url = self.api.getSongStreamUrl(song_id_next)
         storage.updateSongStreamUrl(song_id_next, stream_url)
 
@@ -98,6 +106,7 @@ class GoogleMusicPlaySong():
 
             # test if music changed
             playerProperties = loadJson(xbmc.executeJSONRPC(jsonGetPlaylistPos))
+            utils.log("playerProperties:: "+repr(playerProperties))
             if not 'result' in playerProperties or position != playerProperties['result']['position']:
                 utils.log("ending:: position "+repr(position)+" "+repr(playerProperties))
                 break

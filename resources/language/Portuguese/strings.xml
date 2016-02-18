@@ -12,6 +12,7 @@
     <string id="30066">Pré-carregar URL</string>
     <string id="30052">Caminho de exportação</string>
     <string id="30053">Exportar sempre após atualização da biblioteca</string>
+    <string id="30054">Carregar biblioteca de música local (necessita atualizar biblioteca)</string>
 
     <!-- auto update -->
     <string id="30067">Atualização automática da biblioteca</string>

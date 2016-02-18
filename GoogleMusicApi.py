@@ -68,6 +68,9 @@ class GoogleMusicApi():
 
         self.updatePlaylistSongs()
 
+        if utils.addon.getSetting('load_kodi_library')=='true':
+            storage.loadKodiLib()
+
     def updatePlaylistSongs(self):
         storage.storePlaylistSongs(self.getApi().get_all_user_playlist_contents())
 
