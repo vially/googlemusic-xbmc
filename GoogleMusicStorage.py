@@ -46,7 +46,7 @@ class GoogleMusicStorage():
         return songs
 
     def getFilterSongs(self, filter_type, filter_criteria, albumArtist):
-        #print "### storage getfiltersongs: "+repr(filter_type)+" "+repr(filter_criteria)+" "+repr(albumArtist)
+        utils.log("### storage getfiltersongs: "+repr(filter_type)+" "+repr(filter_criteria)+" "+repr(albumArtist))
 
         if albumArtist:
             query = "select * from songs where album = :filter and album_artist = :albumArtist order by disc asc, track asc"
@@ -64,7 +64,7 @@ class GoogleMusicStorage():
         return songs
 
     def getCriteria(self, criteria, name):
-        #print "### storage getcriteria: "+repr(criteria)+" "+repr(name)
+        utils.log("### storage getcriteria: "+repr(criteria)+" "+repr(name))
 
         if criteria == 'album':
             query = "select album_artist, album, year, max(album_art_url), max(creation_date) from songs where album <> '-Unknown-' group by lower(album_artist), lower(album)"

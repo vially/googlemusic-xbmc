@@ -55,7 +55,7 @@ class GoogleMusicNavigation():
             if eval(utils.addon.getSetting('all-access')):
                 listItems = self.getMenuItems(self.main_menu_aa)
             else:
-                utils.log("NO ALL ACCESS ACCOUNT")
+                utils.log("NO ALL ACCESS/UNLIMITED ACCOUNT")
                 listItems = self.getMenuItems(self.main_menu_noaa)
         elif self.path == "ifl":
             listItems = self.addSongsFromLibrary(self.api.getStationTracks("IFL"), 'library')
@@ -223,7 +223,7 @@ class GoogleMusicNavigation():
         return self.addSongsFromLibrary(songs, 'library')
 
     def getCriteria(self, criteria, albums=''):
-        #utils.log("CRITERIA: "+repr(criteria)+" "+repr(albums))
+        utils.log("CRITERIA: "+repr(criteria)+" "+repr(albums))
         listItems = []
         append = listItems.append
         addFolder = self.createFolder
@@ -231,14 +231,10 @@ class GoogleMusicNavigation():
         items = self.api.getCriteria(criteria, albums)
         if criteria == 'album' or (albums and criteria in ('genre','artist','composer')):
             for item in items:
-                #folder = addFolder('[%s] %s'%(item[0],item[1]),{'path':criteria,'album':item[1],'artist':item[0]},getCm(criteria,item[1]),item[-1])
+                #utils.log(repr(item))
                 folder = addFolder(item[1],{'path':criteria,'album':item[1],'artist':item[0]},getCm(criteria,item[1]),item[3],item[0])
                 folder[1].setInfo(type='music', infoLabels={'year':item[2],'artist':item[0],'album':item[1],
                     'date':time.strftime('%d.%m.%Y', time.gmtime(item[4]/1000000))})
-                #utils.log("folder[1].setInfo('year':" + str(item[2]) +
-                #    ",'artist':" + item[0] +
-                #    ",'album':" + item[1] +
-                #    ", date: " + time.strftime('%d.%m.%Y', time.gmtime(item[4]/1000000))+")")
                 append(folder)
         elif criteria in ('artist','genre'):
             for item in items:
@@ -253,7 +249,6 @@ class GoogleMusicNavigation():
         for item in items:
             suggestion = item.get('suggestion_text')
             image = item['images'][0]['url'] if 'images' in item else None
-            #print repr(item)
             if item['type'] == '1':
                 album = item['album']
                 albumid = album['id']['metajamCompactKey']
