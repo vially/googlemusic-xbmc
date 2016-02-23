@@ -288,7 +288,7 @@ class GoogleMusicStorage():
         query = '''select 'kodi'||idSong as song_id, '*'||comment, rating, lastplayed as last_played, 0 as disc, '' as composer,
                 song.iYear as year, strAlbum as album, strTitle as title, album.strArtists as album_artist,
                 '99' as type, iTrack as trackNumber, 0 as total_tracks, 0 as beats_per_minute,
-                song.strGenres as genre, iTimesPlayed as play_count, album.dateAdded as creation_date,
+                song.strGenres as genre, iTimesPlayed as play_count, album.lastScraped as creation_date,
                 strTitle as name, song.strArtists as artist, '' as url, 0 as total_discs, iDuration as duration,
                 a1.url, strArtist||' - '||strTitle as display_name, strPath||strFileName as stream_url, a2.url
                 from song, artist, album, path

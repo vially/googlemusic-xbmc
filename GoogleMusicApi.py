@@ -69,7 +69,10 @@ class GoogleMusicApi():
         self.updatePlaylistSongs()
 
         if utils.addon.getSetting('load_kodi_library')=='true':
-            storage.loadKodiLib()
+            try:
+                storage.loadKodiLib()
+            except Exception as ex:
+                utils.log("ERROR trying to load local library: "+repr(ex))
 
     def updatePlaylistSongs(self):
         storage.storePlaylistSongs(self.getApi().get_all_user_playlist_contents())
