@@ -127,7 +127,7 @@ class GoogleMusicStorage():
                         api_songs.append(entry['track'])
 
         self.conn.commit()
-        self.storeInAllSongs(api_songs)
+        #self.storeInAllSongs(api_songs)
 
     def storeApiSongs(self, api_songs):
         import time
@@ -246,8 +246,7 @@ class GoogleMusicStorage():
                 playlist_id VARCHAR,
                 song_id VARCHAR,
                 entry_id VARCHAR,
-                FOREIGN KEY(playlist_id) REFERENCES playlists(playlist_id) ON DELETE CASCADE,
-                FOREIGN KEY(song_id) REFERENCES songs(song_id) ON DELETE CASCADE
+                FOREIGN KEY(playlist_id) REFERENCES playlists(playlist_id) ON DELETE CASCADE
         )''')
 
         self.curs.execute('''CREATE INDEX IF NOT EXISTS playlistindex ON playlists_songs(playlist_id)''')
