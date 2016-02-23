@@ -37,31 +37,32 @@ class GoogleMusicPlaySong():
     def __getSongStreamUrl(self, song_id, params):
         # try to fetch from library first
         song = storage.getSong(song_id)
-        if song:
-            # if no metadata
-            if not 'title' in params:
-                params['title'] = song[17]
-                params['artist'] = song[18]
-                params['albumart'] = song[22]
-            # if url in library check if local library or if not expired before returning
-            if song[24]:
-                if song_id[0:4] == 'kodi':
-                    params['url'] = song[24]
-                else:
-                    import time
-                    if int(utils.paramsToDict(song[24]).get('expire',0)) > time.time():
-                        params['url'] = song[24]
-        if 'url' in params:
-            return params
 
-        # try to fetch from web
-        params['url'] = self.api.getSongStreamUrl(song_id)
         # if no metadata
         if not 'title' in params:
-            trackinfo = self.api.getTrack(song_id)
-            params['title'] = trackinfo[17]
-            params['artist'] = trackinfo[18]
-            params['albumart'] = trackinfo[22]
+            if not song:
+                # fecth from web
+                song = self.api.getTrack(song_id)
+            params['title'] = song[17]
+            params['artist'] = song[18]
+            params['albumart'] = song[22]
+            params['tracknumber'] = song[11]
+            params['album'] = song[7]
+            params['year'] = song[6]
+            params['rating'] = song[2]
+
+        # if url in library check if local library or if not expired before returning
+        if song and song[24]:
+            if song_id[0:4] == 'kodi':
+                params['url'] = song[24]
+            else:
+                import time
+                if int(utils.paramsToDict(song[24]).get('expire',0)) > time.time():
+                    params['url'] = song[24]
+
+        if not 'url' in params:
+            # try to fetch from web
+            params['url'] = self.api.getSongStreamUrl(song_id)
 
         return params
 

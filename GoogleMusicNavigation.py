@@ -10,8 +10,6 @@ class GoogleMusicNavigation():
         self.fanart  = utils.addon.getAddonInfo('fanart')
         self.api     = GoogleMusicApi.GoogleMusicApi()
 
-        self.song_url  = utils.addon_url+"?action=play_song&song_id=%s&title=%s&artist=%s&albumart=%s"
-
         self.main_menu_aa = (
             {'title':self.lang(30211), 'params':{'path':"ifl"}},
             {'title':self.lang(30219), 'params':{'path':"listennow"}},
@@ -187,10 +185,10 @@ class GoogleMusicNavigation():
                 songItem = createItem(song, song_type)
                 songItem.setLabel("".join(['[',song[7],'] ',song[8]]))
                 songItem.setLabel2(song[7])
-                append([self.song_url % (song[0], song[8], song[18], song[22]), songItem])
+                append([utils.getUrl(song), songItem])
         else:
             for song in library:
-                append([self.song_url % (song[0], song[8], song[18], song[22]), createItem(song, song_type)])
+                append([utils.getUrl(song), createItem(song, song_type)])
         return listItems
 
     def getPlaylists(self, playlist_type):

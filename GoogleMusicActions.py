@@ -4,7 +4,6 @@ import GoogleMusicApi
 class GoogleMusicActions():
     def __init__(self):
         self.icon      = utils.addon.getAddonInfo('icon')
-        self.song_url  = utils.addon_url+"?action=play_song&song_id=%s&title=%s&artist=%s&albumart=%s"
         self.api       = GoogleMusicApi.GoogleMusicApi()
         self.lang      = utils.addon.getLocalizedString
 
@@ -85,7 +84,7 @@ class GoogleMusicActions():
         playlist.clear()
 
         for song in songs:
-            playlist.add(self.song_url % (song[0], song[8], song[18], song[22]), utils.createItem(song[23], song[22]))
+            playlist.add(utils.getUrl(song), utils.createItem(song[23], song[22]))
 
         if params.get("shuffle"):
             playlist.shuffle()
@@ -98,7 +97,7 @@ class GoogleMusicActions():
         playlist = xbmc.PlayList(xbmc.PLAYLIST_MUSIC)
 
         for song in songs:
-            playlist.add(self.song_url % (song[0], song[8], song[18], song[22]), utils.createItem(song[23], song[22]))
+            playlist.add(utils.getUrl(song), utils.createItem(song[23], song[22]))
 
 
     def playYoutube(self, titles):
@@ -181,7 +180,7 @@ class GoogleMusicActions():
                     nfo.write('<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>\n')
                     nfo.write('<album>\n\t<title>%s</title>\n\t<artist>%s</artist>\n\t<thumb>%s</thumb>\n</album>' % (song[7],song[18],song[25]))
             with open(os.path.join(path,artist,album,str(song[11])+'-'+self._sanitizePath(song[8])+'.strm'), "w") as strm:
-                strm.write(self.song_url % (song[0], song[8], song[18], song[22]))
+                strm.write(utils.getUrl(song))
                 dp.update(int(count * 100 / len(songs)))
 
     def _sanitizePath(self, name):
