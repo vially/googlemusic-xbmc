@@ -12,6 +12,7 @@
 <string id="30066">Pre-fetch URL</string>
 <string id="30052">Chemin d'exportation</string>
 <string id="30053">Toujours exporter la bibliothèque après une mise à jour</string>
+<string id="30054">Charger la bibliothèque musicale locale (nécessite une mise à jour de la bibliothèque)</string>
 <!-- auto update -->
 <string id="30067">Mise à jour automatique de la bibliothèque</string>
 <string id="30068">Jamais</string>
