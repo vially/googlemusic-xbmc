@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <strings>
     <string id="30001">General</string>
+    <string id="30002">Views</string>
     <string id="30051">Advanced</string>
     <string id="30011">Username</string>
     <string id="30012">Password</string>
@@ -8,11 +9,18 @@
     <string id="30062">Clear cache</string>
     <string id="30063">Clear cookie</string>
     <string id="30064">SQLite database</string>
-    <string id="30065">Override View</string>
     <string id="30066">Pre-fetch URL</string>
     <string id="30052">Export Path</string>
     <string id="30053">Always export after library update</string>
     <string id="30054">Load local music library (requires library update)</string>
+
+    <!-- Override Views -->
+    <string id="30065">Override Views</string>
+    <string id="30055">Artists ViewID</string>
+    <string id="30056">Albums ViewID</string>
+    <string id="30057">Playlists ViewID</string>
+    <string id="30058">Stations ViewID</string>
+    <string id="30059">Songs ViewID</string>
 
     <!-- auto update -->
     <string id="30067">Auto Update Library</string>
@@ -41,7 +49,7 @@
     <string id="30208">Search</string>
     <string id="30209">My Library</string>
     <string id="30210">Shuffle My Library</string>
-    <string id="30211">I'm feeling luck mix</string>
+    <string id="30211">I'm feeling lucky mix</string>
     <string id="30212">Composers</string>
     <string id="30213">Songs</string>
     <string id="30214">Shuffle Albums</string>
@@ -70,22 +78,37 @@
     <string id="30313">Play in Youtube</string>
     <string id="30314">Export</string>
     <string id="30315">Add to queue</string>
+    <string id="30316">Create playlist</string>
+    <string id="30317">Delete playlist</string>
+    <string id="30318">Delete station</string>
+    <string id="30319">Artist top songs</string>
+    <string id="30320">Related artists</string>
 
     <!-- messages -->
     <string id="30101">Login failed</string>
     <string id="30102">Invalid credentials or connectivity problems</string>
     <string id="30103">Library update needed</string>
-    <string id="30104">All Access track not playable</string>
+    <string id="30104">Subscriber track not playable</string>
     <string id="30105">Loading Library</string>
     <string id="30106">Cache in use - try later</string>
     <string id="30107">Export completed</string>
     <string id="30108">Export path not defined</string>
     <string id="30109">Error calling Youtube Addon</string>
+    <string id="30110">Done</string>
 
     <!-- dialogs -->
     <string id="30401">Add to Playlist...</string>
     <string id="30402">Radio Name</string>
     <string id="30403">Exporting Library</string>
     <string id="30404">Please wait</string>
+    <string id="30405">Confirmation</string>
+    <string id="30406">Delete playlist?</string>
+    <string id="30407">Delete station?</string>
+    <string id="30408">Fetching video IDs</string>
+    <string id="30409">Set Rating</string>
+    <string id="30410">Thumbs up</string>
+    <string id="30411">Thumbs down</string>
+    <string id="30412">No thumbs</string>
+    <string id="30413">Playlist Name</string>
 
 </strings>
