@@ -87,7 +87,7 @@ class GoogleMusicStorage():
         return self.curs.execute(query,{'name':name.decode('utf8')}).fetchall()
 
     def getPlaylists(self):
-        return self.curs.execute("SELECT playlist_id, name FROM playlists ORDER BY name").fetchall()
+        return self.curs.execute("SELECT playlist_id, name, arturl FROM playlists ORDER BY name").fetchall()
 
     def getAutoPlaylistSongs(self,playlist):
         querys = {'thumbsup':'SELECT * FROM songs WHERE rating > 3 ORDER BY display_name',
@@ -122,7 +122,11 @@ class GoogleMusicStorage():
             #utils.log(repr(playlist))
             playlistId = playlist['id']
             if len(playlist['name']) > 0:
-                self.curs.execute("INSERT INTO playlists (name, playlist_id, type, fetched) VALUES (?, ?, 'user', 1)", (playlist['name'], playlistId) )
+                arturl = utils.addon.getAddonInfo('icon')
+                song = self.getSong(playlist['tracks'][0]['trackId'])
+                if song and song['albumart']:
+                    arturl = song['albumart']
+                self.curs.execute("INSERT INTO playlists (name, playlist_id, type, arturl) VALUES (?, ?, 'user', ?)", (playlist['name'], playlistId, arturl) )
                 for entry in playlist['tracks']:
                     self.curs.execute("INSERT INTO playlists_songs (playlist_id, song_id, entry_id ) VALUES (?, ?, ?)", (playlistId, entry['trackId'], entry['id']))
                     if entry.has_key('track'):
