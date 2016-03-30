@@ -41,15 +41,24 @@ def createItem(title, thumb):
 def setResolvedUrl(listItem):
     xbmcplugin.setResolvedUrl(handle=handle, succeeded=True, listitem=listItem)
 
-def setDirectory(listItems, content, sortMethods):
-    xbmcplugin.addDirectoryItems(handle, listItems)
+def setDirectory(list_items, content, sort_methods, view_mode_id):
+    xbmcplugin.addDirectoryItems(handle, list_items)
     if handle > 0:
         xbmcplugin.setContent(handle, content)
 
-    for sorts in sortMethods:
+    for sorts in sort_methods:
         xbmcplugin.addSortMethod(int(sys.argv[1]), sorts)
 
     xbmcplugin.endOfDirectory(handle, succeeded=True)
+
+    if content == "songs":
+        view_mode_id = addon.getSetting('songs_viewid')
+    elif content == "albums":
+        view_mode_id = addon.getSetting('albums_viewid')
+
+    if view_mode_id and addon.getSetting('overrideview') == "true":
+        xbmc.executebuiltin('Container.SetViewMode(%s)' % view_mode_id)
+
 
 def tryEncode(text, encoding='utf-8'):
     try:

@@ -45,7 +45,7 @@ class GoogleMusicNavigation():
         utils.log("PATH: "+self.path)
 
         listItems = []
-        view_mode_id = 0
+        view_mode_id = ''
         content = ''
         sortMethods = [xbmcplugin.SORT_METHOD_UNSORTED]
 
@@ -70,6 +70,7 @@ class GoogleMusicNavigation():
             content = "songs"
         elif self.path == "playlists":
             listItems = self.getPlaylists(get('playlist_type'))
+            view_mode_id = utils.addon.getSetting('playlists_viewid')
         elif self.path == "filter":
             listItems = self.getCriteria(get('criteria'))
             sortMethods = [xbmcplugin.SORT_METHOD_LABEL_IGNORE_THE]
@@ -77,7 +78,6 @@ class GoogleMusicNavigation():
                 sortMethods = [xbmcplugin.SORT_METHOD_ALBUM_IGNORE_THE, xbmcplugin.SORT_METHOD_VIDEO_YEAR,
                                xbmcplugin.SORT_METHOD_ARTIST, xbmcplugin.SORT_METHOD_ALBUM,
                                xbmcplugin.SORT_METHOD_DATE]
-            view_mode_id = 500
         elif self.path in ["artist", "genre"] and get('albums'):
             albums = unquote_plus(get('albums'))
             listItems = self.getCriteria(self.path, albums)
@@ -86,7 +86,6 @@ class GoogleMusicNavigation():
                            xbmcplugin.SORT_METHOD_ARTIST, xbmcplugin.SORT_METHOD_ALBUM,
                            xbmcplugin.SORT_METHOD_DATE]
             content = "albums"
-            view_mode_id = 500
         elif self.path == "allsongs":
             listItems = self.listFilterSongs(get('criteria'), get('albums'))
             sortMethods = [xbmcplugin.SORT_METHOD_LABEL_IGNORE_THE]
@@ -110,7 +109,6 @@ class GoogleMusicNavigation():
         elif self.path == "listennow":
             listItems = self.getListennow(self.api.getApi().get_listen_now())
             content = "albums"
-            view_mode_id = 500
         elif self.path == "topcharts":
             listItems.append(self.createFolder(self.lang(30206),{'path':'topcharts_albums'}))
             listItems.append(self.createFolder(self.lang(30213),{'path':'topcharts_songs'}))
@@ -120,16 +118,14 @@ class GoogleMusicNavigation():
         elif self.path == "topcharts_albums":
             listItems = self.createAlbumFolder(self.api.getTopcharts(content_type='albums'))
             content = "albums"
-            view_mode_id = 500
         elif self.path == "newreleases":
             listItems = self.createAlbumFolder(self.api.getNewreleases())
             content = "albums"
-            view_mode_id = 500
         elif self.path == "browsestations":
             listItems = self.browseStations(get('category'))
         elif self.path == "get_stations":
             listItems = self.getStations(get('subcategory'))
-            view_mode_id = 500
+            view_mode_id = utils.addon.getSetting('stations_viewid')
         elif self.path == "create_station":
             station = self.api.getApi().create_station(unquote_plus(get('name')), artist_id=get('artistid'), genre_id=get('genreid'), curated_station_id=get('curatedid'))
             listItems = self.addSongsFromLibrary(self.api.getStationTracks(station), 'library')
@@ -144,10 +140,8 @@ class GoogleMusicNavigation():
             utils.log("Invalid path: " + get("path"))
             return
 
-        utils.setDirectory(listItems, content, sortMethods)
+        utils.setDirectory(listItems, content, sortMethods, view_mode_id)
 
-        if view_mode_id > 0 and utils.addon.getSetting('overrideview') == "true":
-            xbmc.executebuiltin('Container.SetViewMode(%d)' % view_mode_id)
 
     def getMenuItems(self, items):
         ''' Build the plugin root menu. '''

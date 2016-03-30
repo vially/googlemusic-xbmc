@@ -14,10 +14,19 @@
         <setting id="prefetch" type="bool" label="30066" default="false" />
     </category>
 
+    <!-- Views -->
+    <category label="30002">
+        <setting id="overrideview"     type="bool"    label="30065"  default="true" />
+        <setting id="artists_viewid"   type="number"  label="30055"  default="500"  enable="eq(-1,true)" />
+        <setting id="albums_viewid"    type="number"  label="30056"  default="500"  enable="eq(-2,true)" />
+        <setting id="playlists_viewid" type="number"  label="30057"  default="51"   enable="eq(-3,true)" />
+        <setting id="stations_viewid"  type="number"  label="30058"  default="500"  enable="eq(-4,true)" />
+        <setting id="songs_viewid"     type="number"  label="30059"  default="506"  enable="eq(-5,true)" />
+    </category>
+
     <!-- Advanced -->
     <category label="30051">
         <setting id="load_kodi_library" type="bool" label="30054" default="false" />
-        <setting id="overrideview" type="bool" label="30065" default="true" />
         <setting id="debug" type="bool" label="30061" default="true" />
         <setting id="clear_cookie" type="action" label="30063" option="close" action="RunPlugin(plugin://plugin.audio.googlemusic.exp/?action=clear_cookie)" />
         <setting id="clear_cache" type="action" label="30062" option="close" action="RunPlugin(plugin://plugin.audio.googlemusic.exp/?action=clear_cache)" />
@@ -25,4 +34,5 @@
         <setting id="sqlite_db" type="text" label="30064" default="googlemusic.db"/>
         <setting id="device_id" type="text" label="Device ID" default="" enable="false"/>
     </category>
+
 </settings>
