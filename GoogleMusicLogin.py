@@ -79,8 +79,10 @@ class GoogleMusicLogin():
             try:
                 self.gmusicapi.login(username, password, utils.addon.getSetting('device_id'))
                 if not self.gmusicapi.is_authenticated():
-                   utils.log("Login in with device_id failed, trying with MAC")
-                   self.gmusicapi.login(username, password, Mobileclient.FROM_MAC_ADDRESS)
+                    utils.log("Login in with device_id failed, trying with MAC")
+                    self.gmusicapi.login(username, password, Mobileclient.FROM_MAC_ADDRESS)
+                    if self.gmusicapi.is_authenticated():
+                        utils.addon.setSetting('device_id', self.gmusicapi.android_id)
             except Exception as e:
                 utils.log(repr(e))
 
