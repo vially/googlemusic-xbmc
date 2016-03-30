@@ -230,16 +230,22 @@ class GoogleMusicNavigation():
         if criteria == 'album' or (albums and criteria in ('genre','artist','composer')):
             for item in items:
                 #utils.log(repr(item))
-                folder = addFolder(item[1],{'path':criteria,'album':item[1],'artist':item[0]},getCm(criteria,item[1]),item[3],item[0])
-                folder[1].setInfo(type='music', infoLabels={'year':item[2],'artist':item[0],'album':item[1],
-                    'date':time.strftime('%d.%m.%Y', time.gmtime(item[4]/1000000))})
+                album  = item['album']
+                artist = item['album_artist']
+                params = {'path':criteria, 'album':album, 'artist':artist}
+                folder = addFolder(album, params, getCm(criteria, album), item['arturl'], artist)
+                folder[1].setInfo(type='music', infoLabels={
+                   'year':item['year'], 'artist':artist, 'album':album,
+                   'date':time.strftime('%d.%m.%Y', time.gmtime(item['date']/1000000))})
                 append(folder)
         elif criteria in ('artist','genre'):
             for item in items:
-                append( addFolder(item[0], {'path':criteria,'albums':item[0]}, getCm(criteria,item[0]), item[1]))
+                append( addFolder(item['criteria'], {'path':criteria,'albums':item['criteria']}, getCm(criteria, item['criteria']), item['arturl']))
+
         else:
             for item in items:
-                append( addFolder(item[0], {'path':criteria,'album':item[0]}, getCm(criteria,item[0])))
+                append( addFolder(item['criteria'], {'path':criteria,'album':item['criteria']}, getCm(criteria, item['criteria'])))
+
         return listItems
 
     def getListennow(self, items):
@@ -307,17 +313,17 @@ class GoogleMusicNavigation():
 
     def createItem(self, song, song_type):
         infoLabels = {
-            'tracknumber': song[11], 'duration': song[21],
-            'year': song[6],         'genre': song[14],
-            'album': song[7],        'artist': song[18],
-            'title': song[8],        'playcount': song[15],
-            'rating': song[2],       'discnumber': song[4]
+            'tracknumber': song['tracknumber'], 'duration':   song['duration'],
+            'year':        song['year'],        'genre':      song['genre'],
+            'album':       song['album'],       'artist':     song['artist'],
+            'title':       song['title'],       'playcount':  song['playcount'],
+            'rating':      song['rating'],      'discnumber': song['discnumber']
         }
 
-        li = utils.createItem(song[23], song[22])
-        li.setProperty('fanart_image', song[25])
+        li = utils.createItem(song['display_name'], song['albumart'])
+        li.setProperty('fanart_image', song['artistart'])
         li.setInfo(type='music', infoLabels=infoLabels)
-        li.addContextMenuItems(self.getSongContextMenu(song[0], song[23], song_type))
+        li.addContextMenuItems(self.getSongContextMenu(song['song_id'], song['display_name'], song_type))
         return li
 
     def getSongContextMenu(self, song_id, title, song_type):
@@ -374,11 +380,11 @@ class GoogleMusicNavigation():
         def listAlbumsResults():
             listItems.append(self.createFolder('[COLOR orange]*** '+self.lang(30206)+' ***[/COLOR]',{'path':'none'}))
             for album in result['albums']:
-                if len(album) > 3:
-                    listItems.extend(self.createAlbumFolder([[album[0],album[1],album[2],album[3]]]))
+                if 'albumId' in album:
+                    listItems.extend(self.createAlbumFolder([[album['name'], album['artist'], album['albumArtRef'], album['albumId']]]))
                 else:
-                    params = {'path':"search_result",'query':utils.tryEncode(album[0])}
-                    listItems.append(self.createFolder("[%s] %s"%(album[1], album[0]), params, [], album[2]))
+                    params = {'path':"search_result",'query':utils.tryEncode(album['name'])}
+                    listItems.append(self.createFolder("[%s] %s"%(album['artist'], album['name']), params, [], album['albumArtRef']))
 
         if isinstance(query,basestring):
             result = self.api.getSearch(query)
@@ -387,11 +393,11 @@ class GoogleMusicNavigation():
                 listItems.append(self.createFolder('[COLOR orange]*** '+self.lang(30205)+' ***[/COLOR]',{'path':'none'}))
                 cm = []
                 for artist in result['artists']:
-                    params = {'path':"search_result",'query':utils.tryEncode(artist[0])}
-                    if len(artist) > 2:
-                        cm = [(self.lang(30301), "XBMC.RunPlugin(%s?action=play_all&artist_id=%s)" % (utils.addon_url, artist[2]))]
-                        params['artistid'] = artist[2]
-                    listItems.append(self.createFolder(artist[0], params, cm, artist[1]))
+                    params = {'path':"search_result",'query':utils.tryEncode(artist['name'])}
+                    if 'artistId' in artist:
+                        cm = [(self.lang(30301), "XBMC.RunPlugin(%s?action=play_all&artist_id=%s)" % (utils.addon_url, artist['artistId']))]
+                        params['artistid'] = artist['artistId']
+                    listItems.append(self.createFolder(artist['name'], params, cm, artist['artistArtRef'] if 'artistArtRef' in artist else ''))
             if result['tracks']:
                 listItems.append(self.createFolder('[COLOR orange]*** '+self.lang(30213)+' ***[/COLOR]',{'path':'none'}))
                 listItems.extend(self.addSongsFromLibrary(result['tracks'], 'library'))

@@ -9,6 +9,7 @@ plugin    = "GoogleMusicEXP-" + addon.getAddonInfo('version')
 dbg       = addon.getSetting( "debug" ) == "true"
 addon_url = sys.argv[0]
 handle    = int(sys.argv[1])
+song_url  = "%s?action=play_song&song_id=%s&title=%s&artist=%s&albumart=%s&tracknumber=%s&album=%s&year=%s&rating=%s"
 
 # utility functions
 def log(message):
@@ -63,5 +64,5 @@ def tryEncode(text, encoding='utf-8'):
     return repr(text)
 
 def getUrl(song):
-    song_url = addon_url+"?action=play_song&song_id=%s&title=%s&artist=%s&albumart=%s&tracknumber=%s&album=%s&year=%s&rating=%s"
-    return song_url % (song[0], song[8], song[18], song[22], song[11], song[7], song[6], song[2])
+    return song_url % (addon_url, song['song_id'], song['title'], song['artist'], song['albumart'],
+                       song['tracknumber'], song['album'], song['year'], song['rating'])

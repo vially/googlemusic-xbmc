@@ -37,30 +37,29 @@ class GoogleMusicPlaySong():
     def __getSongStreamUrl(self, song_id, params):
         # try to fetch from library first
         song = storage.getSong(song_id)
+        params['url'] = song['url'] if song else ''
 
         # if no metadata
         if not 'title' in params:
             if not song:
                 # fecth from web
                 song = self.api.getTrack(song_id)
-            params['title'] = song[17]
-            params['artist'] = song[18]
-            params['albumart'] = song[22]
-            params['tracknumber'] = song[11]
-            params['album'] = song[7]
-            params['year'] = song[6]
-            params['rating'] = song[2]
+            params['title']       = song['title']
+            params['artist']      = song['artist']
+            params['albumart']    = song['albumart']
+            params['tracknumber'] = song['tracknumber']
+            params['album']       = song['album']
+            params['year']        = song['year']
+            params['rating']      = song['rating']
 
         # if url in library check if local library or if not expired before returning
-        if song and song[24]:
-            if song_id[0:4] == 'kodi':
-                params['url'] = song[24]
-            else:
+        if params['url'] and not song_id[0:4] == 'kodi':
                 import time
-                if int(utils.paramsToDict(song[24]).get('expire',0)) > time.time():
-                    params['url'] = song[24]
+            utils.log("TIME:"+str(time.time()))
+            if int(utils.paramsToDict(params['url']).get('expire',0)) < time.time():
+                params['url'] = ''
 
-        if not 'url' in params:
+        if not params['url']:
             # try to fetch from web
             params['url'] = self.api.getSongStreamUrl(song_id)
 
@@ -95,6 +94,8 @@ class GoogleMusicPlaySong():
             return
 
         song_id_next = utils.paramsToDict(playlistItems['result']['items'][position+1]['file']).get("song_id")
+
+        #if local file skip prefetch
         if song_id_next[0:4] == 'kodi':
             return
 

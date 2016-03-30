@@ -55,7 +55,7 @@ class GoogleMusicActions():
         elif (action == "export_playlist"):
             self.exportPlaylist(params.get('title'), params.get('playlist_id'))
         elif (action == "start_radio"):
-            keyboard = xbmc.Keyboard(self.api.getSong(params["song_id"])[8], self.lang(30402))
+            keyboard = xbmc.Keyboard(self.api.getSong(params["song_id"])['title'], self.lang(30402))
             keyboard.doModal()
             if keyboard.isConfirmed() and keyboard.getText():
                 self.playAll({'radio_id': self.api.startRadio(keyboard.getText(), params["song_id"])})
@@ -84,7 +84,7 @@ class GoogleMusicActions():
         playlist.clear()
 
         for song in songs:
-            playlist.add(utils.getUrl(song), utils.createItem(song[23], song[22]))
+            playlist.add(utils.getUrl(song), utils.createItem(song['display_name'], song['albumart']))
 
         if params.get("shuffle"):
             playlist.shuffle()
@@ -97,8 +97,7 @@ class GoogleMusicActions():
         playlist = xbmc.PlayList(xbmc.PLAYLIST_MUSIC)
 
         for song in songs:
-            playlist.add(utils.getUrl(song), utils.createItem(song[23], song[22]))
-
+            playlist.add(utils.getUrl(song), utils.createItem(song['display_name'], song['albumart']))
 
     def playYoutube(self, titles):
         #print repr(titles)
@@ -153,8 +152,8 @@ class GoogleMusicActions():
             m3u.write("#EXTM3U\n")
             for song in songs:
                 m3u.write("\n")
-                m3u.write("#EXTINF:%s, %s - %s\n" % (song[21],song[18],song[8]))
-                m3u.write("plugin://plugin.audio.googlemusic.exp/?action=play_song&song_id=%s\n" % song[0])
+                m3u.write("#EXTINF:%s, %s - %s\n" % (song['duration'], song['artist'], song['title']))
+                m3u.write("plugin://plugin.audio.googlemusic.exp/?action=play_song&song_id=%s\n" % song['song_id'])
 
     def exportLibrary(self, path):
         songs = self.api.getPlaylistSongs('all_songs')
@@ -165,21 +164,21 @@ class GoogleMusicActions():
             os.mkdir(path)
         for song in songs:
             count = count + 1
-            artist = self._sanitizePath(song[18])
-            album  = self._sanitizePath(song[7])
+            artist = self._sanitizePath(song['artist'])
+            album  = self._sanitizePath(song['album'])
             if not os.path.exists(os.path.join(path,artist)):
                 os.mkdir(os.path.join(path,artist))
             if not os.path.exists(os.path.join(path,artist,album)):
                 os.mkdir(os.path.join(path,artist,album))
-            if not os.path.isfile(os.path.join(path,artist,'artist.nfo')) and song[25]:
+            if not os.path.isfile(os.path.join(path,artist,'artist.nfo')) and song['artistart']:
                 with open(os.path.join(path,artist,'artist.nfo'), "w") as nfo:
                     nfo.write('<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>\n')
-                    nfo.write('<artist>\n\t<name>%s</name>\n\t<thumb>%s</thumb>\n</artist>' % (song[18],song[25]))
-            if not os.path.isfile(os.path.join(path,artist,album,'album.nfo')) and song[22]:
+                    nfo.write('<artist>\n\t<name>%s</name>\n\t<thumb>%s</thumb>\n</artist>' % (song['artist'], song['artistart']))
+            if not os.path.isfile(os.path.join(path,artist,album,'album.nfo')) and song['albumart']:
                 with open(os.path.join(path,artist,album,'album.nfo'), "w") as nfo:
                     nfo.write('<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>\n')
-                    nfo.write('<album>\n\t<title>%s</title>\n\t<artist>%s</artist>\n\t<thumb>%s</thumb>\n</album>' % (song[7],song[18],song[25]))
-            with open(os.path.join(path,artist,album,str(song[11])+'-'+self._sanitizePath(song[8])+'.strm'), "w") as strm:
+                    nfo.write('<album>\n\t<title>%s</title>\n\t<artist>%s</artist>\n\t<thumb>%s</thumb>\n</album>' % (song['album'], song['artist'], song['artistart']))
+            with open(os.path.join(path,artist,album,str(song['tracknumber'])+'-'+self._sanitizePath(song['title'])+'.strm'), "w") as strm:
                 strm.write(utils.getUrl(song))
                 dp.update(int(count * 100 / len(songs)))
 
@@ -240,7 +239,7 @@ class GoogleMusicActions():
             params['q'] = '%s -interview -cover -remix -album' % title.lower()
             req = urllib2.Request(url % urllib.urlencode(params), headers=headers)
             response = urllib2.urlopen(req).read()
-            print repr(response)
+            utils.log(repr(response))
             searchresults = loadJson(response)['items']
             if searchresults:
                 videoids.append([searchresults[0]['id']['videoId'], title])

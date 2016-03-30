@@ -33,31 +33,30 @@ class GoogleMusicStorage():
 
     def getPlaylistSongs(self, playlist_id):
         if playlist_id == 'all_songs':
-            result = self.curs.execute("SELECT * FROM songs ORDER BY display_name")
+            query = "SELECT * FROM songs ORDER BY display_name"
         elif playlist_id == 'shuffled_albums':
-            result = self.curs.execute("WITH albums AS (SELECT DISTINCT album, album_artist FROM songs ORDER BY RANDOM()) "+
-                                       "SELECT songs.* FROM albums LEFT JOIN songs ON songs.album = albums.album AND songs.album_artist = albums.album_artist "+
-									   "ORDER BY albums.rowid, songs.disc, songs.track")
+            query = "WITH albums AS (SELECT DISTINCT album, album_artist FROM songs ORDER BY RANDOM()) "\
+                    "SELECT songs.* FROM albums LEFT JOIN songs ON songs.album = albums.album AND songs.album_artist = albums.album_artist "\
+                    "ORDER BY albums.rowid, songs.discnumber, songs.tracknumber"
         else:
-            result = self.curs.execute("SELECT * FROM songs "+
-                                       "INNER JOIN playlists_songs ON songs.song_id = playlists_songs.song_id "+
-                                       "WHERE playlists_songs.playlist_id = ?", (playlist_id,))
-        songs = result.fetchall()
-        return songs
+            query = "SELECT * FROM songs "\
+                    "INNER JOIN playlists_songs ON songs.song_id = playlists_songs.song_id "\
+                    "WHERE playlists_songs.playlist_id = :id"
+        return self.curs.execute(query,{'id':playlist_id}).fetchall()
 
     def getFilterSongs(self, filter_type, filter_criteria, albumArtist):
         utils.log("### storage getfiltersongs: "+repr(filter_type)+" "+repr(filter_criteria)+" "+repr(albumArtist))
 
         if albumArtist:
-            query = "select * from songs where album = :filter and album_artist = :albumArtist order by disc asc, track asc"
+            query = "select * from library_songs where album = :filter and album_artist = :albumArtist order by discnumber asc, tracknumber asc, display_name asc"
         elif filter_type == 'album':
-            query = "select * from songs where album = :filter order by disc asc, track asc"
+            query = "select * from library_songs where album = :filter order by discnumber asc, tracknumber asc, display_name asc"
         elif filter_type == 'artist':
-            query = "select * from songs where artist = :filter order by album asc, disc asc, track asc"
+            query = "select * from library_songs where (artist = :filter or album_artist = :filter) order by album asc, discnumber asc, tracknumber asc, display_name asc"
         elif filter_type == 'genre':
-            query = "select * from songs where genre = :filter order by album asc, disc asc, track asc, title asc"
+            query = "select * from library_songs where genre = :filter order by album asc, discnumber asc, tracknumber asc, title asc"
         elif filter_type == 'composer':
-            query = "select * from songs where composer = :filter order by album asc, disc asc, track asc, title asc"
+            query = "select * from library_songs where composer = :filter order by album asc, discnumber asc, tracknumber asc, title asc"
 
         songs = self.curs.execute(query,{'filter':filter_criteria if filter_criteria else '','albumArtist':albumArtist}).fetchall()
 
@@ -67,21 +66,23 @@ class GoogleMusicStorage():
         utils.log("### storage getcriteria: "+repr(criteria)+" "+repr(name))
 
         if criteria == 'album':
-            query = "select album_artist, album, year, max(album_art_url), max(creation_date) from songs where album <> '-Unknown-' group by lower(album_artist), lower(album)"
-        else:
-            #if criteria == 'artist': criteria = 'album_artist'
-            if criteria == 'artist' and not name:
-                query = "select album_artist, max(artist_art_url) from songs group by lower(album_artist)"
+            query = "select album_artist, album, year, max(albumart) as arturl, max(creation_date) as date "\
+                    "from library_songs where album <> '-Unknown-' group by lower(album_artist), lower(album)"
+        elif criteria == 'artist' and not name:
+            query = "select album_artist as criteria, max(artistart) as arturl from library_songs group by lower(album_artist)"
             elif criteria == 'artist' and name:
-                query = "select album_artist, album, year, max(album_art_url), max(creation_date) from songs where (artist=:name or album_artist=:name) group by lower(album_artist), lower(album)"
+            query = "select album_artist, album, year, max(albumart) as arturl, max(creation_date) as date "\
+                    "from library_songs where album_artist = :name group by lower(album_artist), lower(album)"
             elif criteria == 'genre' and not name:
-                query = "select genre, max(artist_art_url) from songs group by lower(genre)"
+            query = "select genre as criteria, max(artistart) as arturl from library_songs group by lower(genre)"
             elif criteria == 'genre' and name:
-                query = "select album_artist, album, year, max(album_art_url), max(creation_date) from songs where album <> '-Unknown-' and genre=:name group by lower(album_artist), lower(album)"
+            query = "select album_artist, album, year, max(albumart) as arturl , max(creation_date) as date "\
+                    "from library_songs where album <> '-Unknown-' and genre=:name group by lower(album_artist), lower(album)"
             elif name:
-                query = "select album_artist, album, year, max(album_art_url), max(creation_date) from songs where %s=:name group by lower(album_artist), lower(album)" % criteria
+            query = "select album_artist, album, year, max(albumart) as arturl, max(creation_date) as date "\
+                    "from library_songs where %s=:name group by lower(album_artist), lower(album)" % criteria
             else:
-                query = "select %s from songs group by lower(%s)" % (criteria, criteria)
+            query = "select %s as criteria from library_songs group by lower(%s)" % (criteria, criteria)
 
         return self.curs.execute(query,{'name':name.decode('utf8')}).fetchall()
 
@@ -91,21 +92,22 @@ class GoogleMusicStorage():
     def getAutoPlaylistSongs(self,playlist):
         querys = {'thumbsup':'SELECT * FROM songs WHERE rating > 3 ORDER BY display_name',
                   'lastadded':'SELECT * FROM songs ORDER BY creation_date desc LIMIT 500',
-                  'mostplayed':'SELECT * FROM songs ORDER BY play_count desc LIMIT 500',
-                  'freepurchased':'SELECT * FROM songs WHERE type <> 0 order by creation_date desc',
+                  'mostplayed':'SELECT * FROM songs ORDER BY playcount desc LIMIT 500',
+                  'freepurchased':'SELECT * FROM songs WHERE type = 6 order by creation_date desc',
                   'feellucky':'SELECT * FROM songs ORDER BY random() LIMIT 500',
                  }
         return self.curs.execute(querys[playlist]).fetchall()
 
     def getSong(self, song_id):
-        return self.curs.execute("SELECT * FROM songs WHERE song_id = ? ", (song_id,)).fetchone()
+        return self.curs.execute("SELECT title,artist,album,year,tracknumber,rating,albumart,stream_url as url "+
+                                 "FROM songs WHERE song_id = ? ", (song_id,)).fetchone()
 
     def getSearch(self, query):
         query = '%'+ query.replace('%','') + '%'
         result = {}
-        result['artists'] = self.curs.execute("SELECT artist, max(artist_art_url) FROM songs WHERE artist like ? GROUP BY artist", (query,)).fetchall()
+        result['artists'] = self.curs.execute("SELECT artist as name, max(artistart) as artistArtRef FROM songs WHERE artist like ? GROUP BY artist", (query,)).fetchall()
         result['tracks'] = self.curs.execute("SELECT * FROM songs WHERE display_name like ? ORDER BY display_name", (query,)).fetchall()
-        result['albums'] = self.curs.execute("SELECT album, artist, max(album_art_url) FROM songs WHERE album like ? or album_artist like ? GROUP BY album, artist", (query,query)).fetchall()
+        result['albums'] = self.curs.execute("SELECT album as name, artist, max(albumart) as albumArtRef FROM songs WHERE album like ? or album_artist like ? GROUP BY album, artist", (query,query)).fetchall()
         return result
 
     def storePlaylistSongs(self, playlists_songs):
@@ -117,7 +119,7 @@ class GoogleMusicStorage():
         api_songs = []
 
         for playlist in playlists_songs:
-            #print playlist['name']+' id:'+playlist['id']+' tracks:'+str(len(playlist['tracks']))
+            #utils.log(repr(playlist))
             playlistId = playlist['id']
             if len(playlist['name']) > 0:
                 self.curs.execute("INSERT INTO playlists (name, playlist_id, type, fetched) VALUES (?, ?, 'user', 1)", (playlist['name'], playlistId) )
@@ -127,11 +129,6 @@ class GoogleMusicStorage():
                         api_songs.append(entry['track'])
 
         self.conn.commit()
-        #self.storeInAllSongs(api_songs)
-
-    def storeApiSongs(self, api_songs):
-        import time
-        utils.addon.setSetting("fetched_all_songs", str(time.time()))
         self.storeInAllSongs(api_songs)
 
     def storeInAllSongs(self, api_songs):
@@ -144,33 +141,34 @@ class GoogleMusicStorage():
               yield {
                   'song_id':       get("id", get("storeId", get("trackId"))), #+str(i),
                   'comment':       get("comment", ""),
-                  'rating':        get("rating", 0),
-                  'last_played':   get("recentTimestamp", 0),
-                  'disc':          get("discNumber", 0),
+                  'rating':        get("rating"),
+                  'last_played':   get("recentTimestamp"),
+                  'discnumber':    get("discNumber"),
                   'composer':      get("composer", '-Unknown-') if get("composer") else '-Unknown-',
-                  'year':          get("year", 0),
+                  'year':          get("year"),
                   'album':         get("album") if get("album") else '-Unknown-',
                   'title':         get("title", get("name","")),
                   'album_artist':  get("albumArtist") if get("albumArtist") else get("artist") if get("artist") else '-Unknown-',
-                  'type':          get("trackType", 0),
-                  'track':         get("trackNumber" ,0),
-                  'total_tracks':  get("totalTrackCount", 0),
+                  'type':          get("trackType"),
+                  'tracknumber':   get("trackNumber" ),
+                  'total_tracks':  get("totalTrackCount"),
                   'genre':         get("genre", '-Unknown-'),
-                  'play_count':    get("playCount", 0),
-                  'creation_date': get("creationTimestamp", 0),
-                  'name':          get("name", get("title","")),
+                  'playcount':     get("playCount"),
+                  'creation_date': get("creationTimestamp"),
                   'artist':        get("artist") if get("artist") else get("albumArtist") if get("albumArtist") else '-Unknown-',
-                  'total_discs':   get("totalDiscCount", 0),
-                  'duration':      int(get("durationMillis",0))/1000,
-                  'album_art_url': get("albumArtRef")[0]['url'] if get("albumArtRef") else utils.addon.getAddonInfo('icon'),
+                  'total_discs':   get("totalDiscCount"),
+                  'duration':      int(get("durationMillis"))/1000,
+                  'albumart':      get("albumArtRef")[0]['url'] if get("albumArtRef") else utils.addon.getAddonInfo('icon'),
                   'display_name':  self._getSongDisplayName(api_song),
-                  'artist_art_url':get("artistArtRef")[0]['url'] if get("artistArtRef") else utils.addon.getAddonInfo('fanart'),
+                  'stream_url':    None,
+                  'artistart':     get("artistArtRef")[0]['url'] if get("artistArtRef") else utils.addon.getAddonInfo('fanart'),
               }
 
         self.curs.executemany("INSERT OR REPLACE INTO songs VALUES ("+
-                              ":song_id, :comment, :rating, :last_played, :disc, :composer, :year, :album, :title, :album_artist,"+
-                              ":type, :track, :total_tracks, NULL, :genre, :play_count, :creation_date, :name, :artist, "+
-                              "NULL, :total_discs, :duration, :album_art_url, :display_name, NULL, :artist_art_url)", songs())
+                              ":song_id, :comment, :rating, :last_played, :discnumber, :composer, :year, :album, "+
+                              ":title, :album_artist, :type, :tracknumber, :total_tracks, :genre, :playcount, "+
+                              ":creation_date, :artist, :total_discs, :duration, :albumart, :display_name, "+
+                              ":stream_url, :artistart)", songs())
 
         self.conn.commit()
 
@@ -181,7 +179,7 @@ class GoogleMusicStorage():
 
     def incrementSongPlayCount(self, song_id):
         import time
-        self.curs.execute("UPDATE songs SET play_count = play_count+1, last_played = ? WHERE song_id = ?", (int(time.time()*1000000), song_id))
+        self.curs.execute("UPDATE songs SET playcount = playcount+1, last_played = ? WHERE song_id = ?", (int(time.time()*1000000), song_id))
         self.conn.commit()
 
     def addToPlaylist(self, playlist_id, song_id, entry_id):
@@ -201,56 +199,55 @@ class GoogleMusicStorage():
     def _connect(self):
         self.conn = sqlite3.connect(self.path)
         self.conn.text_factory = str
+        self.conn.row_factory = sqlite3.Row
         self.curs = self.conn.cursor()
 
     def initializeDatabase(self):
         self._connect()
 
-        self.curs.execute('''CREATE TABLE IF NOT EXISTS songs (
+        self.curs.executescript('''
+            CREATE TABLE IF NOT EXISTS songs (
                 song_id VARCHAR NOT NULL PRIMARY KEY,           --# 0
                 comment VARCHAR,                                --# 1
-                rating INTEGER,                                 --# 2
-                last_played INTEGER,                            --# 3
-                disc INTEGER,                                   --# 4
+                rating INTEGER NOT NULL DEFAULT 0,         --# 2
+                last_played INTEGER NOT NULL DEFAULT 0,    --# 3
+                discnumber INTEGER NOT NULL DEFAULT 0,     --# 4
                 composer VARCHAR,                               --# 5
-                year INTEGER,                                   --# 6
+                year INTEGER NOT NULL DEFAULT 0,           --# 6
                 album VARCHAR,                                  --# 7
                 title VARCHAR,                                  --# 8
                 album_artist VARCHAR,                           --# 9
-                type INTEGER,                                   --# 10
-                track INTEGER,                                  --# 11
-                total_tracks INTEGER,                           --# 12
-                beats_per_minute INTEGER,                       --# 13
-                genre VARCHAR,                                  --# 14
-                play_count INTEGER,                             --# 15
-                creation_date INTEGER,                          --# 16
-                name VARCHAR,                                   --# 17
-                artist VARCHAR,                                 --# 18
-                url VARCHAR,                                    --# 19
-                total_discs INTEGER,                            --# 20
-                duration INTEGER,                               --# 21
-                album_art_url VARCHAR,                          --# 22
-                display_name VARCHAR,                           --# 23
-                stream_url VARCHAR,                             --# 24
-                artist_art_url VARCHAR                          --# 25
-        )''')
-
-        self.curs.execute('''CREATE TABLE IF NOT EXISTS playlists (
+                type INTEGER NOT NULL DEFAULT 0,           --# 10
+                tracknumber INTEGER NOT NULL DEFAULT 0,    --# 11
+                total_tracks INTEGER NOT NULL DEFAULT 0,   --# 12
+                genre VARCHAR,                             --# 13
+                playcount INTEGER NOT NULL DEFAULT 0,      --# 14
+                creation_date INTEGER NOT NULL DEFAULT 0,  --# 15
+                artist VARCHAR,                            --# 16
+                total_discs INTEGER NOT NULL DEFAULT 0,    --# 17
+                duration INTEGER NOT NULL DEFAULT 0,       --# 18
+                albumart VARCHAR,                          --# 19
+                display_name VARCHAR,                      --# 20
+                stream_url VARCHAR,                        --# 21
+                artistart VARCHAR                          --# 22
+            );
+            CREATE TABLE IF NOT EXISTS playlists (
                 playlist_id VARCHAR NOT NULL PRIMARY KEY,
                 name VARCHAR,
                 type VARCHAR,
-                fetched BOOLEAN
-        )''')
-
-        self.curs.execute('''CREATE TABLE IF NOT EXISTS playlists_songs (
+                arturl VARCHAR
+            );
+            CREATE TABLE IF NOT EXISTS playlists_songs (
                 playlist_id VARCHAR,
                 song_id VARCHAR,
                 entry_id VARCHAR,
                 FOREIGN KEY(playlist_id) REFERENCES playlists(playlist_id) ON DELETE CASCADE
-        )''')
-
-        self.curs.execute('''CREATE INDEX IF NOT EXISTS playlistindex ON playlists_songs(playlist_id)''')
-        self.curs.execute('''CREATE INDEX IF NOT EXISTS songindex ON playlists_songs(song_id)''')
+            );
+            CREATE VIEW IF NOT EXISTS library_songs AS SELECT * FROM SONGS WHERE type <> 7;
+            CREATE INDEX IF NOT EXISTS playlistindex ON playlists_songs(playlist_id);
+            CREATE INDEX IF NOT EXISTS songindex ON playlists_songs(song_id);
+            CREATE INDEX IF NOT EXISTS songinfoindex ON songs(album,artist,genre,album_artist,type);
+        ''')
 
         self.conn.commit()
 
@@ -272,6 +269,8 @@ class GoogleMusicStorage():
 
         # find last kodi music file db
         import glob
+        utils.log("Start local kodi library import")
+
         lastVersionDb = None
         for file in glob.glob(os.path.join(xbmc.translatePath("special://database"), 'MyMusic*.db')):
             if not lastVersionDb:
@@ -283,13 +282,16 @@ class GoogleMusicStorage():
         # load all songs from kodi library
         conn = sqlite3.connect(lastVersionDb)
         conn.text_factory = str
+        conn.row_factory = sqlite3.Row
 
-        query = '''select 'kodi'||idSong as song_id, '*'||comment, rating, lastplayed as last_played, 0 as disc, '' as composer,
-                song.iYear as year, strAlbum as album, strTitle as title, album.strArtists as album_artist,
-                '99' as type, iTrack as trackNumber, 0 as total_tracks, 0 as beats_per_minute,
-                song.strGenres as genre, iTimesPlayed as play_count, album.lastScraped as creation_date,
-                strTitle as name, song.strArtists as artist, '' as url, 0 as total_discs, iDuration as duration,
-                a1.url, strArtist||' - '||strTitle as display_name, strPath||strFileName as stream_url, a2.url
+        query = '''SELECT 'kodi'||idSong as song_id, comment, rating, lastplayed as last_played,
+                       0 as discNumber, '' as composer, song.iYear as year, strAlbum as album,
+                       strTitle as title, album.strArtists as album_artist, '99' as type,
+                       iTrack as tracknumber, 0 as total_tracks, song.strGenres as genre,
+                       iTimesPlayed as playcount, album.lastScraped as creation_date,
+                       song.strArtists as artist, 0 as total_discs, iDuration as duration,
+                       a1.url as albumart, strArtist||' - '||strTitle as display_name,
+                       strPath||strFileName as stream_url, a2.url as artistart
                 from song, artist, album, path
                 left join art a1 on album.idAlbum = a1.media_id and a1.media_type = 'album'
                 left join art a2 on artist.idArtist = a2.media_id and a2.media_type = 'artist'
@@ -300,48 +302,20 @@ class GoogleMusicStorage():
         # check for repeated songs (same title, artist and album)
         uniqSongs = []
         for song in kodiSongs:
-            exists = self.curs.execute("select 1 from songs where title = ? and artist = ? and album = ?",(song[8],song[18],song[7])).fetchall()
+            exists = self.curs.execute("select 1 from songs where lower(title) = lower(?) and lower(artist) = lower(?) and lower(album) = lower(?)",
+                                       (song['title'], song['artist'], song['album'])).fetchall()
             #utils.log(repr(exists))
             if not exists:
-                utils.log(repr(song))
+                #utils.log(repr(song))
                 uniqSongs.append(song)
-        utils.log("%d songs imported from Kodi library" % len(uniqSongs))
 
-        def songs():
-            for song in uniqSongs:
-                yield {
-                  'song_id':          song[0],
-                  'comment':          song[1],
-                  'rating':           song[2],
-                  'last_played':      song[3],
-                  'disc':             song[4],
-                  'composer':         song[5],
-                  'year':             song[6],
-                  'album':            song[7],
-                  'title':            song[8],
-                  'album_artist':     song[9],
-                  'type':             song[10],
-                  'track':            song[11],
-                  'total_tracks':     song[12],
-                  'beats_per_minute': song[13],
-                  'genre':            song[14],
-                  'play_count':       song[15],
-                  'creation_date':    song[16] if song[16] else 0,
-                  'name':             song[17],
-                  'artist':           song[18],
-                  'url':              song[19],
-                  'total_discs':      song[20],
-                  'duration':         song[21],
-                  'album_art_url':    song[22],
-                  'display_name':     song[23],
-                  'stream_url':       song[24],
-                  'artist_art_url':   song[25]
-                }
+        utils.log("%d uniq songs to import from Kodi library" % len(uniqSongs))
 
         self.curs.executemany("INSERT OR REPLACE INTO songs VALUES ("+
-                              ":song_id, :comment, :rating, :last_played, :disc, :composer, :year, :album, :title, :album_artist,"+
-                              ":type, :track, :total_tracks, :beats_per_minute, :genre, :play_count, :creation_date, :name, :artist, "+
-                              ":url, :total_discs, :duration, :album_art_url, :display_name, :stream_url, :artist_art_url)", songs())
+                              ":song_id, :comment, :rating, :last_played, :discnumber, :composer, :year, :album, "+
+                              ":title, :album_artist, :type, :tracknumber, :total_tracks, :genre, :playcount, "+
+                              ":creation_date, :artist, :total_discs, :duration, :albumart, :display_name, "+
+                              ":stream_url, :artistart)", uniqSongs)
 
         self.conn.commit()
 

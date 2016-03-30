@@ -61,10 +61,7 @@ class GoogleMusicApi():
 
         for chunk in gen:
             utils.log("Chunk Size: "+repr(len(chunk)))
-            api_songs = []
-            for song in chunk:
-                api_songs.append(song)
-            storage.storeApiSongs(api_songs)
+            storage.storeInAllSongs(chunk)
 
         self.updatePlaylistSongs()
 
@@ -73,6 +70,10 @@ class GoogleMusicApi():
                 storage.loadKodiLib()
             except Exception as ex:
                 utils.log("ERROR trying to load local library: "+repr(ex))
+
+        import time
+        utils.addon.setSetting("fetched_all_songs", str(time.time()))
+
 
     def updatePlaylistSongs(self):
         storage.storePlaylistSongs(self.getApi().get_all_user_playlist_contents())
@@ -109,11 +110,9 @@ class GoogleMusicApi():
                 tracks.append(self._convertAATrack(track))
             for album in aaresult['album_hits']:
                 #utils.log("RESULT ALBUMS: "+repr(album['album']['name'])+" - "+repr(album['album']['artist'])+" "+album['album']['albumId'])
-                albumDict = album['album']
-                albums.append([albumDict['name'],albumDict['artist'],albumDict.get('albumArtRef',''),albumDict['albumId']])
+                albums.append(album['album'])
             for artist in aaresult['artist_hits']:
-                artistDict = artist['artist']
-                artists.append([artistDict['name'],artistDict.get('artistArtRef',''),artistDict['artistId']])
+                artists.append(artist['artist'])
             utils.log("API search results: tracks "+repr(len(tracks))+" albums "+repr(len(albums))+" artists "+repr(len(artists)))
         except Exception as e:
             utils.log("*** NO ALL ACCESS RESULT IN SEARCH *** "+repr(e))
@@ -172,7 +171,7 @@ class GoogleMusicApi():
         albums = []
         content = self.getApi().get_new_releases()
         for item in content:
-            print repr(item)
+            #utils.log(repr(item))
             album = item['album']
             albums.append([album['name'],album['artist'],album.get('albumArtRef',''),album['albumId']])
         return albums
@@ -197,10 +196,20 @@ class GoogleMusicApi():
 
 
     def _convertAATrack(self, aaTrack):
-        return [aaTrack.get('id') or aaTrack['storeId'],'',0,0,0,'',0,aaTrack.get('album'),
-                aaTrack['title'],aaTrack['albumArtist'],0,
-                aaTrack['trackNumber'],0,0,'',aaTrack.get('playCount', 0),0,aaTrack['title'],
-                aaTrack['artist'],'',0,int(aaTrack['durationMillis'])/1000,
-                aaTrack['albumArtRef'][0]['url'] if aaTrack.get('albumArtRef') else utils.addon.getAddonInfo('icon'),
-                aaTrack['artist']+" - "+aaTrack['title'],'',
-                aaTrack['artistArtRef'][0]['url'] if aaTrack.get('artistArtRef') else utils.addon.getAddonInfo('fanart')]
+        return { 'song_id':       aaTrack.get('id') or aaTrack['storeId'],
+                 'album':         aaTrack.get('album'),
+                 'title':         aaTrack['title'],
+                 'year':          aaTrack.get('year', 0),
+                 'rating':        aaTrack.get('rating', 0),
+                 'album_artist':  aaTrack['albumArtist'],
+                 'tracknumber':   aaTrack['trackNumber'],
+                 'playcount':     aaTrack.get('playCount', 0),
+                 'artist':        aaTrack['artist'],
+                 'genre':         aaTrack['genre'],
+                 'discnumber':    aaTrack['discNumber'],
+                 'duration':      int(aaTrack['durationMillis'])/1000,
+                 'albumart':      aaTrack['albumArtRef'][0]['url'] if aaTrack.get('albumArtRef') else utils.addon.getAddonInfo('icon'),
+                 'display_name':  aaTrack['artist']+" - "+aaTrack['title'],
+                 'artistart':     aaTrack['artistArtRef'][0]['url'] if aaTrack.get('artistArtRef') else utils.addon.getAddonInfo('fanart')
+                }
+
