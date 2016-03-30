@@ -196,6 +196,19 @@ class GoogleMusicStorage():
         self.conn.commit()
         return entry_id[0]
 
+    def deletePlaylist(self, playlist_id):
+        self.curs.execute("DELETE FROM playlists_songs WHERE playlist_id = ?", (playlist_id, ))
+        self.curs.execute("DELETE FROM playlists WHERE playlist_id = ?", (playlist_id, ))
+        self.conn.commit()
+
+    def createPlaylist(self, name, playlist_id):
+        self.curs.execute("INSERT OR REPLACE INTO playlists(playlist_id, name, type) VALUES (?,?,?)", (playlist_id, name, 'user'))
+        self.conn.commit()
+
+    def setThumbs(self, song_id, thumbs):
+        self.curs.execute("UPDATE songs SET rating = ? WHERE song_id = ?", (thumbs, song_id))
+        self.conn.commit()
+
     def updateSongStreamUrl(self, song_id, stream_url):
         self.curs.execute("UPDATE songs SET stream_url = ? WHERE song_id = ?", (stream_url, song_id))
         self.conn.commit()

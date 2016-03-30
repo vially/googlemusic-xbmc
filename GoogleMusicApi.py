@@ -89,6 +89,23 @@ class GoogleMusicApi():
             utils.log("ERROR trying to increment playcount: "+repr(ex))
         storage.incrementSongPlayCount(song_id)
 
+    def createPlaylist(self, name):
+        playlist_id = self.getApi().create_playlist(name)
+        storage.createPlaylist(name, playlist_id)
+
+    def deletePlaylist(self, playlist_id):
+        self.getApi().delete_playlist(playlist_id)
+        storage.deletePlaylist(playlist_id)
+
+    def setThumbs(self, song_id, thumbs):
+        if song_id[0] == 'T':
+            song = self.getApi().get_track_info(song_id)
+            song['rating'] = thumbs
+            self.getApi().change_song_metadata(song)
+        else:
+            self.getApi().change_song_metadata({'id':song_id,'rating':thumbs})
+        storage.setThumbs(song_id, thumbs)
+
     def getFilterSongs(self, filter_type, filter_criteria, albums):
         return storage.getFilterSongs(filter_type, filter_criteria, albums)
 
@@ -122,8 +139,11 @@ class GoogleMusicApi():
     def getAlbum(self, albumid):
         return self._loadAATracks(self.getApi().get_album_info(albumid, include_tracks=True)['tracks'])
 
-    def getArtist(self, artistid):
+    def getArtist(self, artistid, relartists=0):
+        if relartists == 0:
         return self._loadAATracks(self.getApi().get_artist_info(artistid, include_albums=False, max_top_tracks=50, max_rel_artist=0)['topTracks'])
+        else:
+            return self.getApi().get_artist_info(artistid, include_albums=False, max_top_tracks=0, max_rel_artist=relartists)['related_artists']
 
     def getTrack(self, trackid):
         return self._convertAATrack(self.getApi().get_track_info(trackid))

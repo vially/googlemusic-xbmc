@@ -136,6 +136,17 @@ class GoogleMusicNavigation():
             utils.log("ALBUM: "+get('albumid'))
             listItems = self.addSongsFromLibrary(self.api.getAlbum(get('albumid')), 'library')
             content = "songs"
+        elif self.path == "artist_topsongs":
+            listItems = self.addSongsFromLibrary(self.api.getArtist(get('artistid')), 'library')
+            content = "songs"
+        elif self.path == "related_artists":
+            listItems = []
+            items = self.api.getArtist(get('artistid'), relartists=10)
+            for item in items:
+                params = {'path':'artist_topsongs', 'artistid':item['artistId']}
+                artist_art = item['artistArtRef'] if 'artistArtRef' in item else utils.addon.getAddonInfo('icon')
+                listItems.append(self.createFolder(item['name'], params, album_art_url=artist_art))
+
         else:
             utils.log("Invalid path: " + get("path"))
             return
@@ -330,10 +341,13 @@ class GoogleMusicNavigation():
         cm = []
         if song_id.startswith('T'):
             cm.append((self.lang(30309), "XBMC.RunPlugin(%s?action=add_library&song_id=%s)" % (utils.addon_url,song_id)))
+            cm.append((self.lang(30319) or 'Artist top songs', "XBMC.RunPlugin(%s?action=artist_topsongs&song_id=%s)" % (utils.addon_url,song_id)))
+            cm.append((self.lang(30320) or 'Related artists', "XBMC.RunPlugin(%s?action=related_artists&song_id=%s)" % (utils.addon_url,song_id)))
         if song_type == 'library':
             cm.append((self.lang(30307),"XBMC.RunPlugin(%s?action=add_playlist&song_id=%s)" % (utils.addon_url,song_id)))
         elif song_type.startswith('playlist'):
             cm.append((self.lang(30308), "XBMC.RunPlugin(%s?action=del_from_playlist&song_id=%s&playlist_id=%s)" % (utils.addon_url, song_id, song_type[8:])))
+        cm.append((self.lang(30409) or "Rating", "XBMC.RunPlugin(%s?action=set_thumbs&song_id=%s)" % (utils.addon_url, song_id)))
         cm.append((self.lang(30313), "XBMC.RunPlugin(%s?action=play_yt&title=%s)" % (utils.addon_url,title)))
         cm.append((self.lang(30311), "XBMC.RunPlugin(%s?action=search_yt&title=%s)" % (utils.addon_url,title)))
         cm.append((self.lang(30310), "XBMC.RunPlugin(%s?action=start_radio&song_id=%s)" % (utils.addon_url,song_id)))
@@ -346,6 +360,7 @@ class GoogleMusicNavigation():
         cm.append((self.lang(30312), "XBMC.RunPlugin(%s?action=play_all_yt&radio_id=%s)" % (utils.addon_url, radio_id)))
         cm.append((self.lang(30306), "XBMC.RunPlugin(%s?action=add_favourite&path=playlist&radio_id=%s&title=%s)" % (utils.addon_url, radio_id, name)))
         cm.append((self.lang(30315) or 'Add to queue', "XBMC.RunPlugin(%s?action=add_to_queue&radio_id=%s)" % (utils.addon_url, radio_id)))
+        cm.append((self.lang(30318) or 'Delete station', "XBMC.RunPlugin(%s?action=delete_station&radio_id=%s&title=%s)" % (utils.addon_url, radio_id, name)))
         return cm
 
     def getPlayAllContextMenuItems(self, name, playlist):
@@ -356,6 +371,7 @@ class GoogleMusicNavigation():
         cm.append((self.lang(30306), "XBMC.RunPlugin(%s?action=add_favourite&path=playlist&playlist_id=%s&title=%s)" % (utils.addon_url, playlist, name)))
         cm.append((self.lang(30314), "XBMC.RunPlugin(%s?action=export_playlist&playlist_id=%s&title=%s)" % (utils.addon_url, playlist, name)))
         cm.append((self.lang(30315) or 'Add to queue', "XBMC.RunPlugin(%s?action=add_to_queue&playlist_id=%s)" % (utils.addon_url, playlist)))
+        cm.append((self.lang(30317) or 'Delete playlist', "XBMC.RunPlugin(%s?action=delete_playlist&playlist_id=%s&title=%s)" % (utils.addon_url, playlist, name)))
         return cm
 
     def getFilterContextMenuItems(self, filter_type, filter_criteria):
@@ -372,6 +388,7 @@ class GoogleMusicNavigation():
         cm = []
         cm.append((self.lang(30304), "XBMC.RunPlugin(%s?action=update_playlists&playlist_type=%s)" % (utils.addon_url, playlist_type)))
         cm.append((self.lang(30306), "XBMC.RunPlugin(%s?action=add_favourite&path=playlists&playlist_type=%s&title=%s)" % (utils.addon_url, playlist_type, name)))
+        cm.append((self.lang(30316) or 'Create playlist', "XBMC.RunPlugin(%s?action=create_playlist)" % utils.addon_url))
         return cm
 
     def getSearch(self, query):
