@@ -30,16 +30,14 @@ def paramsToDict(parameters):
 
 def createItem(title, thumb):
     li = ListItem(title)
-    try:
-        li.setThumbnailImage(thumb)
-    except: pass
+    li.setArt({'thumb':thumb})
     li.setProperty('IsPlayable', 'true')
     li.setProperty('Music', 'true')
     li.setProperty('mimetype', 'audio/mpeg')
     return li
 
-def setResolvedUrl(listItem):
-    xbmcplugin.setResolvedUrl(handle=handle, succeeded=True, listitem=listItem)
+def setResolvedUrl(list_item):
+    xbmcplugin.setResolvedUrl(handle=handle, succeeded=True, listitem=list_item)
 
 def setDirectory(list_items, content, sort_methods, view_mode_id):
     xbmcplugin.addDirectoryItems(handle, list_items)

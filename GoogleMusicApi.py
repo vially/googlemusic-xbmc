@@ -28,7 +28,6 @@ class GoogleMusicApi():
 
     def clearCache(self):
         storage.clearCache()
-        self.clearCookie()
 
     def clearCookie(self):
         self.getLogin().clearCookie()
@@ -37,9 +36,8 @@ class GoogleMusicApi():
         if playlist_id in ('thumbsup','lastadded','mostplayed','freepurchased','feellucky'):
             songs = storage.getAutoPlaylistSongs(playlist_id)
             if playlist_id == 'thumbsup':
-                """ Try to fetch all access thumbs up songs """
-                for track in self.getApi().get_promoted_songs():
-                    songs.append(self._convertAATrack(track))
+                """ Try to fetch store thumbs up songs """
+                songs.extend(self._loadStoreTracks(self.getApi().get_promoted_songs()))
         else:
             if forceRenew:
                 self.updatePlaylistSongs()
@@ -119,37 +117,31 @@ class GoogleMusicApi():
         albums = result['albums']
         artists = result['artists']
         try:
-            aaresult = self.getApi().search_all_access(query)
-            #utils.log("API getsearch aa: "+repr(aaresult))
-            for song in aaresult['song_hits']:
-                track = song['track']
-                #utils.log("RESULT SONGS: "+repr(track['artist'])+" - "+repr(track['title'])+" "+track['nid'])
-                tracks.append(self._convertAATrack(track))
-            for album in aaresult['album_hits']:
-                #utils.log("RESULT ALBUMS: "+repr(album['album']['name'])+" - "+repr(album['album']['artist'])+" "+album['album']['albumId'])
-                albums.append(album['album'])
-            for artist in aaresult['artist_hits']:
+            store_result = self.getApi().search_all_access(query)
+            #utils.log("API getsearch aa: "+repr(store_result))
+            tracks.extend(self._loadStoreTracks(store_result['song_hits']))
+            albums.extend(self._loadStoreAlbums(store_result['album_hits']))
+            for artist in store_result['artist_hits']:
                 artists.append(artist['artist'])
             utils.log("API search results: tracks "+repr(len(tracks))+" albums "+repr(len(albums))+" artists "+repr(len(artists)))
         except Exception as e:
             utils.log("*** NO ALL ACCESS RESULT IN SEARCH *** "+repr(e))
-            #tracksAA = storage.getAutoPlaylistSongs('thumbsup')
         return result
 
     def getAlbum(self, albumid):
-        return self._loadAATracks(self.getApi().get_album_info(albumid, include_tracks=True)['tracks'])
+        return self._loadStoreTracks(self.getApi().get_album_info(albumid, include_tracks=True)['tracks'])
 
     def getArtist(self, artistid, relartists=0):
         if relartists == 0:
-        return self._loadAATracks(self.getApi().get_artist_info(artistid, include_albums=False, max_top_tracks=50, max_rel_artist=0)['topTracks'])
+            return self._loadStoreTracks(self.getApi().get_artist_info(artistid, include_albums=False, max_top_tracks=50, max_rel_artist=0)['topTracks'])
         else:
             return self.getApi().get_artist_info(artistid, include_albums=False, max_top_tracks=0, max_rel_artist=relartists)['related_artists']
 
     def getTrack(self, trackid):
-        return self._convertAATrack(self.getApi().get_track_info(trackid))
+        return self._convertStoreTrack(self.getApi().get_track_info(trackid))
 
     def getSharedPlaylist(self, sharetoken):
-        return self._loadAATracks(self.getApi().get_shared_playlist_contents(sharetoken))
+        return self._loadStoreTracks(self.getApi().get_shared_playlist_contents(sharetoken))
 
     def getStations(self):
         stations = {}
@@ -161,7 +153,7 @@ class GoogleMusicApi():
         return stations
 
     def getStationTracks(self, station_id):
-        return self._loadAATracks(self.getApi().get_station_tracks(station_id, num_tracks=200))
+        return self._loadStoreTracks(self.getApi().get_station_tracks(station_id, num_tracks=200))
 
     def startRadio(self, name, song_id):
         return self.getApi().create_station(name, track_id=song_id)
@@ -180,25 +172,26 @@ class GoogleMusicApi():
     def getTopcharts(self, content_type='tracks'):
         content = self.getApi().get_top_chart()
         if content_type == 'tracks':
-            return self._loadAATracks(content['tracks'])
+            return self._loadStoreTracks(content['tracks'])
         if content_type == 'albums':
-            albums = []
-            for item in content['albums']:
-                albums.append([item['name'],item['artist'],item.get('albumArtRef',''),item['albumId']])
-            return albums
+            return self._loadStoreAlbums(content['albums'])
 
     def getNewreleases(self):
+        return self._loadStoreAlbums(self.getApi().get_new_releases())
+
+    def _loadStoreAlbums(self, store_albums):
         albums = []
-        content = self.getApi().get_new_releases()
-        for item in content:
-            #utils.log(repr(item))
-            album = item['album']
-            albums.append([album['name'],album['artist'],album.get('albumArtRef',''),album['albumId']])
+        for item in store_albums:
+            utils.log(repr(item))
+            if 'album' in item:
+                item = item['album']
+            albums.append(item)
         return albums
 
-    def _loadAATracks(self, tracks):
+    def _loadStoreTracks(self, tracks):
         result = []
         artistInfo = {}
+        miss = 0
         try:
             for track in tracks:
                 if 'track' in track:
@@ -206,16 +199,18 @@ class GoogleMusicApi():
                 if not 'artistArtRef' in track:
                     artistId = track['artistId'][0]
                     if not artistId in artistInfo:
+                        miss = miss + 1
                         artistInfo[artistId] = self.getApi().get_artist_info(artistId, include_albums=False, max_top_tracks=0, max_rel_artist=0)
                     if 'artistArtRefs' in artistInfo[artistId]:
                         track['artistArtRef'] = artistInfo[artistId]['artistArtRefs']
-                result.append(self._convertAATrack(track))
+                result.append(self._convertStoreTrack(track))
+            utils.log("Loaded %d tracks (%d art miss)" % (len(tracks), miss) )
         except Exception as e:
             utils.log("*** NO ALL ACCESS TRACKS *** "+repr(e))
         return result
 
 
-    def _convertAATrack(self, aaTrack):
+    def _convertStoreTrack(self, aaTrack):
         return { 'song_id':       aaTrack.get('id') or aaTrack['storeId'],
                  'album':         aaTrack.get('album'),
                  'title':         aaTrack['title'],
@@ -225,7 +220,7 @@ class GoogleMusicApi():
                  'tracknumber':   aaTrack['trackNumber'],
                  'playcount':     aaTrack.get('playCount', 0),
                  'artist':        aaTrack['artist'],
-                 'genre':         aaTrack['genre'],
+                 'genre':         aaTrack.get('genre'),
                  'discnumber':    aaTrack['discNumber'],
                  'duration':      int(aaTrack['durationMillis'])/1000,
                  'albumart':      aaTrack['albumArtRef'][0]['url'] if aaTrack.get('albumArtRef') else utils.addon.getAddonInfo('icon'),

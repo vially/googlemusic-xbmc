@@ -16,7 +16,7 @@ class GoogleMusicNavigation():
             {'title':self.lang(30220), 'params':{'path':"topcharts"}},
             {'title':self.lang(30221), 'params':{'path':"newreleases"}},
             {'title':self.lang(30209), 'params':{'path':"library"}},
-            {'title':self.lang(30222), 'params':{'path':"browsestations"}},
+            {'title':self.lang(30222), 'params':{'path':"browse_stations"}},
             {'title':self.lang(30204), 'params':{'path':"playlists", 'playlist_type':"auto"}},
             {'title':self.lang(30202), 'params':{'path':"playlists", 'playlist_type':"user"}},
             {'title':self.lang(30208), 'params':{'path':"search"}}
@@ -40,112 +40,138 @@ class GoogleMusicNavigation():
         )
 
     def listMenu(self, params={}):
-        get = params.get
-        self.path = get("path", "root")
-        utils.log("PATH: "+self.path)
+        get   = params.get
+        path  = get("path", "root")
+        utils.log("PATH: "+path)
 
         listItems = []
         view_mode_id = ''
         content = ''
         sortMethods = [xbmcplugin.SORT_METHOD_UNSORTED]
 
-        if self.path == "root":
+        if path == "root":
             if eval(utils.addon.getSetting('all-access')):
                 listItems = self.getMenuItems(self.main_menu_aa)
             else:
                 utils.log("NO ALL ACCESS/UNLIMITED ACCOUNT")
                 listItems = self.getMenuItems(self.main_menu_noaa)
-        elif self.path == "ifl":
+
+        elif path == "ifl":
             listItems = self.addSongsFromLibrary(self.api.getStationTracks("IFL"), 'library')
             content = "songs"
-        elif self.path == "library":
+
+        elif path == "library":
             listItems = self.getMenuItems(self.lib_menu)
-        elif self.path == "playlist":
+
+        elif path == "playlist":
             listItems = self.listPlaylistSongs(get("playlist_id"))
             if get("playlist_id")=='all_songs':
                 sortMethods = [xbmcplugin.SORT_METHOD_LABEL_IGNORE_THE]
             content = "songs"
-        elif self.path == "station":
+
+        elif path == "station":
             listItems = self.addSongsFromLibrary(self.api.getStationTracks(get('id')), 'library')
             content = "songs"
-        elif self.path == "playlists":
+
+        elif path == "playlists":
             listItems = self.getPlaylists(get('playlist_type'))
             view_mode_id = utils.addon.getSetting('playlists_viewid')
-        elif self.path == "filter":
+
+        elif path == "filter" and 'album' == get('criteria'):
+            listItems = self.listAlbums(get('criteria'))
+            sortMethods = [xbmcplugin.SORT_METHOD_ALBUM_IGNORE_THE, xbmcplugin.SORT_METHOD_VIDEO_YEAR,
+                           xbmcplugin.SORT_METHOD_ARTIST, xbmcplugin.SORT_METHOD_ALBUM, xbmcplugin.SORT_METHOD_DATE]
+            content = "albums"
+
+        elif path in ["artist", "genre"] and get('name'):
+            album_name = unquote_plus(get('name'))
+            listItems = self.listAlbums(path, album_name)
+            paramsAllSongs = {'path':"allcriteriasongs",'criteria':path,'name':album_name}
+            listItems.insert(0,self.createFolder('* '+self.lang(30201), paramsAllSongs))
+            sortMethods = [xbmcplugin.SORT_METHOD_ALBUM_IGNORE_THE, xbmcplugin.SORT_METHOD_VIDEO_YEAR,
+                           xbmcplugin.SORT_METHOD_ARTIST, xbmcplugin.SORT_METHOD_ALBUM, xbmcplugin.SORT_METHOD_DATE]
+            content = "albums"
+
+        elif path == "filter":
             listItems = self.getCriteria(get('criteria'))
             sortMethods = [xbmcplugin.SORT_METHOD_LABEL_IGNORE_THE]
-            if ('album' == get('criteria')):
-                sortMethods = [xbmcplugin.SORT_METHOD_ALBUM_IGNORE_THE, xbmcplugin.SORT_METHOD_VIDEO_YEAR,
-                               xbmcplugin.SORT_METHOD_ARTIST, xbmcplugin.SORT_METHOD_ALBUM,
-                               xbmcplugin.SORT_METHOD_DATE]
-        elif self.path in ["artist", "genre"] and get('albums'):
-            albums = unquote_plus(get('albums'))
-            listItems = self.getCriteria(self.path, albums)
-            listItems.insert(0,self.createFolder('* '+self.lang(30201),{'path':"allsongs",'criteria':self.path,'albums':albums}))
-            sortMethods = [xbmcplugin.SORT_METHOD_ALBUM_IGNORE_THE, xbmcplugin.SORT_METHOD_VIDEO_YEAR,
-                           xbmcplugin.SORT_METHOD_ARTIST, xbmcplugin.SORT_METHOD_ALBUM,
-                           xbmcplugin.SORT_METHOD_DATE]
-            content = "albums"
-        elif self.path == "allsongs":
-            listItems = self.listFilterSongs(get('criteria'), get('albums'))
+
+        elif path == "allcriteriasongs":
+            listItems = self.listAllCriteriaSongs(get('criteria'), get('name'))
             sortMethods = [xbmcplugin.SORT_METHOD_LABEL_IGNORE_THE]
             content = "songs"
-        elif self.path in ["genre", "artist", "album", "composer"]:
-            listItems = self.listFilterSongs(self.path, get('album'), get('artist'))
+
+        elif path in ["genre", "artist", "album", "composer"]:
+            songs = self.api.getFilterSongs(path, unquote_plus(get('album')), unquote_plus(get('artist','')))
+            listItems = self.addSongsFromLibrary(songs, 'library')
             sortMethods = [xbmcplugin.SORT_METHOD_TRACKNUM,  xbmcplugin.SORT_METHOD_TITLE_IGNORE_THE,
                            xbmcplugin.SORT_METHOD_PLAYCOUNT, xbmcplugin.SORT_METHOD_SONG_RATING]
             content = "songs"
-        elif self.path == "search":
+
+        elif path == "search":
             keyboard = xbmc.Keyboard('', self.lang(30208))
             keyboard.doModal()
             if keyboard.isConfirmed() and keyboard.getText():
                 listItems = self.getSearch(keyboard.getText())
             else: return
             content = "songs"
-        elif self.path == "search_result":
+
+        elif path == "search_result":
             utils.log("SEARCH_RESULT: "+get('query'))
             listItems = self.getSearch(params)
             content = "songs"
-        elif self.path == "listennow":
+
+        elif path == "listennow":
             listItems = self.getListennow(self.api.getApi().get_listen_now())
             content = "albums"
-        elif self.path == "topcharts":
+
+        elif path == "topcharts":
             listItems.append(self.createFolder(self.lang(30206),{'path':'topcharts_albums'}))
             listItems.append(self.createFolder(self.lang(30213),{'path':'topcharts_songs'}))
-        elif self.path == "topcharts_songs":
+
+        elif path == "topcharts_songs":
             listItems = self.addSongsFromLibrary(self.api.getTopcharts(), 'library')
             content = "songs"
-        elif self.path == "topcharts_albums":
+
+        elif path == "topcharts_albums":
             listItems = self.createAlbumFolder(self.api.getTopcharts(content_type='albums'))
             content = "albums"
-        elif self.path == "newreleases":
+
+        elif path == "newreleases":
             listItems = self.createAlbumFolder(self.api.getNewreleases())
             content = "albums"
-        elif self.path == "browsestations":
+
+        elif path == "browse_stations":
             listItems = self.browseStations(get('category'))
-        elif self.path == "get_stations":
+
+        elif path == "get_stations":
             listItems = self.getStations(get('subcategory'))
             view_mode_id = utils.addon.getSetting('stations_viewid')
-        elif self.path == "create_station":
+
+        elif path == "create_station":
             station = self.api.getApi().create_station(unquote_plus(get('name')), artist_id=get('artistid'), genre_id=get('genreid'), curated_station_id=get('curatedid'))
             listItems = self.addSongsFromLibrary(self.api.getStationTracks(station), 'library')
             content = "songs"
-        elif self.path == "genres":
+
+        elif path == "genres":
             listItems = self.getGenres(self.api.getApi().get_top_chart_genres())
-        elif self.path == "aa_album":
+
+        elif path == "store_album":
             utils.log("ALBUM: "+get('albumid'))
             listItems = self.addSongsFromLibrary(self.api.getAlbum(get('albumid')), 'library')
             content = "songs"
-        elif self.path == "artist_topsongs":
+
+        elif path == "artist_topsongs":
             listItems = self.addSongsFromLibrary(self.api.getArtist(get('artistid')), 'library')
             content = "songs"
-        elif self.path == "related_artists":
+
+        elif path == "related_artists":
             listItems = []
             items = self.api.getArtist(get('artistid'), relartists=10)
             for item in items:
                 params = {'path':'artist_topsongs', 'artistid':item['artistId']}
                 artist_art = item['artistArtRef'] if 'artistArtRef' in item else utils.addon.getAddonInfo('icon')
-                listItems.append(self.createFolder(item['name'], params, album_art_url=artist_art))
+                listItems.append(self.createFolder(item['name'], params, arturl=artist_art))
 
         else:
             utils.log("Invalid path: " + get("path"))
@@ -184,16 +210,25 @@ class GoogleMusicNavigation():
         listItems = []
         append = listItems.append
         createItem = self.createItem
+
+        for song in library:
+            append([utils.getUrl(song), createItem(song, song_type)])
+
+        return listItems
+
+    def listAllCriteriaSongs(self, filter_type, filter_criteria):
+        songs = self.api.getFilterSongs(filter_type, unquote_plus(filter_criteria), '')
+        listItems = []
+        append = listItems.append
+        createItem = self.createItem
+
         # add album name when showing all artist songs
-        if self.path == 'allsongs':
-            for song in library:
-                songItem = createItem(song, song_type)
-                songItem.setLabel("".join(['[',song[7],'] ',song[8]]))
-                songItem.setLabel2(song[7])
-                append([utils.getUrl(song), songItem])
-        else:
-            for song in library:
-                append([utils.getUrl(song), createItem(song, song_type)])
+        for song in songs:
+            songItem = createItem(song, 'library')
+            songItem.setLabel("".join(['[',song['album'],'] ',song['title']]))
+            songItem.setLabel2(song['album'])
+            append([utils.getUrl(song), songItem])
+
         return listItems
 
     def getPlaylists(self, playlist_type):
@@ -201,6 +236,7 @@ class GoogleMusicNavigation():
         listItems = []
         append = listItems.append
         addFolder = self.createFolder
+
         if playlist_type == 'radio':
             icon = utils.addon.getAddonInfo('icon')
             for rs in self.api.getStations():
@@ -224,34 +260,39 @@ class GoogleMusicNavigation():
 
         return listItems
 
-    def listFilterSongs(self, filter_type, filter_criteria, albums=''):
-        #utils.log("FILTER: "+repr(filter_type)+" "+repr(filter_criteria)+" "+repr(albums))
-        if albums: albums = unquote_plus(albums)
-        if filter_criteria: filter_criteria = unquote_plus(filter_criteria)
-        songs = self.api.getFilterSongs(filter_type, filter_criteria, albums )
-        return self.addSongsFromLibrary(songs, 'library')
-
-    def getCriteria(self, criteria, albums=''):
-        utils.log("CRITERIA: "+repr(criteria)+" "+repr(albums))
+    def listAlbums(self, criteria, name=''):
+        utils.log("LISTALBUMS: "+repr(criteria)+" "+repr(name))
         listItems = []
         append = listItems.append
         addFolder = self.createFolder
         getCm = self.getFilterContextMenuItems
-        items = self.api.getCriteria(criteria, albums)
-        if criteria == 'album' or (albums and criteria in ('genre','artist','composer')):
-            for item in items:
-                #utils.log(repr(item))
-                album  = item['album']
-                artist = item['album_artist']
-                params = {'path':criteria, 'album':album, 'artist':artist}
-                folder = addFolder(album, params, getCm(criteria, album), item['arturl'], artist)
-                folder[1].setInfo(type='music', infoLabels={
+        items = self.api.getCriteria(criteria, name)
+
+        #utils.log(repr(items))
+        for item in items:
+            #utils.log(repr(item))
+            album  = item['album']
+            artist = item['album_artist']
+            params = {'path':criteria,'album':album,'artist':artist}
+            folder = addFolder(album, params, getCm(criteria, album), item['arturl'], artist)
+            folder[1].setInfo(type='music', infoLabels={
                    'year':item['year'], 'artist':artist, 'album':album,
                    'date':time.strftime('%d.%m.%Y', time.gmtime(item['date']/1000000))})
-                append(folder)
-        elif criteria in ('artist','genre'):
+            append(folder)
+
+        return listItems
+
+    def getCriteria(self, criteria):
+        utils.log("CRITERIA: "+repr(criteria))
+        listItems = []
+        append = listItems.append
+        addFolder = self.createFolder
+        getCm = self.getFilterContextMenuItems
+        items = self.api.getCriteria(criteria)
+
+        if criteria in ('artist','genre'):
             for item in items:
-                append( addFolder(item['criteria'], {'path':criteria,'albums':item['criteria']}, getCm(criteria, item['criteria']), item['arturl']))
+                append( addFolder(item['criteria'], {'path':criteria,'name':item['criteria']}, getCm(criteria, item['criteria']), item['arturl']))
 
         else:
             for item in items:
@@ -261,24 +302,29 @@ class GoogleMusicNavigation():
 
     def getListennow(self, items):
         listItems = []
+
         for item in items:
             suggestion = item.get('suggestion_text')
             image = item['images'][0]['url'] if 'images' in item else None
             if item['type'] == '1':
                 album = item['album']
-                albumid = album['id']['metajamCompactKey']
-                title = album['title']+" ("+suggestion+")"
-                listItems.extend(self.createAlbumFolder([[title,album['artist_name'],image,albumid]]))
+                listItems.extend(self.createAlbumFolder([{
+                    'name'        :album['title']+' ('+suggestion+')',
+                    'artist'      :album['artist_name'],
+                    'albumArtRef' :image,
+                    'albumId'     :album['id']['metajamCompactKey']}]))
+
             elif item['type'] == '3':
-                radio = item['radio_station']
+                radio  = item['radio_station']
                 params = {'path':'create_station', 'name':utils.tryEncode('Radio %s (%s)'%(radio['title'], suggestion))}
-                seed = radio['id']['seeds'][0]
+                seed   = radio['id']['seeds'][0]
                 if seed['seedType'] == '3':
-                   params['artistid'] = seed['artistId']
+                    params['artistid'] = seed['artistId']
                 elif seed['seedType'] == '5':
-                   params['genreid'] = seed['genreId']
+                    params['genreid'] = seed['genreId']
                 else: utils.log("ERROR seedtype unknown "+repr(seed['seedType']))
-                listItems.append(self.createFolder(params['name'], params, album_art_url=image))
+                listItems.append(self.createFolder(params['name'], params, arturl=image))
+
             else: utils.log("ERROR item type unknown "+repr(item['type']))
 
         return listItems
@@ -286,12 +332,16 @@ class GoogleMusicNavigation():
     def browseStations(self, index=None):
         listItems = []
         items = self.api.getApi().get_station_categories()
+        #utils.log("INDEX:"+repr(index)+"\n"+repr(items))
         if index:
+            # list subcategories from category index
             items = items[int(index)]['subcategories']
             params = {'path':'get_stations'}
         else:
-            params = {'path':'browsestations'}
+            # list stations categories
+            params = {'path':'browse_stations'}
         for item in items:
+            # populate with categories or subcategories
             params['category'] = items.index(item)
             params['subcategory'] = item['id']
             listItems.append(self.createFolder(item['display_name'], params))
@@ -302,22 +352,27 @@ class GoogleMusicNavigation():
         items = self.api.getApi().get_stations(stationId)
         for item in items:
             params = {'path':'create_station','curatedid':item['seed']['curatedStationId'], 'name':utils.tryEncode(item['name'])}
-            listItems.append(self.createFolder(item['name'],params,album_art_url=item['compositeArtRefs'][0]['url']))
+            listItems.append(self.createFolder(item['name'], params, arturl=item['compositeArtRefs'][0]['url']))
+        return listItems
+
+    def getGenres(self, items):
+        listItems = []
+        print repr(items)
         return listItems
 
     def createAlbumFolder(self, items):
         listItems = []
         for item in items:
-            params = {'path':'aa_album', 'albumid':item[3]}
-            cm = [(self.lang(30301), "XBMC.RunPlugin(%s?action=play_all&album_id=%s)" % (utils.addon_url, item[3])),
-                  (self.lang(30309), "XBMC.RunPlugin(%s?action=add_album_library&album_id=%s)" % (utils.addon_url, item[3])),
-                  (self.lang(30315) or 'Add to queue', "XBMC.RunPlugin(%s?action=add_to_queue&album_id=%s)" % (utils.addon_url, item[3]))]
-            listItems.append(self.createFolder("[%s] %s"%(item[1], item[0]), params, cm, item[2]))
+            params = {'path':'store_album', 'albumid':item['albumId']}
+            cm = [(self.lang(30301), "XBMC.RunPlugin(%s?action=play_all&album_id=%s)" % (utils.addon_url, item['albumId'])),
+                  (self.lang(30309), "XBMC.RunPlugin(%s?action=add_album_library&album_id=%s)" % (utils.addon_url, item['albumId'])),
+                  (self.lang(30315) or 'Add to queue', "XBMC.RunPlugin(%s?action=add_to_queue&album_id=%s)" % (utils.addon_url, item['albumId']))]
+            listItems.append(self.createFolder("[%s] %s"%(item['artist'], item['name']), params, cm, item['albumArtRef']))
         #print repr(items)
         return listItems
 
-    def createFolder(self, name, params, contextMenu=[], album_art_url='', name2='*'):
-        li = ListItem(label=name, label2=name2, thumbnailImage=album_art_url)
+    def createFolder(self, name, params, contextMenu=[], arturl='', name2='*'):
+        li = ListItem(label=name, label2=name2, thumbnailImage=arturl)
         li.addContextMenuItems(contextMenu, replaceItems=True)
         li.setProperty('fanart_image', self.fanart)
         return "?".join([utils.addon_url, urlencode(params)]), li, "true"
@@ -348,8 +403,8 @@ class GoogleMusicNavigation():
         elif song_type.startswith('playlist'):
             cm.append((self.lang(30308), "XBMC.RunPlugin(%s?action=del_from_playlist&song_id=%s&playlist_id=%s)" % (utils.addon_url, song_id, song_type[8:])))
         cm.append((self.lang(30409) or "Rating", "XBMC.RunPlugin(%s?action=set_thumbs&song_id=%s)" % (utils.addon_url, song_id)))
-        cm.append((self.lang(30313), "XBMC.RunPlugin(%s?action=play_yt&title=%s)" % (utils.addon_url,title)))
-        cm.append((self.lang(30311), "XBMC.RunPlugin(%s?action=search_yt&title=%s)" % (utils.addon_url,title)))
+        cm.append((self.lang(30313), "XBMC.RunPlugin(%s?action=play_yt&title=%s)" % (utils.addon_url, title)))
+        cm.append((self.lang(30311), "XBMC.RunPlugin(%s?action=search_yt&title=%s)" % (utils.addon_url, title)))
         cm.append((self.lang(30310), "XBMC.RunPlugin(%s?action=start_radio&song_id=%s)" % (utils.addon_url,song_id)))
         return cm
 
@@ -398,7 +453,7 @@ class GoogleMusicNavigation():
             listItems.append(self.createFolder('[COLOR orange]*** '+self.lang(30206)+' ***[/COLOR]',{'path':'none'}))
             for album in result['albums']:
                 if 'albumId' in album:
-                    listItems.extend(self.createAlbumFolder([[album['name'], album['artist'], album['albumArtRef'], album['albumId']]]))
+                    listItems.extend(self.createAlbumFolder([album]))
                 else:
                     params = {'path':"search_result",'query':utils.tryEncode(album['name'])}
                     listItems.append(self.createFolder("[%s] %s"%(album['artist'], album['name']), params, [], album['albumArtRef']))
@@ -418,14 +473,17 @@ class GoogleMusicNavigation():
             if result['tracks']:
                 listItems.append(self.createFolder('[COLOR orange]*** '+self.lang(30213)+' ***[/COLOR]',{'path':'none'}))
                 listItems.extend(self.addSongsFromLibrary(result['tracks'], 'library'))
+
         elif 'artistid' in query:
             result = self.api.getSearch(unquote_plus(query['query']))
             if result['albums']: listAlbumsResults()
             listItems.append(self.createFolder('[COLOR orange]*** '+self.lang(30213)+' ***[/COLOR]',{'path':'none'}))
             listItems.extend(self.addSongsFromLibrary(self.api.getArtist(query['artistid']), 'library'))
+
         else:
             #listItems.extend(self.addSongsFromLibrary(self.api.getSearch(unquote_plus(query['query']))['tracks'], 'library'))
             listItems.extend(self.getSearch(unquote_plus(query['query'])))
+
         return listItems
 
 

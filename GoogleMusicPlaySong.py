@@ -54,7 +54,7 @@ class GoogleMusicPlaySong():
 
         # if url in library check if local library or if not expired before returning
         if params['url'] and not song_id[0:4] == 'kodi':
-                import time
+            import time
             utils.log("TIME:"+str(time.time()))
             if int(utils.paramsToDict(params['url']).get('expire',0)) < time.time():
                 params['url'] = ''
@@ -74,9 +74,9 @@ class GoogleMusicPlaySong():
         # get song position in playlist
         playerProperties = loadJson(xbmc.executeJSONRPC(jsonGetPlaylistPos))
         while not 'result' in playerProperties or playerProperties['result']['percentage'] > 5:
-          #wait for song playing and playlist ready
-          xbmc.sleep(1000)
-          playerProperties = loadJson(xbmc.executeJSONRPC(jsonGetPlaylistPos))
+            #wait for song playing and playlist ready
+            xbmc.sleep(1000)
+            playerProperties = loadJson(xbmc.executeJSONRPC(jsonGetPlaylistPos))
 
         position = playerProperties['result']['position']
         utils.log("position:"+str(position)+" percentage:"+str(playerProperties['result']['percentage']))

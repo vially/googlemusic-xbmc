@@ -70,18 +70,18 @@ class GoogleMusicStorage():
                     "from library_songs where album <> '-Unknown-' group by lower(album_artist), lower(album)"
         elif criteria == 'artist' and not name:
             query = "select album_artist as criteria, max(artistart) as arturl from library_songs group by lower(album_artist)"
-            elif criteria == 'artist' and name:
+        elif criteria == 'artist' and name:
             query = "select album_artist, album, year, max(albumart) as arturl, max(creation_date) as date "\
                     "from library_songs where album_artist = :name group by lower(album_artist), lower(album)"
-            elif criteria == 'genre' and not name:
+        elif criteria == 'genre' and not name:
             query = "select genre as criteria, max(artistart) as arturl from library_songs group by lower(genre)"
-            elif criteria == 'genre' and name:
+        elif criteria == 'genre' and name:
             query = "select album_artist, album, year, max(albumart) as arturl , max(creation_date) as date "\
                     "from library_songs where album <> '-Unknown-' and genre=:name group by lower(album_artist), lower(album)"
-            elif name:
+        elif name:
             query = "select album_artist, album, year, max(albumart) as arturl, max(creation_date) as date "\
                     "from library_songs where %s=:name group by lower(album_artist), lower(album)" % criteria
-            else:
+        else:
             query = "select %s as criteria from library_songs group by lower(%s)" % (criteria, criteria)
 
         return self.curs.execute(query,{'name':name.decode('utf8')}).fetchall()
@@ -224,16 +224,16 @@ class GoogleMusicStorage():
 
         self.curs.executescript('''
             CREATE TABLE IF NOT EXISTS songs (
-                song_id VARCHAR NOT NULL PRIMARY KEY,           --# 0
-                comment VARCHAR,                                --# 1
+                song_id VARCHAR NOT NULL PRIMARY KEY,      --# 0
+                comment VARCHAR,                           --# 1
                 rating INTEGER NOT NULL DEFAULT 0,         --# 2
                 last_played INTEGER NOT NULL DEFAULT 0,    --# 3
                 discnumber INTEGER NOT NULL DEFAULT 0,     --# 4
-                composer VARCHAR,                               --# 5
+                composer VARCHAR,                          --# 5
                 year INTEGER NOT NULL DEFAULT 0,           --# 6
-                album VARCHAR,                                  --# 7
-                title VARCHAR,                                  --# 8
-                album_artist VARCHAR,                           --# 9
+                album VARCHAR,                             --# 7
+                title VARCHAR,                             --# 8
+                album_artist VARCHAR,                      --# 9
                 type INTEGER NOT NULL DEFAULT 0,           --# 10
                 tracknumber INTEGER NOT NULL DEFAULT 0,    --# 11
                 total_tracks INTEGER NOT NULL DEFAULT 0,   --# 12
@@ -283,7 +283,6 @@ class GoogleMusicStorage():
         return displayName
 
     def loadKodiLib(self):
-
         # find last kodi music file db
         import glob
         utils.log("Start local kodi library import")
@@ -309,11 +308,10 @@ class GoogleMusicStorage():
                        song.strArtists as artist, 0 as total_discs, iDuration as duration,
                        a1.url as albumart, strArtist||' - '||strTitle as display_name,
                        strPath||strFileName as stream_url, a2.url as artistart
-                from song, artist, album, path
-                left join art a1 on album.idAlbum = a1.media_id and a1.media_type = 'album'
-                left join art a2 on artist.idArtist = a2.media_id and a2.media_type = 'artist'
-                where song.idalbum = album.idalbum and song.strArtists = artist.strArtist and song.idPath = path.idPath'''
-
+                   FROM song, artist, album, path
+                       left join art a1 on album.idAlbum = a1.media_id and a1.media_type = 'album'
+                       left join art a2 on artist.idArtist = a2.media_id and a2.media_type = 'artist'
+                   WHERE song.idalbum = album.idalbum and song.strArtists = artist.strArtist and song.idPath = path.idPath'''
         kodiSongs = conn.cursor().execute(query).fetchall()
 
         # check for repeated songs (same title, artist and album)
@@ -335,7 +333,6 @@ class GoogleMusicStorage():
                               ":stream_url, :artistart)", uniqSongs)
 
         self.conn.commit()
-
 
 
 storage = GoogleMusicStorage()

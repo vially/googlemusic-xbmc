@@ -12,20 +12,20 @@ class GoogleMusicActions():
             self.playAll(params)
         elif (action == "add_to_queue"):
             self.addToQueue(params)
+            self.notify(self.lang(30110) or "Done")
         elif (action == "play_all_yt"):
             titles = [song[23] for song in self._getSongs(params)]
             self.playYoutube(titles)
         elif (action == "update_playlists"):
             self.api.getPlaylistsByType(params["playlist_type"], True)
         elif (action == "clear_cache"):
-            try: self.api.clearCache()
-            except Exception as e:
-                utils.log(repr(e))
-                self.notify(self.lang(30106))
+            self.clearCache()
         elif (action == "clear_cookie"):
             self.api.clearCookie()
+            self.notify(self.lang(30110) or "Done")
         elif (action == "add_favourite"):
             self.addFavourite(params.pop("title"),params)
+            self.notify(self.lang(30110) or "Done")
         elif (action == "add_library"):
             self.api.addAAtrack(params["song_id"])
             self.notify(self.lang(30103))
@@ -37,11 +37,9 @@ class GoogleMusicActions():
             self.addToPlaylist(params["song_id"])
         elif (action == "del_from_playlist"):
             self.api.delFromPlaylist(params["playlist_id"], params["song_id"])
+            self.notify(self.lang(30110) or "Done")
         elif (action == "update_library"):
-            try: self.api.clearCache()
-            except Exception as e:
-                utils.log(repr(e))
-                self.notify(self.lang(30106))
+            self.clearCache()
             xbmc.executebuiltin("XBMC.RunPlugin(%s)" % utils.addon_url)
         elif (action == "reload_library"):
             self.api.loadLibrary();
@@ -54,6 +52,7 @@ class GoogleMusicActions():
                 utils.addon.openSettings()
         elif (action == "export_playlist"):
             self.exportPlaylist(params.get('title'), params.get('playlist_id'))
+            self.notify(self.lang(30110) or "Done")
         elif (action == "start_radio"):
             keyboard = xbmc.Keyboard(self.api.getSong(params["song_id"])['title'], self.lang(30402))
             keyboard.doModal()
@@ -74,14 +73,17 @@ class GoogleMusicActions():
             keyboard.doModal()
             if keyboard.isConfirmed() and keyboard.getText():
                 self.api.createPlaylist(keyboard.getText())
+                self.notify(self.lang(30110) or "Done")
         elif (action == "delete_playlist"):
             if xbmcgui.Dialog().yesno(self.lang(30405) or 'Confirmation',self.lang(30406) or 'Delete playlist?','"'+params["title"]+'"'):
                 self.api.deletePlaylist(params["playlist_id"])
                 xbmc.executebuiltin("ActivateWindow(10501,%s/?path=library)" % utils.addon_url)
+                self.notify(self.lang(30110) or "Done")
         elif (action == "delete_station"):
             if xbmcgui.Dialog().yesno(self.lang(30405) or 'Confirmation',self.lang(30407) or 'Delete station?','"'+params["title"]+'"'):
                 self.api.getApi().delete_stations(params["radio_id"])
                 xbmc.executebuiltin("ActivateWindow(10501,%s/?path=library)" % utils.addon_url)
+                self.notify(self.lang(30110) or "Done")
         elif (action == "artist_topsongs"):
             artist_id = self.api.getApi().get_track_info(params["song_id"])['artistId'][0]
             xbmc.executebuiltin("ActivateWindow(10502,%s/?path=artist_topsongs&artistid=%s)" % (utils.addon_url, artist_id))
@@ -133,7 +135,7 @@ class GoogleMusicActions():
         dp = None
         if len(titles) > 1:
             dp = xbmcgui.DialogProgress();
-            dp.create('Fetching video IDs', str(len(titles))+' '+self.lang(30213).lower(), self.lang(30404))
+            dp.create(self.lang(30408) or 'Fetching video IDs', str(len(titles))+' '+self.lang(30213).lower(), self.lang(30404))
 
         ytaddonurl = "plugin://plugin.video.youtube/play/?video_id=%s"
         for videoid, title in self._getVideoIDs(titles, dp):
@@ -141,12 +143,21 @@ class GoogleMusicActions():
 
         xbmc.executebuiltin('playlist.playoffset(video , 0)')
 
-    def addToPlaylist (self, song_id):
+    def clearCache(self):
+        try:
+            self.api.clearCache()
+            self.notify(self.lang(30110) or "Done")
+        except Exception as e:
+            utils.log(repr(e))
+            self.notify(self.lang(30106))
+
+    def addToPlaylist(self, song_id):
         playlists = self.api.getPlaylistsByType('user')
         plist = [pl_name for pl_id, pl_name in playlists]
         selected = xbmcgui.Dialog().select(self.lang(30401) , plist)
         if selected > 0:
             self.api.addToPlaylist(playlists[selected][0], song_id)
+            self.notify(self.lang(30110) or "Done")
 
     def setThumbs(self, song_id):
         options = [self.lang(30410) or 'Thumbs Up', self.lang(30412) or 'No Thumbs', self.lang(30411) or 'Thumbs Down']
@@ -154,6 +165,7 @@ class GoogleMusicActions():
         if selected >= 0:
             thumbs = {'0':'5','1':'1','2':'0'}[str(selected)]
             self.api.setThumbs(song_id, thumbs)
+            self.notify(self.lang(30110) or "Done")
 
     def addFavourite(self, name, params):
         import fileinput
@@ -194,8 +206,8 @@ class GoogleMusicActions():
             count = count + 1
             artist = self._sanitizePath(song['artist'])
             album  = self._sanitizePath(song['album'])
-            if not os.path.exists(os.path.join(path,artist)):
-                os.mkdir(os.path.join(path,artist))
+            if not os.path.exists(os.path.join(path, artist)):
+                os.mkdir(os.path.join(path, artist))
             if not os.path.exists(os.path.join(path,artist,album)):
                 os.mkdir(os.path.join(path,artist,album))
             if not os.path.isfile(os.path.join(path,artist,'artist.nfo')) and song['artistart']:
