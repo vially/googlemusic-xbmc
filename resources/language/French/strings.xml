@@ -7,7 +7,7 @@
 <string id="30061">Débogage</string>
 <string id="30062">Vider le cache</string>
 <string id="30063">Effacer les cookies</string>
-<string id="30064">database SQLite</string>
+<string id="30064">Base de données SQLite</string>
 <string id="30065">Surcharger la vue</string>
 <string id="30066">Pre-fetch URL</string>
 <string id="30052">Chemin d'exportation</string>
@@ -16,20 +16,20 @@
 <!-- auto update -->
 <string id="30067">Mise à jour automatique de la bibliothèque</string>
 <string id="30068">Jamais</string>
-<string id="30069">Hebdo</string>
+<string id="30069">Hebdomadaire</string>
 <string id="30070">Quotidienne</string>
 <string id="30071">Horaire</string>
 <!-- stream quality -->
-<string id="30072">Quality du streaming</string>
+<string id="30072">Qualité du streaming</string>
 <string id="30073">Haute</string>
 <string id="30074">Moyenne</string>
 <string id="30075">Basse</string>
-<string id="30076">Youtube Qualité de vidéo</string>
+<string id="30076">Qualité des vidéos Youtube</string>
 <string id="30077">Quelconque</string>
 <!-- menu items -->
 <string id="30201">Toutes les chansons</string>
 <string id="30202">Playlists</string>
-<string id="30203">Radio</string>
+<string id="30203">Radios</string>
 <string id="30204">Playlists automatiques</string>
 <string id="30205">Artistes</string>
 <string id="30206">Albums</string>
@@ -40,7 +40,7 @@
 <string id="30211">Mix J'ai de la chance</string>
 <string id="30212">Compositeurs</string>
 <string id="30213">Chansons</string>
-<string id="30214">Album shuffle</string>
+<string id="30214">Album aléatoire</string>
 <string id="30215">J'aime</string>
 <string id="30216">Derniers ajouts</string>
 <string id="30217">Titres gratuits et achetés</string>
