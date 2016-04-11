@@ -123,9 +123,10 @@ class GoogleMusicStorage():
             playlistId = playlist['id']
             if len(playlist['name']) > 0:
                 arturl = utils.addon.getAddonInfo('icon')
-                song = self.getSong(playlist['tracks'][0]['trackId'])
-                if song and song['albumart']:
-                    arturl = song['albumart']
+                if playlist['tracks']:
+                    song = self.getSong(playlist['tracks'][0]['trackId'])
+                    if song and song['albumart']:
+                        arturl = song['albumart']
                 self.curs.execute("INSERT INTO playlists (name, playlist_id, type, arturl) VALUES (?, ?, 'user', ?)", (playlist['name'], playlistId, arturl) )
                 for entry in playlist['tracks']:
                     self.curs.execute("INSERT INTO playlists_songs (playlist_id, song_id, entry_id ) VALUES (?, ?, ?)", (playlistId, entry['trackId'], entry['id']))
