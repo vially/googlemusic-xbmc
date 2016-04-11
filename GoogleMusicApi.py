@@ -192,11 +192,12 @@ class GoogleMusicApi():
         result = []
         artistInfo = {}
         miss = 0
-        try:
-            for track in tracks:
+
+        for track in tracks:
+            try:
                 if 'track' in track:
                     track = track['track']
-                if not 'artistArtRef' in track:
+                if not 'artistArtRef' in track and 'artistId' in track:
                     artistId = track['artistId'][0]
                     if not artistId in artistInfo:
                         miss = miss + 1
@@ -204,9 +205,10 @@ class GoogleMusicApi():
                     if 'artistArtRefs' in artistInfo[artistId]:
                         track['artistArtRef'] = artistInfo[artistId]['artistArtRefs']
                 result.append(self._convertStoreTrack(track))
-            utils.log("Loaded %d tracks (%d art miss)" % (len(tracks), miss) )
-        except Exception as e:
-            utils.log("*** NO ALL ACCESS TRACKS *** "+repr(e))
+            except Exception as e:
+                utils.log("*** ERROR LOADING STORE TRACK *** "+repr(e))
+
+        utils.log("Loaded %d tracks (%d art miss)" % (len(tracks), miss) )
         return result
 
 
