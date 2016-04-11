@@ -218,15 +218,15 @@ class GoogleMusicApi():
                  'title':         aaTrack['title'],
                  'year':          aaTrack.get('year', 0),
                  'rating':        aaTrack.get('rating', 0),
-                 'album_artist':  aaTrack['albumArtist'],
-                 'tracknumber':   aaTrack['trackNumber'],
+                 'album_artist':  aaTrack.get('albumArtist'),
+                 'tracknumber':   aaTrack.get('trackNumber'),
                  'playcount':     aaTrack.get('playCount', 0),
-                 'artist':        aaTrack['artist'],
+                 'artist':        aaTrack.get('artist'),
                  'genre':         aaTrack.get('genre'),
-                 'discnumber':    aaTrack['discNumber'],
-                 'duration':      int(aaTrack['durationMillis'])/1000,
+                 'discnumber':    aaTrack.get('discNumber'),
+                 'duration':      int(aaTrack.get('durationMillis',0))/1000,
                  'albumart':      aaTrack['albumArtRef'][0]['url'] if aaTrack.get('albumArtRef') else utils.addon.getAddonInfo('icon'),
-                 'display_name':  aaTrack['artist']+" - "+aaTrack['title'],
+                 'display_name':  aaTrack.get('artist')+" - "+aaTrack['title'],
                  'artistart':     aaTrack['artistArtRef'][0]['url'] if aaTrack.get('artistArtRef') else utils.addon.getAddonInfo('fanart')
                 }
 
