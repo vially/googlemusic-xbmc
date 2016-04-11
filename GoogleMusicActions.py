@@ -153,7 +153,7 @@ class GoogleMusicActions():
 
     def addToPlaylist(self, song_id):
         playlists = self.api.getPlaylistsByType('user')
-        plist = [pl_name for pl_id, pl_name in playlists]
+        plist = [pl_name for pl_id, pl_name, pl_arturl in playlists]
         selected = xbmcgui.Dialog().select(self.lang(30401) , plist)
         if selected > 0:
             self.api.addToPlaylist(playlists[selected][0], song_id)
