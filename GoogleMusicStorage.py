@@ -162,7 +162,7 @@ class GoogleMusicStorage():
                   'creation_date': get("creationTimestamp"),
                   'artist':        get("artist") if get("artist") else get("albumArtist") if get("albumArtist") else '-Unknown-',
                   'total_discs':   get("totalDiscCount"),
-                  'duration':      int(get("durationMillis"))/1000,
+                  'duration':      int(get("durationMillis",0))/1000,
                   'albumart':      get("albumArtRef")[0]['url'] if get("albumArtRef") else utils.addon.getAddonInfo('icon'),
                   'display_name':  self._getSongDisplayName(api_song),
                   'stream_url':    None,
