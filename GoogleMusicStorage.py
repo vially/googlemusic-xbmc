@@ -102,6 +102,14 @@ class GoogleMusicStorage():
         return self.curs.execute("SELECT title,artist,album,year,tracknumber,rating,albumart,stream_url as url "+
                                  "FROM songs WHERE song_id = ? ", (song_id,)).fetchone()
 
+    def getArtist(self, artist_id):
+        artist = self.curs.execute("SELECT artistart FROM artists WHERE artist_id = ? ", (artist_id,)).fetchone()
+        return artist['artistart'] if artist else ''
+
+    def setArtist(self, artist_id, artistart):
+        self.curs.execute("INSERT OR REPLACE INTO artists VALUES (:artist_id, :artistart)" , (artist_id, artistart))
+        self.conn.commit()
+
     def getSearch(self, query):
         query = '%'+ query.replace('%','') + '%'
         result = {}
@@ -139,6 +147,19 @@ class GoogleMusicStorage():
     def storeInAllSongs(self, api_songs):
         self.curs.execute("PRAGMA foreign_keys = OFF")
 
+        default_albumart  = utils.addon.getAddonInfo('icon')
+        default_artistart = utils.addon.getAddonInfo('fanart')
+
+        def artists():
+          for api_song in api_songs:
+              get = api_song.get
+              if not get("artistId") or not get("artistArtRef"): continue
+              yield {
+                  'artist_id': get("artistId")[0],
+                  'artistart': get("artistArtRef")[0]['url'],
+              }
+        self.curs.executemany("INSERT OR REPLACE INTO artists VALUES (:artist_id, :artistart)", artists())
+
         #for i in range(5):
         def songs():
           for api_song in api_songs:
@@ -163,10 +184,10 @@ class GoogleMusicStorage():
                   'artist':        get("artist") if get("artist") else get("albumArtist") if get("albumArtist") else '-Unknown-',
                   'total_discs':   get("totalDiscCount"),
                   'duration':      int(get("durationMillis",0))/1000,
-                  'albumart':      get("albumArtRef")[0]['url'] if get("albumArtRef") else utils.addon.getAddonInfo('icon'),
+                  'albumart':      get("albumArtRef")[0]['url'] if get("albumArtRef") else default_albumart,
                   'display_name':  self._getSongDisplayName(api_song),
                   'stream_url':    None,
-                  'artistart':     get("artistArtRef")[0]['url'] if get("artistArtRef") else utils.addon.getAddonInfo('fanart'),
+                  'artistart':     get("artistArtRef")[0]['url'] if get("artistArtRef") else default_artistart,
               }
 
         self.curs.executemany("INSERT OR REPLACE INTO songs VALUES ("+
@@ -260,6 +281,10 @@ class GoogleMusicStorage():
                 song_id VARCHAR,
                 entry_id VARCHAR,
                 FOREIGN KEY(playlist_id) REFERENCES playlists(playlist_id) ON DELETE CASCADE
+            );
+            CREATE TABLE IF NOT EXISTS artists (
+                artist_id VARCHAR NOT NULL PRIMARY KEY,
+                artistart VARCHAR
             );
             CREATE VIEW IF NOT EXISTS library_songs AS SELECT * FROM SONGS WHERE type <> 7;
             CREATE INDEX IF NOT EXISTS playlistindex ON playlists_songs(playlist_id);

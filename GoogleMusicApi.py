@@ -3,9 +3,11 @@ from GoogleMusicStorage import storage
 
 class GoogleMusicApi():
     def __init__(self):
-        self.api      = None
-        self.device   = None
-        self.login    = None
+        self.api        = None
+        self.device     = None
+        self.login      = None
+        self.artistInfo = {}
+        self.miss       = 0
 
     def getApi(self,nocache=False):
         if self.api == None :
@@ -204,35 +206,49 @@ class GoogleMusicApi():
     def getNewreleases(self):
         return self._loadStoreAlbums(self.getApi().get_new_releases())
 
-    def _loadStoreAlbums(self, store_albums):
-        albums = []
-        for item in store_albums:
+    def _loadArtistArt(self, artistid):
+        if not artistid in self.artistInfo:
+            artistart = storage.getArtist(artistid)
+            if artistart:
+                self.artistInfo[artistid] = {'artistArtRefs':[{'url':artistart}]}
+            else:
+                self.miss += 1
+                self.artistInfo[artistid] = self.getApi().get_artist_info(artistid, include_albums=False, max_top_tracks=0, max_rel_artist=0)
+                if 'artistArtRefs' in self.artistInfo[artistid]:
+                    storage.setArtist(artistid, self.artistInfo[artistid]['artistArtRefs'][0]['url'])
+                else:
+                    utils.log("NO ART FOR ARTIST: "+repr(self.artistInfo[artistid]))
+                    self.artistInfo[artistid] = {'artistArtRefs':[{'url':''}]}
+        return self.artistInfo[artistid]['artistArtRefs']
+
+    def _loadStoreAlbums(self, albums):
+        result    = []
+        self.miss = 0
+
+        for item in albums:
             if 'album' in item:
                 item = item['album']
-            albums.append(item)
-        return albums
+            if not 'artistArtRef' in item and 'artistId' in item and item['artistId'][0] :
+                item['artistArtRef'] = self._loadArtistArt(item['artistId'][0])[0]['url']
+            else:
+                item['artistArtRef'] = utils.addon.getAddonInfo('fanart')
+            result.append(item)
+
+        utils.log("Loaded %d albums (%d art miss)" % (len(albums), self.miss) )
+        return result
 
     def _loadStoreTracks(self, tracks):
-        result = []
-        artistInfo = {}
-        miss = 0
+        result    = []
+        self.miss = 0
 
-        for track in tracks:
-            try:
-                if 'track' in track:
-                    track = track['track']
-                if not 'artistArtRef' in track and 'artistId' in track:
-                    artistId = track['artistId'][0]
-                    if not artistId in artistInfo:
-                        miss = miss + 1
-                        artistInfo[artistId] = self.getApi().get_artist_info(artistId, include_albums=False, max_top_tracks=0, max_rel_artist=0)
-                    if 'artistArtRefs' in artistInfo[artistId]:
-                        track['artistArtRef'] = artistInfo[artistId]['artistArtRefs']
-                result.append(self._convertStoreTrack(track))
-            except Exception as e:
-                utils.log("*** ERROR LOADING STORE TRACK *** "+repr(e))
+        for item in tracks:
+            if 'track' in item:
+                item = item['track']
+            if not 'artistArtRef' in item and 'artistId' in item and item['artistId'][0]:
+                item['artistArtRef'] = self._loadArtistArt(item['artistId'][0])
+            result.append(self._convertStoreTrack(item))
 
-        utils.log("Loaded %d tracks (%d art miss)" % (len(tracks), miss) )
+        utils.log("Loaded %d tracks (%d art miss)" % (len(tracks), self.miss) )
         return result
 
 
