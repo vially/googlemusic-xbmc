@@ -236,21 +236,22 @@ class GoogleMusicApi():
         return result
 
 
-    def _convertStoreTrack(self, aaTrack):
-        return { 'song_id':       aaTrack.get('id') or aaTrack['storeId'],
-                 'album':         aaTrack.get('album'),
-                 'title':         aaTrack['title'],
-                 'year':          aaTrack.get('year', 0),
-                 'rating':        aaTrack.get('rating', 0),
-                 'album_artist':  aaTrack.get('albumArtist'),
-                 'tracknumber':   aaTrack.get('trackNumber'),
-                 'playcount':     aaTrack.get('playCount', 0),
-                 'artist':        aaTrack.get('artist'),
-                 'genre':         aaTrack.get('genre'),
-                 'discnumber':    aaTrack.get('discNumber'),
-                 'duration':      int(aaTrack.get('durationMillis',0))/1000,
-                 'albumart':      aaTrack['albumArtRef'][0]['url'] if aaTrack.get('albumArtRef') else utils.addon.getAddonInfo('icon'),
-                 'display_name':  aaTrack.get('artist')+" - "+aaTrack['title'],
-                 'artistart':     aaTrack['artistArtRef'][0]['url'] if aaTrack.get('artistArtRef') else utils.addon.getAddonInfo('fanart')
+    def _convertStoreTrack(self, track):
+        return { 'song_id':       track.get('id') or track['storeId'],
+                 'album':         track.get('album'),
+                 'title':         track['title'],
+                 'year':          track.get('year', 0),
+                 'rating':        track.get('rating', 0),
+                 'album_artist':  track.get('albumArtist'),
+                 'tracknumber':   track.get('trackNumber',0),
+                 'playcount':     track.get('playCount', 0),
+                 'artist':        track.get('artist'),
+                 'genre':         track.get('genre'),
+                 'discnumber':    track.get('discNumber',0),
+                 'duration':      int(track.get('durationMillis',0))/1000,
+                 'albumart':      track['albumArtRef'][0]['url'] if track.get('albumArtRef') else utils.addon.getAddonInfo('icon'),
+                 'display_name':  track.get('artist')+" - "+track['title'],
+                 'artistart':     track['artistArtRef'][0]['url'] if track.get('artistArtRef') else utils.addon.getAddonInfo('fanart'),
+                 'wentryid':      track.get('wentryid'),
                 }
 
