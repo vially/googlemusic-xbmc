@@ -57,8 +57,10 @@ class GoogleMusicApi():
     def loadLibrary(self):
         gen = self.getApi().get_all_songs(incremental=True)
 
+        uploaded_songs=0
         for chunk in gen:
             utils.log("Chunk Size: "+repr(len(chunk)))
+            uploaded_songs += len(chunk)
             storage.storeInAllSongs(chunk)
 
         self.updatePlaylistSongs()
@@ -71,13 +73,14 @@ class GoogleMusicApi():
 
         import time
         utils.addon.setSetting("fetched_all_songs", str(time.time()))
+        utils.addon.setSetting("library_songs", str(uploaded_songs))
 
 
     def updatePlaylistSongs(self):
         storage.storePlaylistSongs(self.getApi().get_all_user_playlist_contents())
 
-    def getSongStreamUrl(self, song_id):
-        stream_url = self.getLogin().getStreamUrl(song_id)
+    def getSongStreamUrl(self, song_id, session_token=None, wentry_id=None):
+        stream_url = self.getLogin().getStreamUrl(song_id, session_token=session_token, wentry_id=wentry_id)
         return stream_url
 
     def incrementSongPlayCount(self, song_id):
@@ -155,8 +158,28 @@ class GoogleMusicApi():
     def getStationTracks(self, station_id):
         return self._loadStoreTracks(self.getApi().get_station_tracks(station_id, num_tracks=200))
 
-    def startRadio(self, name, song_id):
-        return self.getApi().create_station(name, track_id=song_id)
+    def startRadio(self, name,
+                   track_id=None, artist_id=None, album_id=None,
+                   genre_id=None, curated_station_id=None):
+        station=self.getApi().create_station(name, track_id, artist_id, album_id, genre_id, playlist_token=None, curated_station_id=curated_station_id)
+        #tracks = self._loadStoreTracks(station['tracks'])
+        if 'sessionToken' in station:
+            import random
+            station_arts = ''
+            if 'compositeArtRefs' in station and len(station['compositeArtRefs']) > 0:
+                station_arts = station['compositeArtRefs']
+            utils.log("Free Radio token: "+station['sessionToken'])
+            #utils.log(repr(station))
+            result = []
+            for track in station['tracks']:
+                track_conv = self._convertStoreTrack(track)
+                track_conv['sessiontoken'] = station['sessionToken']
+                if station_arts:
+                    track_conv['artistart'] = station_arts[random.randint(0,len(station_arts)-1)]['url']
+                result.append(track_conv)
+            return result
+        return self._loadStoreTracks(station['tracks'])
+        #return self.getApi().create_station(name, track_id=song_id)
 
     def addAAtrack(self, song_id):
         self.getApi().add_aa_track(song_id)
@@ -182,7 +205,6 @@ class GoogleMusicApi():
     def _loadStoreAlbums(self, store_albums):
         albums = []
         for item in store_albums:
-            utils.log(repr(item))
             if 'album' in item:
                 item = item['album']
             albums.append(item)

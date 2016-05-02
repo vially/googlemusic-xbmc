@@ -61,7 +61,7 @@ class GoogleMusicPlaySong():
 
         if not params['url']:
             # try to fetch from web
-            params['url'] = self.api.getSongStreamUrl(song_id)
+            params['url'] = self.api.getSongStreamUrl(song_id, session_token=params.pop('sessiontoken',None), wentry_id=params.pop('wentryid',None))
 
         return params
 

@@ -6,30 +6,22 @@ from xbmcgui import ListItem
 
 class GoogleMusicNavigation():
     def __init__(self):
-        self.lang    = utils.addon.getLocalizedString
-        self.fanart  = utils.addon.getAddonInfo('fanart')
-        self.api     = GoogleMusicApi.GoogleMusicApi()
+        self.lang = utils.addon.getLocalizedString
+        self.api  = GoogleMusicApi.GoogleMusicApi()
 
-        self.main_menu_aa = (
-            {'title':self.lang(30211), 'params':{'path':"ifl"}},
-            {'title':self.lang(30219), 'params':{'path':"listennow"}},
-            {'title':self.lang(30220), 'params':{'path':"topcharts"}},
-            {'title':self.lang(30221), 'params':{'path':"newreleases"}},
-            {'title':self.lang(30209), 'params':{'path':"library"}},
-            {'title':self.lang(30222), 'params':{'path':"browse_stations"}},
-            {'title':self.lang(30204), 'params':{'path':"playlists", 'playlist_type':"auto"}},
-            {'title':self.lang(30202), 'params':{'path':"playlists", 'playlist_type':"user"}},
-            {'title':self.lang(30208), 'params':{'path':"search"}}
-        )
-        self.main_menu_noaa = (
-            {'title':self.lang(30211), 'params':{'path':"ifl"}},
-            {'title':self.lang(30209), 'params':{'path':"library"}},
-            {'title':self.lang(30204), 'params':{'path':"playlists", 'playlist_type':"auto"}},
-            {'title':self.lang(30202), 'params':{'path':"playlists", 'playlist_type':"user"}},
-            {'title':self.lang(30208), 'params':{'path':"search"}}
+        self.main_menu = (
+            {'title':self.lang(30211), 'params':{'path':"ifl"},                      'user':['library','subscriber']},
+            {'title':self.lang(30219), 'params':{'path':"listennow"},                'user':['subscriber','free']},
+            {'title':self.lang(30220), 'params':{'path':"topcharts"},                'user':['subscriber']},
+            {'title':self.lang(30221), 'params':{'path':"newreleases"},              'user':['subscriber']},
+            {'title':self.lang(30209), 'params':{'path':"library"},                  'user':['library']},
+            {'title':self.lang(30222), 'params':{'path':"browse_stations"},          'user':['subscriber','free']},
+            {'title':self.lang(30204), 'params':{'path':"playlists", 'type':"auto"}, 'user':['library','subscriber']},
+            {'title':self.lang(30202), 'params':{'path':"playlists", 'type':"user"}, 'user':['library','subscriber']},
+            {'title':self.lang(30208), 'params':{'path':"search"},                   'user':['library','subscriber']}
         )
         self.lib_menu = (
-            {'title':self.lang(30203), 'params':{'path':"playlists",'playlist_type':"radio"}},
+            {'title':self.lang(30203), 'params':{'path':"playlists",'type':"radio"}},
             {'title':self.lang(30210), 'params':{'path':"playlist", 'playlist_id':"feellucky"}},
             {'title':self.lang(30214), 'params':{'path':"playlist", 'playlist_id':"shuffled_albums"}},
             {'title':self.lang(30201), 'params':{'path':"playlist", 'playlist_id':"all_songs"}},
@@ -50,11 +42,19 @@ class GoogleMusicNavigation():
         sortMethods = [xbmcplugin.SORT_METHOD_UNSORTED]
 
         if path == "root":
-            if eval(utils.addon.getSetting('all-access')):
-                listItems = self.getMenuItems(self.main_menu_aa)
-            else:
-                utils.log("NO ALL ACCESS/UNLIMITED ACCOUNT")
-                listItems = self.getMenuItems(self.main_menu_noaa)
+            # assemble menu depending on user info
+            subscriber = int(utils.addon.getSetting('subscriber')) == 1
+            library    = int(utils.addon.getSetting('library_songs')) > 0
+            utils.log("Assembling menu for subscriber=%r and library=%r" % (subscriber,library))
+
+            for item in self.main_menu:
+                user = item.pop('user')
+                if (subscriber and 'subscriber' in user) or \
+                   (library and 'library' in user) or \
+                   (not subscriber and not library and 'free' in user):
+                    listItems.append(item)
+
+            listItems = self.getMenuItems(listItems)
 
         elif path == "ifl":
             listItems = self.addSongsFromLibrary(self.api.getStationTracks("IFL"), 'library')
@@ -74,7 +74,7 @@ class GoogleMusicNavigation():
             content = "songs"
 
         elif path == "playlists":
-            listItems = self.getPlaylists(get('playlist_type'))
+            listItems = self.getPlaylists(get('type'))
             view_mode_id = utils.addon.getSetting('playlists_viewid')
 
         elif path == "filter" and 'album' == get('criteria'):
@@ -149,9 +149,10 @@ class GoogleMusicNavigation():
             view_mode_id = utils.addon.getSetting('stations_viewid')
 
         elif path == "create_station":
-            station = self.api.getApi().create_station(unquote_plus(get('name')), artist_id=get('artistid'), genre_id=get('genreid'), curated_station_id=get('curatedid'))
-            listItems = self.addSongsFromLibrary(self.api.getStationTracks(station), 'library')
-            content = "songs"
+            if utils.addon.getSetting('subscriber') == "0":
+                xbmc.executebuiltin("XBMC.Notification(%s,%s,5000,%s)" % (utils.plugin, utils.tryEncode("Song skipping is limited!"), utils.addon.getAddonInfo('icon')))
+            utils.playAll(self.api.startRadio(unquote_plus(get('name')),artist_id=get('artistid'), genre_id=get('genreid'), curated_station_id=get('curatedid')))
+            return
 
         elif path == "genres":
             listItems = self.getGenres(self.api.getApi().get_top_chart_genres())
@@ -188,8 +189,8 @@ class GoogleMusicNavigation():
             cm = []
             if 'playlist_id' in params:
                 cm = self.getPlayAllContextMenuItems(menu_item['title'], params['playlist_id'])
-            elif 'playlist_type' in params:
-                cm = self.getPlaylistsContextMenuItems(menu_item['title'], params['playlist_type'])
+            elif 'type' in params:
+                cm = self.getPlaylistsContextMenuItems(menu_item['title'], params['type'])
             elif params['path'] == 'library':
                 cm.append((self.lang(30314), "XBMC.RunPlugin(%s?action=export_library)" % utils.addon_url))
                 cm.append((self.lang(30305), "XBMC.RunPlugin(%s?action=update_library)" % utils.addon_url))
@@ -367,7 +368,7 @@ class GoogleMusicNavigation():
             cm = [(self.lang(30301), "XBMC.RunPlugin(%s?action=play_all&album_id=%s)" % (utils.addon_url, item['albumId'])),
                   (self.lang(30309), "XBMC.RunPlugin(%s?action=add_album_library&album_id=%s)" % (utils.addon_url, item['albumId'])),
                   (self.lang(30315) or 'Add to queue', "XBMC.RunPlugin(%s?action=add_to_queue&album_id=%s)" % (utils.addon_url, item['albumId']))]
-            listItems.append(self.createFolder("[%s] %s"%(item['artist'], item['name']), params, cm, item['albumArtRef']))
+            listItems.append(self.createFolder("[%s] %s"%(item['artist'], item['name']), params, cm, item.get('albumArtRef','')))
         #print repr(items)
         return listItems
 

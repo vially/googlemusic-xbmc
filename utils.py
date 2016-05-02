@@ -71,5 +71,24 @@ def tryEncode(text, encoding='utf-8'):
     return repr(text)
 
 def getUrl(song):
-    return song_url % (addon_url, song['song_id'], song['title'], song['artist'], song['albumart'],
-                       song['tracknumber'], song['album'], song['year'], song['rating'])
+    url = song_url % (addon_url, song['song_id'], song['title'], song['artist'], song['albumart'],
+                      song['tracknumber'], song['album'], song['year'], song['rating'], song['artistart'])
+    if 'sessiontoken' in song:
+        url += "&sessiontoken=%s&wentryid=%s" % ( song['sessiontoken'], song['wentryid'] )
+    return url
+
+def playAll(songs, shuffle=False):
+    player = xbmc.Player()
+    if (player.isPlaying()):
+        player.stop()
+
+    playlist = xbmc.PlayList(xbmc.PLAYLIST_MUSIC)
+    playlist.clear()
+
+    for song in songs:
+        playlist.add(getUrl(song), createItem(song['display_name'], song['albumart'], song['artistart']))
+
+    if shuffle:
+        playlist.shuffle()
+
+    xbmc.executebuiltin('playlist.playoffset(music , 0)')

@@ -9,7 +9,7 @@ class GoogleMusicActions():
 
     def executeAction(self, action, params):
         if (action == "play_all"):
-            self.playAll(params)
+            utils.playAll(self._getSongs(params), 'shuffle' in params)
         elif (action == "add_to_queue"):
             self.addToQueue(params)
             self.notify(self.lang(30110) or "Done")
@@ -57,7 +57,7 @@ class GoogleMusicActions():
             keyboard = xbmc.Keyboard(self.api.getSong(params["song_id"])['title'], self.lang(30402))
             keyboard.doModal()
             if keyboard.isConfirmed() and keyboard.getText():
-                self.playAll({'radio_id': self.api.startRadio(keyboard.getText(), params["song_id"])})
+                utils.playAll(self.api.startRadio(keyboard.getText(), params["song_id"]))
                 xbmc.executebuiltin("ActivateWindow(10500)")
                 #xbmc.executebuiltin("XBMC.RunPlugin(%s?path=station&id=%s)" % (sys.argv[0],radio_id))
         elif (action == "search_yt"):
@@ -95,24 +95,6 @@ class GoogleMusicActions():
 
     def notify(self, text):
         xbmc.executebuiltin("XBMC.Notification(%s,%s,5000,%s)" % (utils.plugin, utils.tryEncode(text), self.icon))
-
-    def playAll(self, params={}):
-        songs = self._getSongs(params)
-
-        player = xbmc.Player()
-        if (player.isPlaying()):
-            player.stop()
-
-        playlist = xbmc.PlayList(xbmc.PLAYLIST_MUSIC)
-        playlist.clear()
-
-        for song in songs:
-            playlist.add(utils.getUrl(song), utils.createItem(song['display_name'], song['albumart']))
-
-        if params.get("shuffle"):
-            playlist.shuffle()
-
-        xbmc.executebuiltin('playlist.playoffset(music , 0)')
 
     def addToQueue(self, params={}):
         songs = self._getSongs(params)

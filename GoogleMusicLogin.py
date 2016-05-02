@@ -24,14 +24,14 @@ class GoogleMusicLogin():
     def getApi(self):
         return self.gmusicapi
 
-    def getStreamUrl(self,song_id):
+    def getStreamUrl(self, song_id, session_token, wentry_id):
         # retrieve registered device
         device_id = self.getDevice()
         # retrieve stream quality from settings
         quality = { '0':'hi','1':'med','2':'low' } [utils.addon.getSetting('quality')]
         utils.log("getStreamUrl songid: %s device: %s quality: %s"%(song_id, device_id, quality))
 
-        return self.gmusicapi.get_stream_url(song_id, device_id, quality)
+        return self.gmusicapi.get_stream_url(song_id, device_id, quality, session_token, wentry_id)
 
     def getDevice(self):
         return utils.addon.getSetting('device_id')
@@ -63,6 +63,7 @@ class GoogleMusicLogin():
         utils.addon.setSetting('logged_in-mobile', "")
         utils.addon.setSetting('authtoken-mobile', "")
         utils.addon.setSetting('device_id', "")
+        utils.addon.setSetting('subscriber', "0")
 
     def logout(self):
         self.gmusicapi.logout()
@@ -99,12 +100,7 @@ class GoogleMusicLogin():
                 utils.addon.setSetting('logged_in-mobile', "1")
                 utils.addon.setSetting('authtoken-mobile', self.gmusicapi.session._authtoken)
                 utils.addon.setSetting('cookie-date', str(datetime.now()))
-                try:
-                    self.gmusicapi.get_listen_now()
-                    utils.addon.setSetting('all-access', "1")
-                except:
-                    utils.addon.setSetting('all-access', "0")
-
+                utils.addon.setSetting('subscriber','1' if self.gmusicapi.is_subscribed else '0')
 
         else:
 
