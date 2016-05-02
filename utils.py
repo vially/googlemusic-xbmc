@@ -9,7 +9,7 @@ plugin    = "GoogleMusicEXP-" + addon.getAddonInfo('version')
 dbg       = addon.getSetting( "debug" ) == "true"
 addon_url = sys.argv[0]
 handle    = int(sys.argv[1])
-song_url  = "%s?action=play_song&song_id=%s&title=%s&artist=%s&albumart=%s&tracknumber=%s&album=%s&year=%s&rating=%s"
+song_url  = "%s?action=play_song&song_id=%s&title=%s&artist=%s&albumart=%s&tracknumber=%s&album=%s&year=%s&rating=%s&artistart=%s"
 
 # utility functions
 def log(message):
@@ -28,9 +28,9 @@ def paramsToDict(parameters):
             except: pass
     return paramDict
 
-def createItem(title, thumb):
+def createItem(title, thumb, fanart):
     li = ListItem(title)
-    li.setArt({'thumb':thumb})
+    li.setArt({'thumb':thumb, 'fanart':fanart})
     li.setProperty('IsPlayable', 'true')
     li.setProperty('Music', 'true')
     li.setProperty('mimetype', 'audio/mpeg')

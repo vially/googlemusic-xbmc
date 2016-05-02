@@ -66,23 +66,23 @@ class GoogleMusicStorage():
         utils.log("### storage getcriteria: "+repr(criteria)+" "+repr(name))
 
         if criteria == 'album':
-            query = "select album_artist, album, year, max(albumart) as arturl, max(creation_date) as date "\
+            query = "select album_artist, album, year, artistart, max(albumart) as arturl, max(creation_date) as date "\
                     "from library_songs where album <> '-Unknown-' group by lower(album_artist), lower(album)"
         elif criteria == 'artist' and not name:
             query = "select album_artist as criteria, max(artistart) as arturl from library_songs group by lower(album_artist)"
         elif criteria == 'artist' and name:
-            query = "select album_artist, album, year, max(albumart) as arturl, max(creation_date) as date "\
+            query = "select album_artist, album, year, artistart,  max(albumart) as arturl, max(creation_date) as date "\
                     "from library_songs where album_artist = :name group by lower(album_artist), lower(album)"
         elif criteria == 'genre' and not name:
             query = "select genre as criteria, max(artistart) as arturl from library_songs group by lower(genre)"
         elif criteria == 'genre' and name:
-            query = "select album_artist, album, year, max(albumart) as arturl , max(creation_date) as date "\
+            query = "select album_artist, album, year, artistart, max(albumart) as arturl , max(creation_date) as date "\
                     "from library_songs where album <> '-Unknown-' and genre=:name group by lower(album_artist), lower(album)"
         elif name:
-            query = "select album_artist, album, year, max(albumart) as arturl, max(creation_date) as date "\
+            query = "select album_artist, album, year, artistart, max(albumart) as arturl, max(creation_date) as date "\
                     "from library_songs where %s=:name group by lower(album_artist), lower(album)" % criteria
         else:
-            query = "select %s as criteria from library_songs group by lower(%s)" % (criteria, criteria)
+            query = "select %s as criteria, max(albumart) as arturl from library_songs group by lower(%s)" % (criteria, criteria)
 
         return self.curs.execute(query,{'name':name.decode('utf8')}).fetchall()
 
@@ -105,9 +105,9 @@ class GoogleMusicStorage():
     def getSearch(self, query):
         query = '%'+ query.replace('%','') + '%'
         result = {}
-        result['artists'] = self.curs.execute("SELECT artist as name, max(artistart) as artistArtRef FROM songs WHERE artist like ? GROUP BY artist", (query,)).fetchall()
+        result['artists'] = self.curs.execute("SELECT artist as name, max(artistart) as artistart FROM songs WHERE artist like ? GROUP BY artist", (query,)).fetchall()
         result['tracks'] = self.curs.execute("SELECT * FROM songs WHERE display_name like ? ORDER BY display_name", (query,)).fetchall()
-        result['albums'] = self.curs.execute("SELECT album as name, artist, max(albumart) as albumArtRef FROM songs WHERE album like ? or album_artist like ? GROUP BY album, artist", (query,query)).fetchall()
+        result['albums'] = self.curs.execute("SELECT album as name, artist, max(albumart) as albumart FROM songs WHERE album like ? or album_artist like ? GROUP BY album, artist", (query,query)).fetchall()
         return result
 
     def storePlaylistSongs(self, playlists_songs):

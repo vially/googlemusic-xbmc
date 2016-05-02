@@ -275,7 +275,7 @@ class GoogleMusicNavigation():
             album  = item['album']
             artist = item['album_artist']
             params = {'path':criteria,'album':album,'artist':artist}
-            folder = addFolder(album, params, getCm(criteria, album), item['arturl'], artist)
+            folder = addFolder(album, params, getCm(criteria, album), item['arturl'], artist, item['artistart'])
             folder[1].setInfo(type='music', infoLabels={
                    'year':item['year'], 'artist':artist, 'album':album,
                    'date':time.strftime('%d.%m.%Y', time.gmtime(item['date']/1000000))})
@@ -293,7 +293,7 @@ class GoogleMusicNavigation():
 
         if criteria in ('artist','genre'):
             for item in items:
-                append( addFolder(item['criteria'], {'path':criteria,'name':item['criteria']}, getCm(criteria, item['criteria']), item['arturl']))
+                append( addFolder(item['criteria'], {'path':criteria,'name':item['criteria']}, getCm(criteria, item['criteria']), item['arturl'], fanarturl=item['arturl']))
 
         else:
             for item in items:
@@ -302,11 +302,13 @@ class GoogleMusicNavigation():
         return listItems
 
     def getListennow(self, items):
-        listItems = []
+        listItems    = []
+        default_art  = utils.addon.getAddonInfo('icon')
 
         for item in items:
             suggestion = item.get('suggestion_text')
-            image = item['images'][0]['url'] if 'images' in item else None
+            image = item['images'][0]['url'] if 'images' in item else default_art
+
             if item['type'] == '1':
                 album = item['album']
                 listItems.extend(self.createAlbumFolder([{
@@ -350,10 +352,17 @@ class GoogleMusicNavigation():
 
     def getStations(self, stationId):
         listItems = []
+
+        default_thumb  = utils.addon.getAddonInfo('icon')
+        default_fanart = utils.addon.getAddonInfo('fanart')
+
         items = self.api.getApi().get_stations(stationId)
         for item in items:
             params = {'path':'create_station','curatedid':item['seed']['curatedStationId'], 'name':utils.tryEncode(item['name'])}
-            listItems.append(self.createFolder(item['name'], params, arturl=item['compositeArtRefs'][0]['url']))
+            #utils.log("STATION: "+repr(item))
+            url1 = item['compositeArtRefs'][0]['url'] if 'compositeArtRefs' in item and item['compositeArtRefs'] else default_thumb
+            url2 = item['imageUrls'][0]['url'] if 'imageUrls' in item and item['imageUrls'] else default_fanart
+            listItems.append(self.createFolder(item['name'], params, arturl=url1, fanarturl=url2))
         return listItems
 
     def getGenres(self, items):
@@ -368,14 +377,14 @@ class GoogleMusicNavigation():
             cm = [(self.lang(30301), "XBMC.RunPlugin(%s?action=play_all&album_id=%s)" % (utils.addon_url, item['albumId'])),
                   (self.lang(30309), "XBMC.RunPlugin(%s?action=add_album_library&album_id=%s)" % (utils.addon_url, item['albumId'])),
                   (self.lang(30315) or 'Add to queue', "XBMC.RunPlugin(%s?action=add_to_queue&album_id=%s)" % (utils.addon_url, item['albumId']))]
-            listItems.append(self.createFolder("[%s] %s"%(item['artist'], item['name']), params, cm, item.get('albumArtRef','')))
+            listItems.append(self.createFolder("[%s] %s"%(item['artist'], item['name']), params, cm, item.get('albumArtRef',''), fanarturl=item.get('artistArtRef','')))
         #print repr(items)
         return listItems
 
-    def createFolder(self, name, params, contextMenu=[], arturl='', name2='*'):
-        li = ListItem(label=name, label2=name2, thumbnailImage=arturl)
+    def createFolder(self, name, params, contextMenu=[], arturl='', name2='*', fanarturl=utils.addon.getAddonInfo('fanart')):
+        li = ListItem(label=name, label2=name2)
+        li.setArt({'thumb':arturl, 'fanart':fanarturl})
         li.addContextMenuItems(contextMenu, replaceItems=True)
-        li.setProperty('fanart_image', self.fanart)
         return "?".join([utils.addon_url, urlencode(params)]), li, "true"
 
     def createItem(self, song, song_type):
@@ -387,8 +396,7 @@ class GoogleMusicNavigation():
             'rating':      song['rating'],      'discnumber': song['discnumber']
         }
 
-        li = utils.createItem(song['display_name'], song['albumart'])
-        li.setProperty('fanart_image', song['artistart'])
+        li = utils.createItem(song['display_name'], song['albumart'], song['artistart'])
         li.setInfo(type='music', infoLabels=infoLabels)
         li.addContextMenuItems(self.getSongContextMenu(song['song_id'], song['display_name'], song_type))
         return li

@@ -102,7 +102,7 @@ class GoogleMusicActions():
         playlist = xbmc.PlayList(xbmc.PLAYLIST_MUSIC)
 
         for song in songs:
-            playlist.add(utils.getUrl(song), utils.createItem(song['display_name'], song['albumart']))
+            playlist.add(utils.getUrl(song), utils.createItem(song['display_name'], song['albumart'], song['artistart']))
 
     def playYoutube(self, titles):
         #print repr(titles)

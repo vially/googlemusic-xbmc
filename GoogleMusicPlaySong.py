@@ -15,7 +15,7 @@ class GoogleMusicPlaySong():
         title  = params.get('title')
         utils.log("Song: %s - %r " % (title, url))
 
-        li = utils.createItem(title, params.pop('albumart'))
+        li = utils.createItem(title, params.pop('albumart'), params.pop('artistart'))
         li.setInfo(type='music', infoLabels=params)
         li.setPath(url)
 
