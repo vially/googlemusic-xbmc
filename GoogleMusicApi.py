@@ -120,7 +120,7 @@ class GoogleMusicApi():
         albums = result['albums']
         artists = result['artists']
         try:
-            store_result = self.getApi().search_all_access(query)
+            store_result = self.getApi().search(query)
             #utils.log("API getsearch aa: "+repr(store_result))
             tracks.extend(self._loadStoreTracks(store_result['song_hits']))
             albums.extend(self._loadStoreAlbums(store_result['album_hits']))
@@ -183,8 +183,8 @@ class GoogleMusicApi():
         return self._loadStoreTracks(station['tracks'])
         #return self.getApi().create_station(name, track_id=song_id)
 
-    def addAAtrack(self, song_id):
-        self.getApi().add_aa_track(song_id)
+    def addStoreTrack(self, song_id):
+        self.getApi().add_store_track(song_id)
 
     def addToPlaylist(self, playlist_id, song_id):
         entry_id = self.getApi().add_songs_to_playlist(playlist_id, song_id)
