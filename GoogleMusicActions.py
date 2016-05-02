@@ -31,7 +31,7 @@ class GoogleMusicActions():
             self.notify(self.lang(30103))
         elif (action == "add_album_library"):
             for track in self.api.getAlbum(params["album_id"]):
-                self.api.addAAtrack(track[0])
+                self.api.addAAtrack(track["song_id"])
             self.notify(self.lang(30103))
         elif (action == "add_playlist"):
             self.addToPlaylist(params["song_id"])
@@ -173,15 +173,21 @@ class GoogleMusicActions():
 
         url = ''
         for k,v in params.iteritems():
-            url = url+'&'+unicode(k)+'='+unicode(v)
+            url = url+'&amp;'+unicode(k)+'='+unicode(v)
 
         fav = '\t<favourite name="%s" thumb="%s">ActivateWindow(10501,&quot;%s?%s&quot;,return)</favourite>'
-        fav = fav % (name, xbmc.translatePath(self.icon), utils.addon_url, url[1:])
+        fav = fav % (name, xbmc.translatePath(self.icon), utils.addon_url , url[1:])
 
-        for line in fileinput.input(path, inplace=1):
-            if line.startswith('</favourites>'):
-                print fav
-            print line,
+        if not os.path.isfile(path):
+            with open(path, "w") as favfile:
+                favfile.write("<favourites>\n")
+                favfile.write(fav+"\n")
+                favfile.write("</favourites>")
+        else:
+            for line in fileinput.input(path, inplace=1):
+                if line.startswith('</favourites>'):
+                    print fav
+                print line,
 
     def exportPlaylist(self, title, playlist_id):
         utils.log("Loading playlist: " + playlist_id)
