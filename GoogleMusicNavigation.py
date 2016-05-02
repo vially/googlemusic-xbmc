@@ -218,9 +218,9 @@ class GoogleMusicNavigation():
         return listItems
 
     def listAllCriteriaSongs(self, filter_type, filter_criteria):
-        songs = self.api.getFilterSongs(filter_type, unquote_plus(filter_criteria), '')
-        listItems = []
-        append = listItems.append
+        songs      = self.api.getFilterSongs(filter_type, unquote_plus(filter_criteria), '')
+        listItems  = []
+        append     = listItems.append
         createItem = self.createItem
 
         # add album name when showing all artist songs
@@ -235,7 +235,7 @@ class GoogleMusicNavigation():
     def getPlaylists(self, playlist_type):
         utils.log("Getting playlists of type: " + playlist_type)
         listItems = []
-        append = listItems.append
+        append    = listItems.append
         addFolder = self.createFolder
 
         if playlist_type == 'radio':
@@ -264,10 +264,10 @@ class GoogleMusicNavigation():
     def listAlbums(self, criteria, name=''):
         utils.log("LISTALBUMS: "+repr(criteria)+" "+repr(name))
         listItems = []
-        append = listItems.append
+        append    = listItems.append
         addFolder = self.createFolder
-        getCm = self.getFilterContextMenuItems
-        items = self.api.getCriteria(criteria, name)
+        getCm     = self.getFilterContextMenuItems
+        items     = self.api.getCriteria(criteria, name)
 
         #utils.log(repr(items))
         for item in items:
@@ -286,10 +286,10 @@ class GoogleMusicNavigation():
     def getCriteria(self, criteria):
         utils.log("CRITERIA: "+repr(criteria))
         listItems = []
-        append = listItems.append
+        append    = listItems.append
         addFolder = self.createFolder
-        getCm = self.getFilterContextMenuItems
-        items = self.api.getCriteria(criteria)
+        getCm     = self.getFilterContextMenuItems
+        items     = self.api.getCriteria(criteria)
 
         if criteria in ('artist','genre'):
             for item in items:

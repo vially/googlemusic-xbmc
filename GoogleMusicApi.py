@@ -86,10 +86,7 @@ class GoogleMusicApi():
         return stream_url
 
     def incrementSongPlayCount(self, song_id):
-        try:
-            self.getApi().increment_song_playcount(song_id)
-        except Exception as ex:
-            utils.log("ERROR trying to increment playcount: "+repr(ex))
+        self.getApi().increment_song_playcount(song_id)
         storage.incrementSongPlayCount(song_id)
 
     def createPlaylist(self, name):
@@ -154,7 +151,7 @@ class GoogleMusicApi():
         stations = {}
         try:
             stations = self.getApi().get_all_stations()
-            utils.log("STATIONS: "+repr(stations))
+            #utils.log("STATIONS: "+repr(stations))
         except Exception as e:
             utils.log("*** NO STATIONS *** "+repr(e))
         return stations

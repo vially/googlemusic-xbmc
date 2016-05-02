@@ -47,8 +47,6 @@ def setDirectory(list_items, content, sort_methods, view_mode_id):
     for sorts in sort_methods:
         xbmcplugin.addSortMethod(int(sys.argv[1]), sorts)
 
-    xbmcplugin.endOfDirectory(handle, succeeded=True)
-
     if content == "songs":
         view_mode_id = addon.getSetting('songs_viewid')
     elif content == "albums":
@@ -56,6 +54,8 @@ def setDirectory(list_items, content, sort_methods, view_mode_id):
 
     if view_mode_id and addon.getSetting('overrideview') == "true":
         xbmc.executebuiltin('Container.SetViewMode(%s)' % view_mode_id)
+
+    xbmcplugin.endOfDirectory(handle, succeeded=True)
 
 
 def tryEncode(text, encoding='utf-8'):

@@ -93,7 +93,6 @@ class GoogleMusicLogin():
                 self.language = utils.addon.getLocalizedString
                 dialog = xbmcgui.Dialog()
                 dialog.ok(self.language(30101), self.language(30102))
-                #utils.addon.openSettings()
                 raise
             else:
                 utils.log("Login succeeded")

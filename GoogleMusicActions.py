@@ -14,7 +14,7 @@ class GoogleMusicActions():
             self.addToQueue(params)
             self.notify(self.lang(30110) or "Done")
         elif (action == "play_all_yt"):
-            titles = [song[23] for song in self._getSongs(params)]
+            titles = [song['title'] for song in self._getSongs(params)]
             self.playYoutube(titles)
         elif (action == "update_playlists"):
             self.api.getPlaylistsByType(params["playlist_type"], True)
@@ -89,7 +89,7 @@ class GoogleMusicActions():
             xbmc.executebuiltin("ActivateWindow(10502,%s/?path=artist_topsongs&artistid=%s)" % (utils.addon_url, artist_id))
         elif (action == "related_artists"):
             artist_id = self.api.getApi().get_track_info(params["song_id"])['artistId'][0]
-            xbmc.executebuiltin("ActivateWindow(10500,%s/?path=related_artists&artistid=%s)" % (utils.addon_url, artist_id))
+            xbmc.executebuiltin("ActivateWindow(10501,%s/?path=related_artists&artistid=%s)" % (utils.addon_url, artist_id))
         else:
             utils.log("Invalid action: " + action)
 
