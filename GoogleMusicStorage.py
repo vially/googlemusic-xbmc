@@ -20,6 +20,14 @@ class GoogleMusicStorage():
                 elif updatelib == 3 and difftime > 60 * 60: # hour
                     self.clearCache()
 
+        # try to detect problem in database creation
+        if os.path.isfile(self.path):
+            try:
+                self.curs.execute("SELECT * FROM songs, library_songs, playlists, playlists_songs LIMIT 1").fetchone()
+            except Exception as ex:
+                utils.log("Cache database error, deleting "+repr(ex))
+                self.clearCache()
+
         # Make sure to initialize database when it does not exist.
         if not os.path.isfile(self.path):
             self.initializeDatabase()
