@@ -163,12 +163,12 @@ class GoogleMusicNavigation():
             content = "songs"
 
         elif path == "artist_topsongs":
-            listItems = self.addSongsFromLibrary(self.api.getArtist(get('artistid')), 'library')
+            listItems = self.addSongsFromLibrary(self.api.getArtistInfo(get('artistid'))['tracks'], 'library')
             content = "songs"
 
         elif path == "related_artists":
             listItems = []
-            items = self.api.getArtist(get('artistid'), relartists=10)
+            items = self.api.getArtistInfo(get('artistid'), False, 0, relartists=10)['relartists']
             for item in items:
                 params = {'path':'artist_topsongs', 'artistid':item['artistId']}
                 artist_art = item['artistArtRef'] if 'artistArtRef' in item else utils.addon.getAddonInfo('icon')
@@ -464,8 +464,9 @@ class GoogleMusicNavigation():
                 if 'albumId' in album:
                     listItems.extend(self.createAlbumFolder([album]))
                 else:
-                    params = {'path':"search_result",'query':utils.tryEncode(album['name'])}
-                    listItems.append(self.createFolder("[%s] %s"%(album['artist'], album['name']), params, [], album['albumArtRef']))
+                    params = {'path':'album','album':utils.tryEncode(album['name']),'artist':utils.tryEncode(album['artist'])}
+                    cm = self.getFilterContextMenuItems('album',album['name'])
+                    listItems.append(self.createFolder("[%s] %s"%(album['artist'], album['name']), params, cm, album['albumart']))
 
         if isinstance(query,basestring):
             result = self.api.getSearch(query)
@@ -474,20 +475,21 @@ class GoogleMusicNavigation():
                 listItems.append(self.createFolder('[COLOR orange]*** '+self.lang(30205)+' ***[/COLOR]',{'path':'none'}))
                 cm = []
                 for artist in result['artists']:
-                    params = {'path':"search_result",'query':utils.tryEncode(artist['name'])}
+                    params = {'path':'artist','name':utils.tryEncode(artist['name'])}
                     if 'artistId' in artist:
+                        params = {'path':'search_result','artistid':artist['artistId'],'query':utils.tryEncode(artist['name'])}
                         cm = [(self.lang(30301), "XBMC.RunPlugin(%s?action=play_all&artist_id=%s)" % (utils.addon_url, artist['artistId']))]
-                        params['artistid'] = artist['artistId']
-                    listItems.append(self.createFolder(artist['name'], params, cm, artist['artistArtRef'] if 'artistArtRef' in artist else ''))
+                    art = artist['artistArtRef'] if 'artistArtRef' in artist else utils.addon.getAddonInfo('icon')
+                    listItems.append(self.createFolder(artist['name'], params, cm, arturl=art, fanarturl=art))
             if result['tracks']:
                 listItems.append(self.createFolder('[COLOR orange]*** '+self.lang(30213)+' ***[/COLOR]',{'path':'none'}))
                 listItems.extend(self.addSongsFromLibrary(result['tracks'], 'library'))
 
         elif 'artistid' in query:
-            result = self.api.getSearch(unquote_plus(query['query']))
+            result = self.api.getArtistInfo(query['artistid'], True, 20, 0)
             if result['albums']: listAlbumsResults()
             listItems.append(self.createFolder('[COLOR orange]*** '+self.lang(30213)+' ***[/COLOR]',{'path':'none'}))
-            listItems.extend(self.addSongsFromLibrary(self.api.getArtist(query['artistid']), 'library'))
+            listItems.extend(self.addSongsFromLibrary(result['tracks'], 'library'))
 
         else:
             #listItems.extend(self.addSongsFromLibrary(self.api.getSearch(unquote_plus(query['query']))['tracks'], 'library'))

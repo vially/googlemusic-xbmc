@@ -230,7 +230,7 @@ class GoogleMusicActions():
             songs = self.api.getSharedPlaylist(urllib.unquote_plus(get('share_token')))
         elif get('artist_id'):
             utils.log("Loading artist top tracks: " + get('artist_id'))
-            songs = self.api.getArtist(get('artist_id'))
+            songs = self.api.getArtistInfo(get('artist_id'))['tracks']
         elif get('radio_id'):
             utils.log("Loading radio: " + get('radio_id'))
             songs = self.api.getStationTracks(get('radio_id'))

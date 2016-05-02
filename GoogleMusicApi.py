@@ -134,11 +134,13 @@ class GoogleMusicApi():
     def getAlbum(self, albumid):
         return self._loadStoreTracks(self.getApi().get_album_info(albumid, include_tracks=True)['tracks'])
 
-    def getArtist(self, artistid, relartists=0):
-        if relartists == 0:
-            return self._loadStoreTracks(self.getApi().get_artist_info(artistid, include_albums=False, max_top_tracks=50, max_rel_artist=0)['topTracks'])
-        else:
-            return self.getApi().get_artist_info(artistid, include_albums=False, max_top_tracks=0, max_rel_artist=relartists)['related_artists']
+    def getArtistInfo(self, artistid, albums=False, tracks=20, relartists=0):
+        info = self.getApi().get_artist_info(artistid, include_albums=albums, max_top_tracks=tracks, max_rel_artist=relartists)
+        result = {}
+        result['tracks']     = self._loadStoreTracks(info['topTracks']) if 'topTracks' in info else None
+        result['relartists'] = info['related_artists'] if 'related_artists' in info else None
+        result['albums']     = self._loadStoreAlbums(info['albums']) if 'albums' in info else None
+        return result
 
     def getTrack(self, trackid):
         return self._convertStoreTrack(self.getApi().get_track_info(trackid))

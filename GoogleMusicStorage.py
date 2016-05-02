@@ -105,7 +105,7 @@ class GoogleMusicStorage():
     def getSearch(self, query):
         query = '%'+ query.replace('%','') + '%'
         result = {}
-        result['artists'] = self.curs.execute("SELECT artist as name, max(artistart) as artistart FROM songs WHERE artist like ? GROUP BY artist", (query,)).fetchall()
+        result['artists'] = self.curs.execute("SELECT artist as name, max(artistart) as artistArtRef FROM songs WHERE artist like ? GROUP BY artist", (query,)).fetchall()
         result['tracks'] = self.curs.execute("SELECT * FROM songs WHERE display_name like ? ORDER BY display_name", (query,)).fetchall()
         result['albums'] = self.curs.execute("SELECT album as name, artist, max(albumart) as albumart FROM songs WHERE album like ? or album_artist like ? GROUP BY album, artist", (query,query)).fetchall()
         return result
