@@ -158,7 +158,7 @@ class GoogleMusicActions():
             url = url+'&amp;'+unicode(k)+'='+unicode(v)
 
         fav = '\t<favourite name="%s" thumb="%s">ActivateWindow(10501,&quot;%s?%s&quot;,return)</favourite>'
-        fav = fav % (name, xbmc.translatePath(self.icon), utils.addon_url , url[1:])
+        fav = fav % (name, xbmc.translatePath(self.icon), utils.addon_url , url[5:])
 
         if not os.path.isfile(path):
             with open(path, "w") as favfile:
@@ -167,6 +167,9 @@ class GoogleMusicActions():
                 favfile.write("</favourites>")
         else:
             for line in fileinput.input(path, inplace=1):
+                if line.startswith('<favourites />'):
+                    print "<favourites>\n"+fav+"\n</favourites>"
+                    continue
                 if line.startswith('</favourites>'):
                     print fav
                 print line,
