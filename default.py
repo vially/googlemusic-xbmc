@@ -12,27 +12,13 @@ if (__name__ == "__main__" ):
         import GoogleMusicPlaySong
         GoogleMusicPlaySong.GoogleMusicPlaySong().play(params)
 
-    elif action:
-
-        import GoogleMusicActions
-        GoogleMusicActions.GoogleMusicActions().executeAction(action, params)
-
-    elif params.get('path'):
-
-        import GoogleMusicNavigation
-        GoogleMusicNavigation.GoogleMusicNavigation().listMenu(params)
-
-    elif not params:
+    else:
 
         reload(sys)
         sys.setdefaultencoding("utf-8")
 
         import GoogleMusicStorage
         storage = GoogleMusicStorage.storage
-
-        import GoogleMusicNavigation
-        navigation = GoogleMusicNavigation.GoogleMusicNavigation()
-
         import GoogleMusicLogin
         login = GoogleMusicLogin.GoogleMusicLogin()
 
@@ -44,7 +30,7 @@ if (__name__ == "__main__" ):
            login.clearCookie()
            addon.setSetting('version', addon.getAddonInfo('version'))
 
-        # check for initing cookies, db and library only on main menu
+        # check for initing cookies, db and library
         storage.checkDbInit()
         login.checkCredentials()
         login.checkCookie()
@@ -55,13 +41,20 @@ if (__name__ == "__main__" ):
 
             xbmc.executebuiltin("XBMC.Notification(%s,%s,5000,%s)" % (utils.plugin, utils.tryEncode(addon.getLocalizedString(30105)) ,addon.getAddonInfo('icon')))
             utils.log('Loading library')
-            navigation.api.loadLibrary()
+            import GoogleMusicApi
+            GoogleMusicApi.GoogleMusicApi().loadLibrary()
 
             if addon.getSetting('auto_export')=='true' and addon.getSetting('export_path'):
                 import GoogleMusicActions
                 GoogleMusicActions.GoogleMusicActions().exportLibrary(addon.getSetting('export_path'))
 
-        navigation.listMenu()
+        if action:
 
-    else:
-        utils.log(" ARGV Nothing done.. verify params " + repr(params))
+            import GoogleMusicActions
+            GoogleMusicActions.GoogleMusicActions().executeAction(action, params)
+
+        else:
+
+            import GoogleMusicNavigation
+            GoogleMusicNavigation.GoogleMusicNavigation().listMenu(params)
+
