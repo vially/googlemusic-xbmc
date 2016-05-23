@@ -51,7 +51,7 @@ class GoogleMusicNavigation():
                 user = item.pop('user')
                 if (subscriber and 'subscriber' in user) or \
                    (library and 'library' in user) or \
-                   (not subscriber and not library and 'free' in user):
+                   (not subscriber and 'free' in user):
                     listItems.append(item)
 
             listItems = self.getMenuItems(listItems)
