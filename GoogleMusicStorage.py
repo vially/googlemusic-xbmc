@@ -79,7 +79,7 @@ class GoogleMusicStorage():
 
         if criteria == 'album':
             query = "select album_artist, album, year, artistart, max(albumart) as arturl, max(creation_date) as date "\
-                    "from library_songs where album <> '-Unknown-' group by lower(album_artist), lower(album)"
+                    "from library_songs where album <> '-???-' group by lower(album_artist), lower(album)"
         elif criteria == 'artist' and not name:
             query = "select album_artist as criteria, max(artistart) as arturl from library_songs group by lower(album_artist)"
         elif criteria == 'artist' and name:
@@ -89,7 +89,7 @@ class GoogleMusicStorage():
             query = "select genre as criteria, max(artistart) as arturl from library_songs group by lower(genre)"
         elif criteria == 'genre' and name:
             query = "select album_artist, album, year, artistart, max(albumart) as arturl , max(creation_date) as date "\
-                    "from library_songs where album <> '-Unknown-' and genre=:name group by lower(album_artist), lower(album)"
+                    "from library_songs where album <> '-???-' and genre=:name group by lower(album_artist), lower(album)"
         elif name:
             query = "select album_artist, album, year, artistart, max(albumart) as arturl, max(creation_date) as date "\
                     "from library_songs where %s=:name group by lower(album_artist), lower(album)" % criteria
@@ -186,18 +186,18 @@ class GoogleMusicStorage():
                   'rating':        get("rating"),
                   'last_played':   get("recentTimestamp"),
                   'discnumber':    get("discNumber"),
-                  'composer':      get("composer", '-Unknown-') if get("composer") else '-Unknown-',
+                  'composer':      get("composer") if get("composer") else '-???-',
                   'year':          get("year"),
-                  'album':         get("album") if get("album") else '-Unknown-',
+                  'album':         get("album") if get("album") else '-???-',
                   'title':         get("title", get("name","")),
-                  'album_artist':  get("albumArtist") if get("albumArtist") else get("artist") if get("artist") else '-Unknown-',
+                  'album_artist':  get("albumArtist") if get("albumArtist") else get("artist") if get("artist") else '-???-',
                   'type':          get("trackType"),
                   'tracknumber':   get("trackNumber" ),
                   'total_tracks':  get("totalTrackCount"),
-                  'genre':         get("genre", '-Unknown-'),
+                  'genre':         get("genre", '-???-'),
                   'playcount':     get("playCount"),
                   'creation_date': get("creationTimestamp"),
-                  'artist':        get("artist") if get("artist") else get("albumArtist") if get("albumArtist") else '-Unknown-',
+                  'artist':        get("artist") if get("artist") else get("albumArtist") if get("albumArtist") else '-???-',
                   'total_discs':   get("totalDiscCount"),
                   'duration':      int(get("durationMillis",0))/1000,
                   'albumart':      get("albumArtRef")[0]['url'] if get("albumArtRef") else default_albumart,
@@ -313,7 +313,7 @@ class GoogleMusicStorage():
         self.conn.commit()
 
     def _getSongDisplayName(self, api_song):
-        displayName = "-Unknown-"
+        displayName = "-???-"
         song_name = api_song.get("title")
         song_artist = api_song.get("artist")
 
