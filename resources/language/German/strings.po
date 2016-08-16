@@ -1,0 +1,414 @@
+# Kodi Media Center language file
+# Addon Name: Google Music EXP
+# Addon id: plugin.audio.googlemusic.exp
+# Addon Provider: foreverguest
+msgid ""
+msgstr ""
+"Project-Id-Version: plugin.audio.googlemusic.exp\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: foreverguest\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: de\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+####
+# Settings
+####
+msgctxt "#30001"
+msgid "General"
+msgstr "Allgemein"
+
+msgctxt "#30002"
+msgid "Views"
+msgstr ""
+
+msgctxt "#30051"
+msgid "Advanced"
+msgstr "Fortgeschritten"
+
+msgctxt "#30011"
+msgid "Username"
+msgstr "Benutzername"
+
+msgctxt "#30012"
+msgid "Password"
+msgstr "Passwort"
+
+msgctxt "#30061"
+msgid "Debug"
+msgstr "Debugging"
+
+msgctxt "#30062"
+msgid "Clear cache"
+msgstr "Cache leeren"
+
+msgctxt "#30063"
+msgid "Clear cookie"
+msgstr "Cookies löschen"
+
+msgctxt "#30064"
+msgid "SQLite database"
+msgstr "SQLite-Datenbank"
+
+msgctxt "#30066"
+msgid "Pre-fetch URL"
+msgstr "URL vorgreifen"
+
+msgctxt "#30052"
+msgid "Export Path"
+msgstr "Export-Pfad"
+
+msgctxt "#30053"
+msgid "Always export after library update"
+msgstr "Nach einer Aktualisierung der Bibliothek immer exportieren"
+
+msgctxt "#30054"
+msgid "Load local music library (requires library update)"
+msgstr ""
+
+msgctxt "#30065"
+msgid "Override Views"
+msgstr "Ansicht überschreiben"
+
+msgctxt "#30055"
+msgid "Artists ViewID"
+msgstr ""
+
+msgctxt "#30056"
+msgid "Albums ViewID"
+msgstr ""
+
+msgctxt "#30057"
+msgid "Playlists ViewID"
+msgstr ""
+
+msgctxt "#30058"
+msgid "Stations ViewID"
+msgstr ""
+
+msgctxt "#30059"
+msgid "Songs ViewID"
+msgstr ""
+
+msgctxt "#30067"
+msgid "Auto Update Library"
+msgstr "Bibliothek automatisch aktualisieren"
+
+msgctxt "#30068"
+msgid "Never"
+msgstr "Nie"
+
+msgctxt "#30069"
+msgid "Weekly"
+msgstr "Wöchentlich"
+
+msgctxt "#30070"
+msgid "Daily"
+msgstr "Täglich"
+
+msgctxt "#30071"
+msgid "Hourly"
+msgstr "Stündlich"
+
+msgctxt "#30072"
+msgid "Stream quality"
+msgstr "Stream-Qualität"
+
+msgctxt "#30073"
+msgid "High"
+msgstr "Hoch"
+
+msgctxt "#30074"
+msgid "Medium"
+msgstr "Mittel"
+
+msgctxt "#30075"
+msgid "Low"
+msgstr "Niedrig"
+
+msgctxt "#30076"
+msgid "Youtube Video Quality"
+msgstr "Youtube Video Qualität"
+
+msgctxt "#30077"
+msgid "Any"
+msgstr "Irgendein"
+
+####
+# Navigation menus
+####
+msgctxt "#30201"
+msgid "All Songs"
+msgstr "Alle Titel"
+
+msgctxt "#30202"
+msgid "Playlists"
+msgstr ""
+
+msgctxt "#30203"
+msgid "Stations"
+msgstr "Schnellmixe"
+
+msgctxt "#30204"
+msgid "Auto Playlists"
+msgstr "Automatische Playlists"
+
+msgctxt "#30205"
+msgid "Artists"
+msgstr "Interpreten"
+
+msgctxt "#30206"
+msgid "Albums"
+msgstr "Alben"
+
+msgctxt "#30207"
+msgid "Genres"
+msgstr ""
+
+msgctxt "#30208"
+msgid "Search"
+msgstr "Suche"
+
+msgctxt "#30209"
+msgid "My Library"
+msgstr "Meine Musik"
+
+msgctxt "#30210"
+msgid "Shuffle My Library"
+msgstr "Meine Musik zufällig wiedergeben"
+
+msgctxt "#30211"
+msgid "I'm feeling lucky mix"
+msgstr "Auf gut Glück-Mix"
+
+msgctxt "#30212"
+msgid "Composers"
+msgstr "Komponisten"
+
+msgctxt "#30213"
+msgid "Songs"
+msgstr "Titel"
+
+msgctxt "#30214"
+msgid "Shuffle Albums"
+msgstr "Zufall Alben"
+
+msgctxt "#30215"
+msgid "Thumbs up"
+msgstr "Mag ich"
+
+msgctxt "#30216"
+msgid "Last added"
+msgstr "Zuletzt hinzugefügt"
+
+msgctxt "#30217"
+msgid "Free and purchased"
+msgstr "Kostenlos & gekauft"
+
+msgctxt "#30218"
+msgid "Most played"
+msgstr "Meist gespielt"
+
+msgctxt "#30219"
+msgid "Listen Now"
+msgstr "Jetzt anhören"
+
+msgctxt "#30220"
+msgid "Top charts"
+msgstr "Top-Charts"
+
+msgctxt "#30221"
+msgid "New Releases"
+msgstr "Neuerscheinungen"
+
+msgctxt "#30222"
+msgid "Browse stations"
+msgstr "Sender durchsuchen"
+
+####
+# Context actions
+####
+msgctxt "#30301"
+msgid "Play all"
+msgstr "Alle wiedergeben"
+
+msgctxt "#30302"
+msgid "Play all - shuffle"
+msgstr "Alle zufällig wiedergeben"
+
+msgctxt "#30303"
+msgid "Update playlist"
+msgstr "Playlist aktualisieren"
+
+msgctxt "#30304"
+msgid "Update playlists"
+msgstr "Playlists aktualisieren"
+
+msgctxt "#30305"
+msgid "Update library"
+msgstr "Bibliothek aktualisieren"
+
+msgctxt "#30306"
+msgid "Add to favourites"
+msgstr "Zu Favoriten hinzufügen"
+
+msgctxt "#30307"
+msgid "Add to playlist"
+msgstr "Zu Playlist hinzufügen"
+
+msgctxt "#30308"
+msgid "Remove from playlist"
+msgstr "Aus Playlist entfernen"
+
+msgctxt "#30309"
+msgid "Add to library"
+msgstr "Zur Bibliothek hinzufügen"
+
+msgctxt "#30310"
+msgid "Start Radio"
+msgstr "Radio starten"
+
+msgctxt "#30311"
+msgid "Search in Youtube"
+msgstr "In Youtube suchen"
+
+msgctxt "#30312"
+msgid "Play all in Youtube"
+msgstr "Alle in YouTube wiedergeben"
+
+msgctxt "#30313"
+msgid "Play in Youtube"
+msgstr "In YouTube wiedergeben"
+
+msgctxt "#30314"
+msgid "Export"
+msgstr "Exportieren"
+
+msgctxt "#30315"
+msgid "Add to queue"
+msgstr ""
+
+msgctxt "#30316"
+msgid "Create playlist"
+msgstr ""
+
+msgctxt "#30317"
+msgid "Delete playlist"
+msgstr ""
+
+msgctxt "#30318"
+msgid "Delete station"
+msgstr ""
+
+msgctxt "#30319"
+msgid "Artist top songs"
+msgstr ""
+
+msgctxt "#30320"
+msgid "Related artists"
+msgstr ""
+
+msgctxt "#30321"
+msgid "Play in Youtube - shuffle"
+msgstr "Alle zufällig in YouTube wiedergeben"
+
+####
+# Messages
+####
+msgctxt "#30101"
+msgid "Login failed"
+msgstr "Login gescheitert"
+
+msgctxt "#30102"
+msgid "Invalid credentials or connectivity problems"
+msgstr "Ungültige Anmeldedaten oder Verbindungsprobleme"
+
+msgctxt "#30103"
+msgid "Library update needed"
+msgstr "Aktualisierung der Bibliothek wird benötigt"
+
+msgctxt "#30104"
+msgid "Subscriber track not playable"
+msgstr "All Access-Titel kann nicht wiedergegeben werden"
+
+msgctxt "#30105"
+msgid "Loading Library"
+msgstr "Bibliothek wird geladen"
+
+msgctxt "#30106"
+msgid "Cache in use - try later"
+msgstr "Cache wird gerade benutzt - später erneut versuchen"
+
+msgctxt "#30107"
+msgid "Export completed"
+msgstr "Export fertiggestellt"
+
+msgctxt "#30108"
+msgid "Export path not defined"
+msgstr "Kein Export-Pfad definiert"
+
+msgctxt "#30109"
+msgid "Error calling Youtube Addon"
+msgstr "Fehler beim Aufrufen des YouTube-Addons"
+
+msgctxt "#30110"
+msgid "Done"
+msgstr ""
+
+msgctxt "#30401"
+msgid "Add to Playlist..."
+msgstr "Zu Playlist hinzufügen..."
+
+msgctxt "#30402"
+msgid "Radio Name"
+msgstr "Radio-Name"
+
+msgctxt "#30403"
+msgid "Exporting Library"
+msgstr "Bibliothek wird exportiert"
+
+msgctxt "#30404"
+msgid "Please wait"
+msgstr "Bitte warten"
+
+msgctxt "#30405"
+msgid "Confirmation"
+msgstr ""
+
+msgctxt "#30406"
+msgid "Delete playlist?"
+msgstr ""
+
+msgctxt "#30407"
+msgid "Delete station?"
+msgstr ""
+
+msgctxt "#30408"
+msgid "Fetching video IDs"
+msgstr ""
+
+msgctxt "#30409"
+msgid "Set Rating"
+msgstr ""
+
+msgctxt "#30410"
+msgid "Thumbs up"
+msgstr ""
+
+msgctxt "#30411"
+msgid "Thumbs down"
+msgstr ""
+
+msgctxt "#30412"
+msgid "No thumbs"
+msgstr ""
+
+msgctxt "#30413"
+msgid "Playlist Name"
+msgstr ""
+

@@ -12,7 +12,7 @@ class GoogleMusicActions():
             utils.playAll(self._getSongs(params), 'shuffle' in params)
         elif (action == "add_to_queue"):
             self.addToQueue(params)
-            self.notify(self.lang(30110) or "Done")
+            self.notify(self.lang(30110))
         elif (action == "play_all_yt"):
             titles = [song['display_name'] for song in self._getSongs(params)]
             self.playYoutube(titles, 'shuffle' in params)
@@ -22,10 +22,10 @@ class GoogleMusicActions():
             self.clearCache()
         elif (action == "clear_cookie"):
             self.api.clearCookie()
-            self.notify(self.lang(30110) or "Done")
+            self.notify(self.lang(30110))
         elif (action == "add_favourite"):
             self.addFavourite(params.pop("title"),params)
-            self.notify(self.lang(30110) or "Done")
+            self.notify(self.lang(30110))
         elif (action == "add_library"):
             self.api.addStoreTrack(params["song_id"])
             self.notify(self.lang(30103))
@@ -37,7 +37,7 @@ class GoogleMusicActions():
             self.addToPlaylist(params["song_id"])
         elif (action == "del_from_playlist"):
             self.api.delFromPlaylist(params["playlist_id"], params["song_id"])
-            self.notify(self.lang(30110) or "Done")
+            self.notify(self.lang(30110))
         elif (action == "update_library"):
             self.clearCache()
             xbmc.executebuiltin("XBMC.RunPlugin(%s)" % utils.addon_url)
@@ -52,7 +52,7 @@ class GoogleMusicActions():
                 utils.addon.openSettings()
         elif (action == "export_playlist"):
             self.exportPlaylist(params.get('title'), params.get('playlist_id'))
-            self.notify(self.lang(30110) or "Done")
+            self.notify(self.lang(30110))
         elif (action == "start_radio"):
             keyboard = xbmc.Keyboard(self.api.getSong(params["song_id"])['title'], self.lang(30402))
             keyboard.doModal()
@@ -69,18 +69,18 @@ class GoogleMusicActions():
         elif (action == "set_thumbs"):
             self.setThumbs(params["song_id"])
         elif (action == "create_playlist"):
-            keyboard = xbmc.Keyboard('',self.lang(30413) or "Playlist Name")
+            keyboard = xbmc.Keyboard('',self.lang(30413))
             keyboard.doModal()
             if keyboard.isConfirmed() and keyboard.getText():
                 self.api.createPlaylist(keyboard.getText())
-                self.notify(self.lang(30110) or "Done")
+                self.notify(self.lang(30110))
         elif (action == "delete_playlist"):
-            if xbmcgui.Dialog().yesno(self.lang(30405) or 'Confirmation',self.lang(30406) or 'Delete playlist?','"'+params["title"]+'"'):
+            if xbmcgui.Dialog().yesno(self.lang(30405),self.lang(30406),'"'+params["title"]+'"'):
                 self.api.deletePlaylist(params["playlist_id"])
                 xbmc.executebuiltin("ActivateWindow(10502,%s/?path=library)" % utils.addon_url)
                 self.notify(self.lang(30110))
         elif (action == "delete_station"):
-            if xbmcgui.Dialog().yesno(self.lang(30405) or 'Confirmation',self.lang(30407) or 'Delete station?','"'+params["title"]+'"'):
+            if xbmcgui.Dialog().yesno(self.lang(30405),self.lang(30407),'"'+params["title"]+'"'):
                 self.api.getApi().delete_stations(params["radio_id"])
                 xbmc.executebuiltin("ActivateWindow(10502,%s/?path=library)" % utils.addon_url)
                 self.notify(self.lang(30110))
@@ -131,7 +131,7 @@ class GoogleMusicActions():
     def clearCache(self):
         try:
             self.api.clearCache()
-            self.notify(self.lang(30110) or "Done")
+            self.notify(self.lang(30110))
         except Exception as e:
             utils.log(repr(e))
             self.notify(self.lang(30106))
@@ -142,15 +142,15 @@ class GoogleMusicActions():
         selected = xbmcgui.Dialog().select(self.lang(30401) , plist)
         if selected > 0:
             self.api.addToPlaylist(playlists[selected][0], song_id)
-            self.notify(self.lang(30110) or "Done")
+            self.notify(self.lang(30110))
 
     def setThumbs(self, song_id):
-        options = [self.lang(30410) or 'Thumbs Up', self.lang(30412) or 'No Thumbs', self.lang(30411) or 'Thumbs Down']
-        selected = xbmcgui.Dialog().select(self.lang(30409) or 'Rating' , options)
+        options = [self.lang(30410), self.lang(30412), self.lang(30411)]
+        selected = xbmcgui.Dialog().select(self.lang(30409), options)
         if selected >= 0:
             thumbs = {'0':'5','1':'1','2':'0'}[str(selected)]
             self.api.setThumbs(song_id, thumbs)
-            self.notify(self.lang(30110) or "Done")
+            self.notify(self.lang(30110))
 
     def addFavourite(self, name, params):
         import fileinput

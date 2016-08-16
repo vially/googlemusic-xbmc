@@ -431,13 +431,13 @@ class GoogleMusicNavigation():
         cm = []
         if song_id.startswith('T'):
             cm.append((self.lang(30309), "XBMC.RunPlugin(%s?action=add_library&song_id=%s)" % (utils.addon_url,song_id)))
-            cm.append((self.lang(30319) or 'Artist top songs', "XBMC.RunPlugin(%s?action=artist_topsongs&song_id=%s)" % (utils.addon_url,song_id)))
-            cm.append((self.lang(30320) or 'Related artists', "XBMC.RunPlugin(%s?action=related_artists&song_id=%s)" % (utils.addon_url,song_id)))
+            cm.append((self.lang(30319), "XBMC.RunPlugin(%s?action=artist_topsongs&song_id=%s)" % (utils.addon_url,song_id)))
+            cm.append((self.lang(30320), "XBMC.RunPlugin(%s?action=related_artists&song_id=%s)" % (utils.addon_url,song_id)))
         if song_type == 'library':
             cm.append((self.lang(30307),"XBMC.RunPlugin(%s?action=add_playlist&song_id=%s)" % (utils.addon_url,song_id)))
         elif song_type.startswith('playlist'):
             cm.append((self.lang(30308), "XBMC.RunPlugin(%s?action=del_from_playlist&song_id=%s&playlist_id=%s)" % (utils.addon_url, song_id, song_type[8:])))
-        cm.append((self.lang(30409) or "Rating", "XBMC.RunPlugin(%s?action=set_thumbs&song_id=%s)" % (utils.addon_url, song_id)))
+        cm.append((self.lang(30409), "XBMC.RunPlugin(%s?action=set_thumbs&song_id=%s)" % (utils.addon_url, song_id)))
         cm.append((self.lang(30313), "XBMC.RunPlugin(%s?action=play_yt&title=%s)" % (utils.addon_url, title)))
         cm.append((self.lang(30311), "XBMC.RunPlugin(%s?action=search_yt&title=%s)" % (utils.addon_url, title)))
         cm.append((self.lang(30310), "XBMC.RunPlugin(%s?action=start_radio&song_id=%s)" % (utils.addon_url,song_id)))
@@ -450,8 +450,8 @@ class GoogleMusicNavigation():
         cm.append((self.lang(30312), "XBMC.RunPlugin(%s?action=play_all_yt&radio_id=%s)" % (utils.addon_url, radio_id)))
         cm.append((self.lang(30321), "XBMC.RunPlugin(%s?action=play_all_yt&radio_id=%s&shuffle=true)" % (utils.addon_url, radio_id)))
         cm.append((self.lang(30306), "XBMC.RunPlugin(%s?action=add_favourite&path=playlist&radio_id=%s&title=%s)" % (utils.addon_url, radio_id, name)))
-        cm.append((self.lang(30315) or 'Add to queue', "XBMC.RunPlugin(%s?action=add_to_queue&radio_id=%s)" % (utils.addon_url, radio_id)))
-        cm.append((self.lang(30318) or 'Delete station', "XBMC.RunPlugin(%s?action=delete_station&radio_id=%s&title=%s)" % (utils.addon_url, radio_id, name)))
+        cm.append((self.lang(30315), "XBMC.RunPlugin(%s?action=add_to_queue&radio_id=%s)" % (utils.addon_url, radio_id)))
+        cm.append((self.lang(30318), "XBMC.RunPlugin(%s?action=delete_station&radio_id=%s&title=%s)" % (utils.addon_url, radio_id, name)))
         return cm
 
     def getPlayAllContextMenuItems(self, name, playlist):
@@ -462,8 +462,8 @@ class GoogleMusicNavigation():
         cm.append((self.lang(30321), "XBMC.RunPlugin(%s?action=play_all_yt&playlist_id=%s&shuffle=true)" % (utils.addon_url, playlist)))
         cm.append((self.lang(30306), "XBMC.RunPlugin(%s?action=add_favourite&path=playlist&playlist_id=%s&title=%s)" % (utils.addon_url, playlist, name)))
         cm.append((self.lang(30314), "XBMC.RunPlugin(%s?action=export_playlist&playlist_id=%s&title=%s)" % (utils.addon_url, playlist, name)))
-        cm.append((self.lang(30315) or 'Add to queue', "XBMC.RunPlugin(%s?action=add_to_queue&playlist_id=%s)" % (utils.addon_url, playlist)))
-        cm.append((self.lang(30317) or 'Delete playlist', "XBMC.RunPlugin(%s?action=delete_playlist&playlist_id=%s&title=%s)" % (utils.addon_url, playlist, name)))
+        cm.append((self.lang(30315), "XBMC.RunPlugin(%s?action=add_to_queue&playlist_id=%s)" % (utils.addon_url, playlist)))
+        cm.append((self.lang(30317), "XBMC.RunPlugin(%s?action=delete_playlist&playlist_id=%s&title=%s)" % (utils.addon_url, playlist, name)))
         return cm
 
     def getFilterContextMenuItems(self, filter_type, filter_criteria, artist=''):
@@ -481,7 +481,7 @@ class GoogleMusicNavigation():
         cm = []
         cm.append((self.lang(30304), "XBMC.RunPlugin(%s?action=update_playlists&playlist_type=%s)" % (utils.addon_url, playlist_type)))
         cm.append((self.lang(30306), "XBMC.RunPlugin(%s?action=add_favourite&path=playlists&playlist_type=%s&title=%s)" % (utils.addon_url, playlist_type, name)))
-        cm.append((self.lang(30316) or 'Create playlist', "XBMC.RunPlugin(%s?action=create_playlist)" % utils.addon_url))
+        cm.append((self.lang(30316), "XBMC.RunPlugin(%s?action=create_playlist)" % utils.addon_url))
         return cm
 
     def getSearch(self, query):
