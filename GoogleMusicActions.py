@@ -243,9 +243,13 @@ class GoogleMusicActions():
         return songs
 
     def _getVideoIDs(self, titles, progress_dialog=None):
+
         import urllib, urllib2
         import gmusicapi.compat as compat
         loadJson = compat.json.loads
+
+        import GoogleMusicStorage
+        storage = GoogleMusicStorage.storage
 
         headers = {'Host': 'www.googleapis.com',
                    'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.36 Safari/537.36',
@@ -253,7 +257,9 @@ class GoogleMusicActions():
                    }
         params = {'part': 'id',
                   'maxResults': 1,
-                  'type': 'video', #'order': 'rating', #'regionCode':'us',
+                  'type': 'video',
+                  #'order': 'rating', #'regionCode':'us', #'safeSearch': 'none',
+                  'videoCategoryId':'10', # Music category
                   'videoDefinition': { '0':'high','1':'standard','2':'any' } [utils.addon.getSetting('youtube.video.quality')],
                   'key': 'AIzaSyCpYQnhH6BA_wGBB79agx_32kuoq7WwTZg'
                   }
@@ -267,7 +273,16 @@ class GoogleMusicActions():
                     return videoids
                 count = count +1
                 progress_dialog.update(int(count * 100 / len(titles)))
-            params['q'] = '%s -interview -cover -remix -album' % title.lower()
+
+            # try to fetch from local library first
+            videoid = storage.getVideo(title)
+            if videoid:
+                videoids.append([videoid, title])
+                utils.log("Found videoid in library %s:%s" % (videoid, title))
+                continue
+
+            # fetch from web
+            params['q'] = '%s -interview -cover -remix -album -rocksmith -solo -lyrics -live -show' % title.lower()
             req = urllib2.Request(url % urllib.urlencode(params), headers=headers)
             response = urllib2.urlopen(req).read()
             utils.log(repr(response))

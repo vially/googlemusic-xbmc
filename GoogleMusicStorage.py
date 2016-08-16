@@ -103,12 +103,16 @@ class GoogleMusicStorage():
                   'mostplayed':'SELECT * FROM songs ORDER BY playcount desc LIMIT 500',
                   'freepurchased':'SELECT * FROM songs WHERE type = 6 order by creation_date desc',
                   'feellucky':'SELECT * FROM songs ORDER BY random() LIMIT 500',
+                  'videos':'SELECT * FROM songs WHERE videoid IS NOT NULL ORDER BY display_name',
                  }
         return self.curs.execute(querys[playlist]).fetchall()
 
     def getSong(self, song_id):
         return self.curs.execute("SELECT title,artist,album,year,tracknumber,rating,albumart,stream_url as url "+
                                  "FROM songs WHERE song_id = ? ", (song_id,)).fetchone()
+
+    def getVideo(self, title):
+        return self.curs.execute("SELECT videoid FROM songs WHERE display_name like ? ", ('%'+title+'%',)).fetchone()["videoid"]
 
     def getArtist(self, artist_id):
         artist = self.curs.execute("SELECT artistart FROM artists WHERE artist_id = ? ", (artist_id,)).fetchone()
@@ -196,13 +200,14 @@ class GoogleMusicStorage():
                   'display_name':  self._getSongDisplayName(api_song),
                   'stream_url':    None,
                   'artistart':     get("artistArtRef")[0]['url'] if get("artistArtRef") else default_artistart,
+                  'videoid':       get("primaryVideo",{"id":None})["id"],
               }
 
         self.curs.executemany("INSERT OR REPLACE INTO songs VALUES ("+
                               ":song_id, :comment, :rating, :last_played, :discnumber, :composer, :year, :album, "+
                               ":title, :album_artist, :type, :tracknumber, :total_tracks, :genre, :playcount, "+
                               ":creation_date, :artist, :total_discs, :duration, :albumart, :display_name, "+
-                              ":stream_url, :artistart)", songs())
+                              ":stream_url, :artistart, :videoid)", songs())
 
         self.conn.commit()
 
@@ -276,7 +281,8 @@ class GoogleMusicStorage():
                 albumart VARCHAR,                          --# 19
                 display_name VARCHAR,                      --# 20
                 stream_url VARCHAR,                        --# 21
-                artistart VARCHAR                          --# 22
+                artistart VARCHAR,                         --# 22
+                videoid VARCHAR                            --# 23
             );
             CREATE TABLE IF NOT EXISTS playlists (
                 playlist_id VARCHAR NOT NULL PRIMARY KEY,
@@ -341,7 +347,7 @@ class GoogleMusicStorage():
                        iTimesPlayed as playcount, album.lastScraped as creation_date,
                        song.strArtists as artist, 0 as total_discs, iDuration as duration,
                        a1.url as albumart, strArtist||' - '||strTitle as display_name,
-                       strPath||strFileName as stream_url, a2.url as artistart
+                       strPath||strFileName as stream_url, a2.url as artistart, '' as videoid
                    FROM song, artist, album, path
                        left join art a1 on album.idAlbum = a1.media_id and a1.media_type = 'album'
                        left join art a2 on artist.idArtist = a2.media_id and a2.media_type = 'artist'
@@ -364,7 +370,7 @@ class GoogleMusicStorage():
                               ":song_id, :comment, :rating, :last_played, :discnumber, :composer, :year, :album, "+
                               ":title, :album_artist, :type, :tracknumber, :total_tracks, :genre, :playcount, "+
                               ":creation_date, :artist, :total_discs, :duration, :albumart, :display_name, "+
-                              ":stream_url, :artistart)", uniqSongs)
+                              ":stream_url, :artistart, :videoid)", uniqSongs)
 
         self.conn.commit()
 

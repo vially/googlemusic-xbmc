@@ -203,9 +203,24 @@ class GoogleMusicNavigation():
     def listPlaylistSongs(self, playlist_id):
         utils.log("Loading playlist: " + playlist_id)
         songs = self.api.getPlaylistSongs(playlist_id)
+        if playlist_id == 'videos':
+            return self.addVideosFromLibrary(songs)
         if playlist_id in ('thumbsup','lastadded','mostplayed','freepurchased','feellucky','all_songs','shuffled_albums'):
             return self.addSongsFromLibrary(songs, 'library')
         return self.addSongsFromLibrary(songs, 'playlist'+playlist_id)
+
+    def addVideosFromLibrary(self, library):
+        listItems = []
+        append = listItems.append
+
+        for song in library:
+            li = ListItem(song['display_name'])
+            li.setArt({'thumb':song['albumart'], 'fanart': song['artistart']})
+            li.setProperty('IsPlayable', 'true')
+            li.setProperty('Video', 'true')
+            append(["plugin://plugin.video.youtube/play/?video_id=%s" % song['videoid'], li])
+
+        return listItems
 
     def addSongsFromLibrary(self, library, song_type):
         listItems = []
@@ -249,7 +264,8 @@ class GoogleMusicNavigation():
         elif playlist_type == 'auto':
             icon = utils.addon.getAddonInfo('icon')
             auto = [['thumbsup',self.lang(30215),icon],['lastadded',self.lang(30216),icon],
-                    ['freepurchased',self.lang(30217),icon],['mostplayed',self.lang(30218),icon]]
+                    ['freepurchased',self.lang(30217),icon],['mostplayed',self.lang(30218),icon],
+                    ['videos','Videos',icon]]
             for pl_id, pl_name, pl_arturl in auto:
                 cm = self.getPlayAllContextMenuItems(pl_name, pl_id)
                 append(addFolder(pl_name, {'path':"playlist", 'playlist_id':pl_id}, cm, pl_arturl))

@@ -35,7 +35,7 @@ class GoogleMusicApi():
         self.getLogin().clearCookie()
 
     def getPlaylistSongs(self, playlist_id, forceRenew=False):
-        if playlist_id in ('thumbsup','lastadded','mostplayed','freepurchased','feellucky'):
+        if playlist_id in ('videos','thumbsup','lastadded','mostplayed','freepurchased','feellucky'):
             songs = storage.getAutoPlaylistSongs(playlist_id)
             if playlist_id == 'thumbsup':
                 """ Try to fetch store thumbs up songs """
@@ -272,6 +272,7 @@ class GoogleMusicApi():
                  'albumart':      track['albumArtRef'][0]['url'] if track.get('albumArtRef') else utils.addon.getAddonInfo('icon'),
                  'display_name':  track.get('artist')+" - "+track['title'],
                  'artistart':     track['artistArtRef'][0]['url'] if track.get('artistArtRef') else utils.addon.getAddonInfo('fanart'),
+                 'videoid':       track.get('primaryVideo',{'id':""})['id'],
                  'wentryid':      track.get('wentryid'),
                 }
 
