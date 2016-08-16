@@ -241,7 +241,8 @@ class GoogleMusicActions():
             utils.log("Loading radio: " + get('radio_id'))
             songs = self.api.getStationTracks(get('radio_id'))
         else:
-            songs = self.api.getFilterSongs(get('filter_type'), get('filter_criteria'), albums='')
+            songs = self.api.getFilterSongs(get('filter_type'), get('filter_criteria'), get('artist'))
+
 
         return songs
 

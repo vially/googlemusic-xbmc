@@ -291,7 +291,7 @@ class GoogleMusicNavigation():
             album  = item['album']
             artist = item['album_artist']
             params = {'path':criteria,'album':album,'artist':artist}
-            folder = addFolder(album, params, getCm(criteria, album), item['arturl'], artist, item['artistart'])
+            folder = addFolder(album, params, getCm(criteria, album, artist), item['arturl'], artist, item['artistart'])
             folder[1].setInfo(type='music', infoLabels={
                    'year':item['year'], 'artist':artist, 'album':album,
                    'date':time.strftime('%d.%m.%Y', time.gmtime(item['date']/1000000)),
@@ -466,15 +466,15 @@ class GoogleMusicNavigation():
         cm.append((self.lang(30317) or 'Delete playlist', "XBMC.RunPlugin(%s?action=delete_playlist&playlist_id=%s&title=%s)" % (utils.addon_url, playlist, name)))
         return cm
 
-    def getFilterContextMenuItems(self, filter_type, filter_criteria):
+    def getFilterContextMenuItems(self, filter_type, filter_criteria, artist=''):
         cm = []
         cm.append((self.lang(30306), "XBMC.RunPlugin(%s?action=add_favourite&path=%s&name=%s&title=%s)" % (utils.addon_url, filter_type, filter_criteria, filter_criteria)))
-        cm.append((self.lang(30301), "XBMC.RunPlugin(%s?action=play_all&filter_type=%s&filter_criteria=%s)" % (utils.addon_url, filter_type, filter_criteria)))
-        cm.append((self.lang(30302), "XBMC.RunPlugin(%s?action=play_all&filter_type=%s&filter_criteria=%s&shuffle=true)" % (utils.addon_url, filter_type, filter_criteria)))
-        cm.append((self.lang(30312), "XBMC.RunPlugin(%s?action=play_all_yt&filter_type=%s&filter_criteria=%s)" % (utils.addon_url, filter_type, filter_criteria)))
+        cm.append((self.lang(30301), "XBMC.RunPlugin(%s?action=play_all&filter_type=%s&filter_criteria=%s&artist=%s)" % (utils.addon_url, filter_type, filter_criteria, artist)))
+        cm.append((self.lang(30302), "XBMC.RunPlugin(%s?action=play_all&filter_type=%s&filter_criteria=%s&shuffle=true&artist=%s)" % (utils.addon_url, filter_type, filter_criteria, artist)))
+        cm.append((self.lang(30312), "XBMC.RunPlugin(%s?action=play_all_yt&filter_type=%s&filter_criteria=%s&artist=%s)" % (utils.addon_url, filter_type, filter_criteria, artist)))
         cm.append((self.lang(30321), "XBMC.RunPlugin(%s?action=play_all_yt&filter_type=%s&filter_criteria=%s&shuffle=true&artist=%s)" % (utils.addon_url, filter_type, filter_criteria, artist)))
-        cm.append((self.lang(30208), "XBMC.RunPlugin(%s?action=search&filter_type=%s&filter_criteria=%s)" % (utils.addon_url, filter_type, filter_criteria)))
-        cm.append((self.lang(30315) or 'Add to queue', "XBMC.RunPlugin(%s?action=add_to_queue&filter_type=album&filter_criteria=%s)" % (utils.addon_url, filter_criteria)))
+        cm.append((self.lang(30208), "XBMC.RunPlugin(%s?action=search&filter_type=%s&filter_criteria=%s&artist=%s)" % (utils.addon_url, filter_type, filter_criteria, artist)))
+        cm.append((self.lang(30315), "XBMC.RunPlugin(%s?action=add_to_queue&filter_type=album&filter_criteria=%s&artist=%s)" % (utils.addon_url, filter_criteria, artist)))
         return cm
 
     def getPlaylistsContextMenuItems(self, name, playlist_type):
