@@ -25,7 +25,7 @@ class GoogleMusicStorage():
             try:
                 self.curs.execute("SELECT * FROM songs, library_songs, playlists, playlists_songs LIMIT 1").fetchone()
             except Exception as ex:
-                utils.log("Cache database error, deleting "+repr(ex))
+                utils.log("Cache database error, clear "+repr(ex))
                 self.clearCache()
 
         # Make sure to initialize database when it does not exist.
@@ -60,19 +60,22 @@ class GoogleMusicStorage():
         utils.log("### storage getfiltersongs: "+repr(filter_type)+" "+repr(filter_criteria)+" "+repr(albumArtist))
 
         if albumArtist:
-            query = "select * from library_songs where album = :filter and album_artist = :albumArtist order by discnumber asc, tracknumber asc, display_name asc"
+            query = "select * from library_songs where album = :filter and album_artist = :albumArtist "\
+                    "order by discnumber asc, tracknumber asc, display_name asc"
         elif filter_type == 'album':
-            query = "select * from library_songs where album = :filter order by discnumber asc, tracknumber asc, display_name asc"
+            query = "select * from library_songs where album = :filter "\
+                    "order by discnumber asc, tracknumber asc, display_name asc"
         elif filter_type == 'artist':
-            query = "select * from library_songs where (artist = :filter or album_artist = :filter) order by album asc, discnumber asc, tracknumber asc, display_name asc"
+            query = "select * from library_songs where (artist = :filter or album_artist = :filter) "\
+                    "order by album asc, discnumber asc, tracknumber asc, display_name asc"
         elif filter_type == 'genre':
-            query = "select * from library_songs where genre = :filter order by album asc, discnumber asc, tracknumber asc, title asc"
+            query = "select * from library_songs where genre = :filter "\
+                    "order by album asc, discnumber asc, tracknumber asc, title asc"
         elif filter_type == 'composer':
-            query = "select * from library_songs where composer = :filter order by album asc, discnumber asc, tracknumber asc, title asc"
+            query = "select * from library_songs where composer = :filter "\
+                    "order by album asc, discnumber asc, tracknumber asc, title asc"
 
-        songs = self.curs.execute(query,{'filter':filter_criteria if filter_criteria else '','albumArtist':albumArtist}).fetchall()
-
-        return songs
+        return self.curs.execute(query,{'filter':filter_criteria,'albumArtist':albumArtist}).fetchall()
 
     def getCriteria(self, criteria, name):
         utils.log("### storage getcriteria: "+repr(criteria)+" "+repr(name))
@@ -112,7 +115,7 @@ class GoogleMusicStorage():
         return self.curs.execute(querys[playlist]).fetchall()
 
     def getSong(self, song_id):
-        return self.curs.execute("SELECT title,artist,album,year,tracknumber,rating,albumart,stream_url as url "+
+        return self.curs.execute("SELECT title,artist,album,year,tracknumber,rating,albumart,artistart,stream_url as url "+
                                  "FROM songs WHERE song_id = ? ", (song_id,)).fetchone()
 
     def getVideo(self, title):
@@ -163,8 +166,8 @@ class GoogleMusicStorage():
     def storeInAllSongs(self, api_songs):
         self.curs.execute("PRAGMA foreign_keys = OFF")
 
-        default_albumart  = utils.addon.getAddonInfo('icon')
-        default_artistart = utils.addon.getAddonInfo('fanart')
+        default_albumart  = [{"url": utils.addon.getAddonInfo('icon')}]
+        default_artistart = [{"url": utils.addon.getAddonInfo('fanart')}]
 
         def artists():
           for api_song in api_songs:
@@ -200,10 +203,10 @@ class GoogleMusicStorage():
                   'artist':        get("artist") if get("artist") else get("albumArtist") if get("albumArtist") else '-???-',
                   'total_discs':   get("totalDiscCount"),
                   'duration':      int(get("durationMillis",0))/1000,
-                  'albumart':      get("albumArtRef")[0]['url'] if get("albumArtRef") else default_albumart,
+                  'albumart':      get("albumArtRef", default_albumart)[0]['url'],
                   'display_name':  self._getSongDisplayName(api_song),
                   'stream_url':    None,
-                  'artistart':     get("artistArtRef")[0]['url'] if get("artistArtRef") else default_artistart,
+                  'artistart':     get("artistArtRef", default_artistart)[0]["url"],
                   'videoid':       get("primaryVideo",{"id":None})["id"],
               }
 
@@ -360,9 +363,9 @@ class GoogleMusicStorage():
 
         # check for repeated songs (same title, artist and album)
         uniqSongs = []
+        uniqQuery = "select 1 from songs where lower(title) = lower(?) and lower(artist) = lower(?) and lower(album) = lower(?)"
         for song in kodiSongs:
-            exists = self.curs.execute("select 1 from songs where lower(title) = lower(?) and lower(artist) = lower(?) and lower(album) = lower(?)",
-                                       (song['title'], song['artist'], song['album'])).fetchall()
+            exists = self.curs.execute(uniqQuery, (song['title'], song['artist'], song['album'])).fetchall()
             #utils.log(repr(exists))
             if not exists:
                 #utils.log(repr(song))

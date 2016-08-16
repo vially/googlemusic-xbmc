@@ -149,7 +149,8 @@ class GoogleMusicApi():
         return result
 
     def getTrack(self, trackid):
-        return self._convertStoreTrack(self.getApi().get_track_info(trackid))
+        #return self._convertStoreTrack(self.getApi().get_track_info(trackid))
+        return self._loadStoreTracks([self.getApi().get_track_info(trackid)])[0]
 
     def getSharedPlaylist(self, sharetoken):
         return self._loadStoreTracks(self.getApi().get_shared_playlist_contents(sharetoken))

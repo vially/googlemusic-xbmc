@@ -40,7 +40,7 @@ def setResolvedUrl(list_item):
     xbmcplugin.setResolvedUrl(handle=handle, succeeded=True, listitem=list_item)
 
 def setDirectory(list_items, content, sort_methods, view_mode_id):
-    xbmcplugin.addDirectoryItems(handle, list_items)
+    xbmcplugin.addDirectoryItems(handle, list_items, len(list_items))
     if handle > 0:
         xbmcplugin.setContent(handle, content)
 
@@ -52,11 +52,10 @@ def setDirectory(list_items, content, sort_methods, view_mode_id):
     elif content == "albums":
         view_mode_id = addon.getSetting('albums_viewid')
 
-    if view_mode_id and addon.getSetting('overrideview') == "true":
-        xbmc.executebuiltin('Container.SetViewMode(%s)' % view_mode_id)
-
     xbmcplugin.endOfDirectory(handle, succeeded=True)
 
+    if view_mode_id and addon.getSetting('overrideview') == "true":
+        xbmc.executebuiltin('Container.SetViewMode(%s)' % view_mode_id)
 
 def tryEncode(text, encoding='utf-8'):
     try:

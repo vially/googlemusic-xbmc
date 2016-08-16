@@ -285,7 +285,6 @@ class GoogleMusicNavigation():
         getCm     = self.getFilterContextMenuItems
         items     = self.api.getCriteria(criteria, name)
 
-        #utils.log(repr(items))
         for item in items:
             #utils.log(repr(item))
             album  = item['album']

@@ -42,7 +42,9 @@ class GoogleMusicActions():
             self.clearCache()
             xbmc.executebuiltin("XBMC.RunPlugin(%s)" % utils.addon_url)
         elif (action == "reload_library"):
+            xbmc.executebuiltin('ActivateWindow(10138)')
             self.api.loadLibrary();
+            xbmc.executebuiltin('Dialog.Close(10138)')
         elif (action == "export_library"):
             if utils.addon.getSetting('export_path'):
                 self.exportLibrary(utils.addon.getSetting('export_path'))
@@ -63,7 +65,7 @@ class GoogleMusicActions():
         elif (action == "search_yt"):
             xbmc.executebuiltin("ActivateWindow(10025,plugin://plugin.video.youtube/search/?q=%s)" % params['title'])
         elif (action == "play_yt"):
-            self.playYoutube([params.get('title')])
+            self.playYoutube([params.get('artist')+' - '+params.get('title')])
         elif (action == "search"):
             xbmc.executebuiltin("ActivateWindow(10502,%s/?path=search_result&query=%s)" % (utils.addon_url, params.get('filter_criteria')))
         elif (action == "set_thumbs"):
