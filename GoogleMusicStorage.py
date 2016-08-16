@@ -118,12 +118,12 @@ class GoogleMusicStorage():
         self.curs.execute("INSERT OR REPLACE INTO artists VALUES (:artist_id, :artistart)" , (artist_id, artistart))
         self.conn.commit()
 
-    def getSearch(self, query):
+    def getSearch(self, query, max_results=10):
         query = '%'+ query.replace('%','') + '%'
         result = {}
-        result['artists'] = self.curs.execute("SELECT artist as name, max(artistart) as artistArtRef FROM songs WHERE artist like ? GROUP BY artist", (query,)).fetchall()
-        result['tracks'] = self.curs.execute("SELECT * FROM songs WHERE display_name like ? ORDER BY display_name", (query,)).fetchall()
-        result['albums'] = self.curs.execute("SELECT album as name, artist, max(albumart) as albumart FROM songs WHERE album like ? or album_artist like ? GROUP BY album, artist", (query,query)).fetchall()
+        result['artists'] = self.curs.execute("SELECT artist as name, max(artistart) as artistArtRef FROM songs WHERE artist like ? GROUP BY artist LIMIT %s" % max_results, (query,)).fetchall()
+        result['tracks'] = self.curs.execute("SELECT * FROM songs WHERE display_name like ? ORDER BY display_name LIMIT %s" % max_results, (query,)).fetchall()
+        result['albums'] = self.curs.execute("SELECT album as name, artist, artistart, max(albumart) as albumart FROM songs WHERE album like ? or album_artist like ? GROUP BY album, artist LIMIT %s" % max_results, (query,query)).fetchall()
         return result
 
     def storePlaylistSongs(self, playlists_songs):

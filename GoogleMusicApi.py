@@ -112,20 +112,27 @@ class GoogleMusicApi():
     def getCriteria(self, criteria, artist=''):
         return storage.getCriteria(criteria,artist)
 
-    def getSearch(self, query):
+    def getSearch(self, query, max_results=10):
         utils.log("API getsearch: "+query)
-        result = storage.getSearch(query)
+        result = storage.getSearch(query, max_results)
+        #result = {'tracks':[],'albums':[],'artists':[]}
         tracks = result['tracks']
         albums = result['albums']
         artists = result['artists']
+        stations = []
+        videos = []
+        result['stations'] = stations
+        result['videos'] = videos
         try:
-            store_result = self.getApi().search(query)
+            store_result = self.getApi().search(query, max_results)
             #utils.log("API getsearch aa: "+repr(store_result))
             tracks.extend(self._loadStoreTracks(store_result['song_hits']))
             albums.extend(self._loadStoreAlbums(store_result['album_hits']))
-            for artist in store_result['artist_hits']:
-                artists.append(artist['artist'])
-            utils.log("API search results: tracks "+repr(len(tracks))+" albums "+repr(len(albums))+" artists "+repr(len(artists)))
+            artists.extend([artist['artist'] for artist in store_result['artist_hits']])
+            stations.extend([station['station'] for station in store_result['station_hits']])
+            videos.extend([video['youtube_video'] for video in store_result['video_hits']])
+            utils.log("API search results: tracks "+repr(len(tracks))+" albums "+repr(len(albums))
+                     +" artists "+repr(len(artists))+" stations "+repr(len(stations))+" videos "+repr(len(videos)))
         except Exception as e:
             utils.log("*** NO ALL ACCESS RESULT IN SEARCH *** "+repr(e))
         return result
