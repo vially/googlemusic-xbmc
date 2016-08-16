@@ -14,8 +14,8 @@ class GoogleMusicActions():
             self.addToQueue(params)
             self.notify(self.lang(30110) or "Done")
         elif (action == "play_all_yt"):
-            titles = [song['title'] for song in self._getSongs(params)]
-            self.playYoutube(titles)
+            titles = [song['display_name'] for song in self._getSongs(params)]
+            self.playYoutube(titles, 'shuffle' in params)
         elif (action == "update_playlists"):
             self.api.getPlaylistsByType(params["playlist_type"], True)
         elif (action == "clear_cache"):
@@ -104,24 +104,27 @@ class GoogleMusicActions():
         for song in songs:
             playlist.add(utils.getUrl(song), utils.createItem(song['display_name'], song['albumart'], song['artistart']))
 
-    def playYoutube(self, titles):
-        #print repr(titles)
-
-        player = xbmc.Player()
-        if (player.isPlaying()):
-            player.stop()
-
-        playlist = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
-        playlist.clear()
+    def playYoutube(self, titles, shuffle=False):
+        utils.log(repr(titles))
 
         dp = None
         if len(titles) > 1:
             dp = xbmcgui.DialogProgress();
-            dp.create(self.lang(30408) or 'Fetching video IDs', str(len(titles))+' '+self.lang(30213).lower(), self.lang(30404))
+            dp.create(self.lang(30408), str(len(titles))+' '+self.lang(30213).lower(), self.lang(30404))
+
+        playlist = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
+        playlist.clear()
 
         ytaddonurl = "plugin://plugin.video.youtube/play/?video_id=%s"
         for videoid, title in self._getVideoIDs(titles, dp):
             playlist.add(ytaddonurl % videoid, xbmcgui.ListItem(title))
+
+        if shuffle:
+            playlist.shuffle()
+
+        player = xbmc.Player()
+        if (player.isPlaying()):
+            player.stop()
 
         xbmc.executebuiltin('playlist.playoffset(video , 0)')
 
