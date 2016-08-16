@@ -14,7 +14,7 @@ song_url  = "%s?action=play_song&song_id=%s&title=%s&artist=%s&albumart=%s&track
 # utility functions
 def log(message):
     if dbg:
-        xbmc.log("[%s] %s" % (plugin, message))
+        xbmc.log("[%s] %s" % (plugin, message), xbmc.LOGNOTICE)
 
 def paramsToDict(parameters):
     ''' Convert parameters encoded in a URL to a dict. '''
