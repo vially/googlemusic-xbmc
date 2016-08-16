@@ -122,7 +122,7 @@ class GoogleMusicNavigation():
             content = "songs"
 
         elif path == "listennow":
-            listItems = self.getListennow(self.api.getApi().get_listen_now())
+            listItems = self.getListennow(self.api.getApi().get_listen_now_items())
             content = "albums"
 
         elif path == "topcharts":
