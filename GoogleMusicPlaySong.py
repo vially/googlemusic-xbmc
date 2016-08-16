@@ -47,6 +47,7 @@ class GoogleMusicPlaySong():
             params['title']       = song['title']
             params['artist']      = song['artist']
             params['albumart']    = song['albumart']
+            params['artistart']   = song['artistart']
             params['tracknumber'] = song['tracknumber']
             params['album']       = song['album']
             params['year']        = song['year']
