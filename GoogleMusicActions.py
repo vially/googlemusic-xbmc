@@ -65,7 +65,7 @@ class GoogleMusicActions():
         elif (action == "play_yt"):
             self.playYoutube([params.get('title')])
         elif (action == "search"):
-            xbmc.executebuiltin("ActivateWindow(10501,%s/?path=search_result&query=%s)" % (utils.addon_url, params.get('filter_criteria')))
+            xbmc.executebuiltin("ActivateWindow(10502,%s/?path=search_result&query=%s)" % (utils.addon_url, params.get('filter_criteria')))
         elif (action == "set_thumbs"):
             self.setThumbs(params["song_id"])
         elif (action == "create_playlist"):
@@ -77,19 +77,19 @@ class GoogleMusicActions():
         elif (action == "delete_playlist"):
             if xbmcgui.Dialog().yesno(self.lang(30405) or 'Confirmation',self.lang(30406) or 'Delete playlist?','"'+params["title"]+'"'):
                 self.api.deletePlaylist(params["playlist_id"])
-                xbmc.executebuiltin("ActivateWindow(10501,%s/?path=library)" % utils.addon_url)
-                self.notify(self.lang(30110) or "Done")
+                xbmc.executebuiltin("ActivateWindow(10502,%s/?path=library)" % utils.addon_url)
+                self.notify(self.lang(30110))
         elif (action == "delete_station"):
             if xbmcgui.Dialog().yesno(self.lang(30405) or 'Confirmation',self.lang(30407) or 'Delete station?','"'+params["title"]+'"'):
                 self.api.getApi().delete_stations(params["radio_id"])
-                xbmc.executebuiltin("ActivateWindow(10501,%s/?path=library)" % utils.addon_url)
-                self.notify(self.lang(30110) or "Done")
+                xbmc.executebuiltin("ActivateWindow(10502,%s/?path=library)" % utils.addon_url)
+                self.notify(self.lang(30110))
         elif (action == "artist_topsongs"):
             artist_id = self.api.getApi().get_track_info(params["song_id"])['artistId'][0]
             xbmc.executebuiltin("ActivateWindow(10502,%s/?path=artist_topsongs&artistid=%s)" % (utils.addon_url, artist_id))
         elif (action == "related_artists"):
             artist_id = self.api.getApi().get_track_info(params["song_id"])['artistId'][0]
-            xbmc.executebuiltin("ActivateWindow(10501,%s/?path=related_artists&artistid=%s)" % (utils.addon_url, artist_id))
+            xbmc.executebuiltin("ActivateWindow(10502,%s/?path=related_artists&artistid=%s)" % (utils.addon_url, artist_id))
         else:
             utils.log("Invalid action: " + action)
 
@@ -157,7 +157,7 @@ class GoogleMusicActions():
         for k,v in params.iteritems():
             url = url+'&amp;'+unicode(k)+'='+unicode(v)
 
-        fav = '\t<favourite name="%s" thumb="%s">ActivateWindow(10501,&quot;%s?%s&quot;,return)</favourite>'
+        fav = '\t<favourite name="%s" thumb="%s">ActivateWindow(10502,&quot;%s?%s&quot;,return)</favourite>'
         fav = fav % (name, xbmc.translatePath(self.icon), utils.addon_url , url[5:])
 
         if not os.path.isfile(path):

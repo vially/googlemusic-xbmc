@@ -294,7 +294,8 @@ class GoogleMusicNavigation():
             folder = addFolder(album, params, getCm(criteria, album), item['arturl'], artist, item['artistart'])
             folder[1].setInfo(type='music', infoLabels={
                    'year':item['year'], 'artist':artist, 'album':album,
-                   'date':time.strftime('%d.%m.%Y', time.gmtime(item['date']/1000000))})
+                   'date':time.strftime('%d.%m.%Y', time.gmtime(item['date']/1000000)),
+                   'mediatype':'album'})
             append(folder)
 
         return listItems
@@ -398,15 +399,17 @@ class GoogleMusicNavigation():
             params = {'path':'store_album', 'albumid':item['albumId']}
             cm = [(self.lang(30301), "XBMC.RunPlugin(%s?action=play_all&album_id=%s)" % (utils.addon_url, item['albumId'])),
                   (self.lang(30309), "XBMC.RunPlugin(%s?action=add_album_library&album_id=%s)" % (utils.addon_url, item['albumId'])),
-                  (self.lang(30315) or 'Add to queue', "XBMC.RunPlugin(%s?action=add_to_queue&album_id=%s)" % (utils.addon_url, item['albumId']))]
-            listItems.append(self.createFolder("[%s] %s"%(item['artist'], item['name']), params, cm, item.get('albumArtRef',''), fanarturl=item.get('artistArtRef','')))
+                  (self.lang(30315), "XBMC.RunPlugin(%s?action=add_to_queue&album_id=%s)" % (utils.addon_url, item['albumId']))]
+            folder = self.createFolder("[%s] %s"%(item['artist'], item['name']), params, cm, item.get('albumArtRef',''), fanarturl=item.get('artistArtRef',''))
+            folder[1].setInfo(type='Music', infoLabels={'artist':item['artist'], 'album':item['name'], 'mediatype':'album'})
+            listItems.append(folder)
         #print repr(items)
         return listItems
 
     def createFolder(self, name, params, contextMenu=[], arturl='', name2='*', fanarturl=utils.addon.getAddonInfo('fanart')):
         li = ListItem(label=name, label2=name2)
         li.setArt({'thumb':arturl, 'fanart':fanarturl})
-        li.addContextMenuItems(contextMenu, replaceItems=True)
+        li.addContextMenuItems(contextMenu)
         return "?".join([utils.addon_url, urlencode(params)]), li, "true"
 
     def createItem(self, song, song_type):
@@ -415,7 +418,8 @@ class GoogleMusicNavigation():
             'year':        song['year'],        'genre':      song['genre'],
             'album':       song['album'],       'artist':     song['artist'],
             'title':       song['title'],       'playcount':  song['playcount'],
-            'rating':      song['rating'],      'discnumber': song['discnumber']
+            'rating':      song['rating'],      'discnumber': song['discnumber'],
+            'mediatype':   'song'
         }
 
         li = utils.createItem(song['display_name'], song['albumart'], song['artistart'])
