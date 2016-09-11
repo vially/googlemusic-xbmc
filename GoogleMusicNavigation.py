@@ -522,7 +522,7 @@ class GoogleMusicNavigation():
             if result['videos']:
                 listItems.append(self.createFolder('[COLOR orange]*** Youtube ***[/COLOR]',{'path':'none'}))
                 for video in result['videos']:
-                    listItems.append(self.createFolder(video['title']),{'action':'play_yt','title':video['title']})
+                    listItems.append(self.createFolder(video['title'],{'action':'play_yt','title':video['title']}))
 
         elif 'artistid' in query:
             result = self.api.getArtistInfo(query['artistid'], True, 20, 0)
