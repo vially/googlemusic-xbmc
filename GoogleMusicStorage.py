@@ -7,7 +7,7 @@ class GoogleMusicStorage():
 
     def checkDbInit(self):
         # check if auto update is enabled
-        if os.path.isfile(self.path):
+        if os.path.isfile(self.path) and utils.addon.getSetting('fetched_all_songs'):
             updatelib = int(utils.addon.getSetting('updatelib'))
             if updatelib != 0:
                 import time
