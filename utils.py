@@ -91,3 +91,61 @@ def playAll(songs, shuffle=False):
         playlist.shuffle()
 
     xbmc.executebuiltin('playlist.playoffset(music , 0)')
+
+def checkInit():
+    import GoogleMusicStorage
+    storage = GoogleMusicStorage.storage
+    import GoogleMusicLogin
+    login = GoogleMusicLogin.GoogleMusicLogin()
+
+    log("Checking init data")
+    storage.checkDbInit()
+    login.checkCredentials()
+    login.checkCookie()
+    login.initDevice()
+
+
+def initAddon():
+    import GoogleMusicStorage
+    storage = GoogleMusicStorage.storage
+    import GoogleMusicLogin
+    login = GoogleMusicLogin.GoogleMusicLogin()
+
+    if addon.getSetting('init-started') == '1':
+        return
+
+    log("Initing addon data")
+
+    addon.setSetting('init-started','1')
+
+    try:
+        reload(sys)
+        sys.setdefaultencoding("utf-8")
+
+         # if version changed clear cache
+        if not addon.getSetting('version') or addon.getSetting('version') != addon.getAddonInfo('version'):
+           storage.clearCache()
+           login.clearCookie()
+           addon.setSetting('version', addon.getAddonInfo('version'))
+
+        # check for initing cookies, db and library
+        storage.checkDbInit()
+        login.checkCredentials()
+        login.checkCookie()
+        login.initDevice()
+
+        # check if library needs to be loaded
+        if addon.getSetting('fetched_all_songs') == '0':
+
+            xbmc.executebuiltin("XBMC.Notification(%s,%s,5000,%s)" % (plugin, tryEncode(addon.getLocalizedString(30105)) ,addon.getAddonInfo('icon')))
+            log('Loading library')
+            import GoogleMusicApi
+            GoogleMusicApi.GoogleMusicApi().loadLibrary()
+
+            if addon.getSetting('auto_export')=='true' and addon.getSetting('export_path'):
+                import GoogleMusicActions
+                GoogleMusicActions.GoogleMusicActions().exportLibrary(addon.getSetting('export_path'))
+    except Exception as e:
+        log("ERROR: "+repr(e))
+
+    addon.setSetting('init-started','0')

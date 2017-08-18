@@ -42,6 +42,7 @@ class GoogleMusicStorage():
                 utils.log("Error trying to delete database "+repr(ex))
                 self._connect()
         utils.addon.setSetting("fetched_all_songs", "0")
+        utils.addon.setSetting('init-started','0')
 
     def getPlaylistSongs(self, playlist_id):
         if playlist_id == 'all_songs':

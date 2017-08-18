@@ -14,39 +14,20 @@ if (__name__ == "__main__" ):
 
     else:
 
-        reload(sys)
-        sys.setdefaultencoding("utf-8")
+        # check hourly if addon needs initing any data
+        import time
+        if (not utils.addon.getSetting('last-checked') or
+            time.time() - float(utils.addon.getSetting('last-checked')) > 3600):
+            utils.checkInit()
+            utils.addon.setSetting('last-checked',str(time.time()))
 
-        import GoogleMusicStorage
-        storage = GoogleMusicStorage.storage
-        import GoogleMusicLogin
-        login = GoogleMusicLogin.GoogleMusicLogin()
+        # if any vital setting is missing, trigger init
+        if (not utils.addon.getSetting('authtoken-mobile') or
+            not utils.addon.getSetting('version') or
+            utils.addon.getSetting('version') != utils.addon.getAddonInfo('version') or
+            utils.addon.getSetting('fetched_all_songs') == '0'):
 
-        addon = utils.addon
-
-        # if version changed clear cache
-        if not addon.getSetting('version') or addon.getSetting('version') != addon.getAddonInfo('version'):
-           storage.clearCache()
-           login.clearCookie()
-           addon.setSetting('version', addon.getAddonInfo('version'))
-
-        # check for initing cookies, db and library
-        storage.checkDbInit()
-        login.checkCredentials()
-        login.checkCookie()
-        login.initDevice()
-
-        # check if library needs to be loaded
-        if addon.getSetting('fetched_all_songs') == '0':
-
-            xbmc.executebuiltin("XBMC.Notification(%s,%s,5000,%s)" % (utils.plugin, utils.tryEncode(addon.getLocalizedString(30105)) ,addon.getAddonInfo('icon')))
-            utils.log('Loading library')
-            import GoogleMusicApi
-            GoogleMusicApi.GoogleMusicApi().loadLibrary()
-
-            if addon.getSetting('auto_export')=='true' and addon.getSetting('export_path'):
-                import GoogleMusicActions
-                GoogleMusicActions.GoogleMusicActions().exportLibrary(addon.getSetting('export_path'))
+            utils.initAddon()
 
         if action:
 
