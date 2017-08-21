@@ -109,11 +109,27 @@ class GoogleMusicNavigation():
             content = "songs"
 
         elif path == "search":
+            listItems.append(self.createFolder(self.lang(30223),{'path':'search_new'}))
+            history = utils.addon.getSetting('search-history').split('|')
+            for item in history:
+                if item:
+                    listItems.append(self.createFolder(item,{'path':'search_query','query':item}))
+
+        elif path == "search_new":
             keyboard = xbmc.Keyboard('', self.lang(30208))
             keyboard.doModal()
             if keyboard.isConfirmed() and keyboard.getText():
                 listItems = self.getSearch(keyboard.getText())
+                history = utils.addon.getSetting('search-history')
+                history = keyboard.getText()+('|'+history if history else '')
+                if len(history.split('|')) > 10:
+                    history = '|'.join(history.split('|')[0:-1])
+                utils.addon.setSetting('search-history',history)
+                content = "songs"
             else: return
+
+        elif path == "search_query":
+            listItems = self.getSearch(url2pathname(get("query")))
             content = "songs"
 
         elif path == "search_result":
@@ -522,7 +538,7 @@ class GoogleMusicNavigation():
             if result['videos']:
                 listItems.append(self.createFolder('[COLOR orange]*** Youtube ***[/COLOR]',{'path':'none'}))
                 for video in result['videos']:
-                    listItems.append(self.createFolder(video['title'],{'action':'play_yt','title':video['title']}))
+                    listItems.append(self.createFolder(video['title'],{'action':'play_yt','display_name':video['title']}))
 
         elif 'artistid' in query:
             result = self.api.getArtistInfo(query['artistid'], True, 20, 0)
