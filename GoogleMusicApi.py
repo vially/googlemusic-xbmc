@@ -169,8 +169,8 @@ class GoogleMusicApi():
 
     def startRadio(self, name,
                    track_id=None, artist_id=None, album_id=None,
-                   genre_id=None, curated_station_id=None):
-        station=self.getApi().create_station(name, track_id, artist_id, album_id, genre_id, playlist_token=None, curated_station_id=curated_station_id)
+                   genre_id=None, playlist_token=None, curated_station_id=None):
+        station=self.getApi().create_station(name, track_id, artist_id, album_id, genre_id, playlist_token, curated_station_id)
         #tracks = self._loadStoreTracks(station['tracks'])
         if 'sessionToken' in station:
             import random

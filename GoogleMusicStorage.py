@@ -103,7 +103,7 @@ class GoogleMusicStorage():
         return self.curs.execute(query,{'name':name.decode('utf8')}).fetchall()
 
     def getPlaylists(self):
-        return self.curs.execute("SELECT playlist_id, name, arturl FROM playlists ORDER BY name").fetchall()
+        return self.curs.execute("SELECT playlist_id, name, arturl, token FROM playlists ORDER BY name").fetchall()
 
     def getAutoPlaylistSongs(self,playlist):
         querys = {'thumbsup':'SELECT * FROM songs WHERE rating > 3 ORDER BY display_name',
@@ -296,7 +296,8 @@ class GoogleMusicStorage():
                 playlist_id VARCHAR NOT NULL PRIMARY KEY,
                 name VARCHAR,
                 type VARCHAR,
-                arturl VARCHAR
+                arturl VARCHAR,
+                token VARCHAR
             );
             CREATE TABLE IF NOT EXISTS playlists_songs (
                 playlist_id VARCHAR,

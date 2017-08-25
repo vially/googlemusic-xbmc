@@ -59,7 +59,8 @@ class GoogleMusicActions():
             keyboard = xbmc.Keyboard(self.api.getSong(params["song_id"])['title'], self.lang(30402))
             keyboard.doModal()
             if keyboard.isConfirmed() and keyboard.getText():
-                utils.playAll(self.api.startRadio(keyboard.getText(), params["song_id"]))
+                items = self.api.startRadio(keyboard.getText(), params.get('song_id'), playlist_token=params.get('token'))
+                utils.playAll(items)
                 xbmc.executebuiltin("ActivateWindow(10500)")
                 #xbmc.executebuiltin("XBMC.RunPlugin(%s?path=station&id=%s)" % (sys.argv[0],radio_id))
         elif (action == "search_yt"):
@@ -140,7 +141,7 @@ class GoogleMusicActions():
 
     def addToPlaylist(self, song_id):
         playlists = self.api.getPlaylistsByType('user')
-        plist = [pl_name for pl_id, pl_name, pl_arturl in playlists]
+        plist = [pl_name for pl_id, pl_name, pl_arturl, token in playlists]
         selected = xbmcgui.Dialog().select(self.lang(30401) , plist)
         if selected > 0:
             self.api.addToPlaylist(playlists[selected][0], song_id)
