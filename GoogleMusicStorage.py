@@ -144,6 +144,9 @@ class GoogleMusicStorage():
         self.curs.execute("DELETE FROM playlists_songs")
         self.curs.execute("DELETE FROM playlists")
 
+        insert1 = "INSERT OR REPLACE INTO playlists (name, playlist_id, type, arturl, token) VALUES (?, ?, 'user', ?, ?)"
+        insert2 = "INSERT OR REPLACE INTO playlists_songs (playlist_id, song_id, entry_id ) VALUES (?, ?, ?)"
+
         api_songs = []
 
         for playlist in playlists_songs:
@@ -155,9 +158,9 @@ class GoogleMusicStorage():
                     song = self.getSong(playlist['tracks'][0]['trackId'])
                     if song and song['albumart']:
                         arturl = song['albumart']
-                self.curs.execute("INSERT OR REPLACE INTO playlists (name, playlist_id, type, arturl) VALUES (?, ?, 'user', ?)", (playlist['name'], playlistId, arturl) )
+                self.curs.execute(insert1, (playlist['name'], playlistId, arturl, playlist.get('shareToken')) )
                 for entry in playlist['tracks']:
-                    self.curs.execute("INSERT OR REPLACE INTO playlists_songs (playlist_id, song_id, entry_id ) VALUES (?, ?, ?)", (playlistId, entry['trackId'], entry['id']))
+                    self.curs.execute(insert2, (playlistId, entry['trackId'], entry['id']))
                     if entry.has_key('track'):
                         api_songs.append(entry['track'])
 
