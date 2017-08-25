@@ -44,7 +44,7 @@ class GoogleMusicNavigation():
         if path == "root":
             # assemble menu depending on user info
             subscriber = int(utils.addon.getSetting('subscriber')) == 1
-            library    = int(utils.addon.getSetting('library_songs')) > 0
+            library    = utils.addon.getSetting('library_songs') and int(utils.addon.getSetting('library_songs')) > 0
             utils.log("Assembling menu for subscriber=%r and library=%r" % (subscriber,library))
 
             for item in self.main_menu:
