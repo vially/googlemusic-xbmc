@@ -120,7 +120,8 @@ class GoogleMusicStorage():
                                  "FROM songs WHERE song_id = ? ", (song_id,)).fetchone()
 
     def getVideo(self, title):
-        return self.curs.execute("SELECT videoid FROM songs WHERE display_name like ? ", ('%'+title+'%',)).fetchone()["videoid"]
+        videoid = self.curs.execute("SELECT videoid FROM songs WHERE display_name like ? ", ('%'+title+'%',)).fetchone()
+        return videoid['videoid'] if videoid else ''
 
     def getArtist(self, artist_id):
         artist = self.curs.execute("SELECT artistart FROM artists WHERE artist_id = ? ", (artist_id,)).fetchone()
