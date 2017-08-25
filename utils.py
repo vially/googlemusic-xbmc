@@ -76,7 +76,7 @@ def getUrl(song):
         url += "&sessiontoken=%s&wentryid=%s" % ( song['sessiontoken'], song['wentryid'] )
     return url
 
-def playAll(songs, shuffle=False):
+def playAll(songs, shuffle=False, fromhere=''):
     player = xbmc.Player()
     if (player.isPlaying()):
         player.stop()
@@ -84,11 +84,22 @@ def playAll(songs, shuffle=False):
     playlist = xbmc.PlayList(xbmc.PLAYLIST_MUSIC)
     playlist.clear()
 
+    fromhereSong = None
     for song in songs:
-        playlist.add(getUrl(song), createItem(song['display_name'], song['albumart'], song['artistart']))
+        if song['song_id'] != fromhere:
+            item = createItem(song['display_name'], song['albumart'], song['artistart'])
+            item.setInfo(type='music', infoLabels={'artist':song['artist'],'title':song['title']})
+            playlist.add(getUrl(song), item )
+        else:
+            fromhereSong = song
 
-    if shuffle:
+    if shuffle or fromhere:
         playlist.shuffle()
+
+    if fromhere:
+        item = createItem(fromhereSong['display_name'], fromhereSong['albumart'], fromhereSong['artistart'])
+        item.setInfo(type='music', infoLabels={'artist':fromhereSong['artist'],'title':fromhereSong['title']})
+        playlist.add(getUrl(fromhereSong), item, 0)
 
     xbmc.executebuiltin('playlist.playoffset(music , 0)')
 

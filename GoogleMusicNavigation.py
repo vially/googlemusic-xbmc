@@ -451,7 +451,9 @@ class GoogleMusicNavigation():
         if song_type == 'library':
             cm.append((self.lang(30307),"XBMC.RunPlugin(%s?action=add_playlist&song_id=%s)" % (utils.addon_url,song_id)))
         elif song_type.startswith('playlist'):
-            cm.append((self.lang(30308), "XBMC.RunPlugin(%s?action=del_from_playlist&song_id=%s&playlist_id=%s)" % (utils.addon_url, song_id, song_type[8:])))
+            pl_id = song_type[8:]
+            cm.append((self.lang(30322), "XBMC.RunPlugin(%s?action=play_all&from_here=%s&playlist_id=%s)" % (utils.addon_url, song_id, pl_id)))
+            cm.append((self.lang(30308), "XBMC.RunPlugin(%s?action=del_from_playlist&song_id=%s&playlist_id=%s)" % (utils.addon_url, song_id, pl_id)))
         cm.append((self.lang(30409), "XBMC.RunPlugin(%s?action=set_thumbs&song_id=%s)" % (utils.addon_url, song_id)))
         cm.append((self.lang(30313), "XBMC.RunPlugin(%s?action=play_yt&title=%s)" % (utils.addon_url, title)))
         cm.append((self.lang(30311), "XBMC.RunPlugin(%s?action=search_yt&title=%s)" % (utils.addon_url, title)))

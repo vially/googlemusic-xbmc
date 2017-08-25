@@ -9,7 +9,7 @@ class GoogleMusicActions():
 
     def executeAction(self, action, params):
         if (action == "play_all"):
-            utils.playAll(self._getSongs(params), 'shuffle' in params)
+            utils.playAll(self._getSongs(params), 'shuffle' in params, params.get('from_here'))
         elif (action == "add_to_queue"):
             self.addToQueue(params)
             self.notify(self.lang(30110))
