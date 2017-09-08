@@ -1,10 +1,10 @@
-#Google Music addon for XBMC
+# Google Music addon for XBMC
 
-##Usage and notes
+## Usage and notes
 
 **This plugin is a very early release and uses an [Unofficial-Google-Music-Api](https://github.com/simon-weber/Unofficial-Google-Music-API) so use at your own risk.**
 
-##Installation
+## Installation
 
 To install this add-on you must download it from [here](http://forum.kodi.tv/showthread.php?tid=200640)
 and install it using the Add-on Manager from within XBMC by going to:
@@ -17,11 +17,11 @@ and install it using the Add-on Manager from within XBMC by going to:
 
 That's it. You should now be able to run the plugin and enjoy your Google Music from XBMC.
 
-##Features
+## Features
 
 At the moment it only supports playback of your Google Music songs into XBMC.
 
-##Known issues
+## Known issues
 
 ### Google Two-Factor Authentication
 Remember if you use two-factor auth with Google you need to get an application specific password.
