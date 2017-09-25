@@ -1,0 +1,414 @@
+# Kodi Media Center language file
+# Addon Name: Google Music EXP
+# Addon id: plugin.audio.googlemusic.exp
+# Addon Provider: foreverguest
+msgid ""
+msgstr ""
+"Project-Id-Version: plugin.audio.googlemusic.exp\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"PO-Revision-Date: 2017-09-20 08:42+0300\n"
+"Last-Translator: A. Dambledore\n"
+"Language-Team: Eng2Heb\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: he_IL\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 2.0.3\n"
+
+# ###
+# Settings
+# ###
+msgctxt "#30001"
+msgid "General"
+msgstr "כללי"
+
+msgctxt "#30002"
+msgid "Views"
+msgstr "צפיות"
+
+msgctxt "#30051"
+msgid "Advanced"
+msgstr "מתקדם"
+
+msgctxt "#30011"
+msgid "Username"
+msgstr "שם משתמש"
+
+msgctxt "#30012"
+msgid "Password"
+msgstr "ססמה"
+
+msgctxt "#30061"
+msgid "Debug"
+msgstr "איתור באגים"
+
+msgctxt "#30062"
+msgid "Clear cache"
+msgstr "ניקוי מטמון"
+
+msgctxt "#30063"
+msgid "Clear cookie"
+msgstr "ניקוי קוקיז"
+
+msgctxt "#30064"
+msgid "SQLite database"
+msgstr "מסד הנתונים SQLite"
+
+msgctxt "#30066"
+msgid "Pre-fetch URL"
+msgstr "השג מראש כתובת URL"
+
+msgctxt "#30052"
+msgid "Export Path"
+msgstr "ייצא נתיב"
+
+msgctxt "#30053"
+msgid "Always export after library update"
+msgstr "ייצא תמיד לאחר עדכון הספרייה"
+
+msgctxt "#30054"
+msgid "Load local music library (requires library update)"
+msgstr "טען ספריית מוסיקה מקומית (דורש עדכון ספריה)"
+
+msgctxt "#30065"
+msgid "Override Views"
+msgstr "עקוף צפיות"
+
+msgctxt "#30055"
+msgid "Artists ViewID"
+msgstr "ViewID אמנים"
+
+msgctxt "#30056"
+msgid "Albums ViewID"
+msgstr "ViewID אלבומים"
+
+msgctxt "#30057"
+msgid "Playlists ViewID"
+msgstr "ViewID רשימת ניגון"
+
+msgctxt "#30058"
+msgid "Stations ViewID"
+msgstr "ViewID תחנות"
+
+msgctxt "#30059"
+msgid "Songs ViewID"
+msgstr "ViewID שירים"
+
+msgctxt "#30067"
+msgid "Auto Update Library"
+msgstr "עדכון ספרייה אוטומטי"
+
+msgctxt "#30068"
+msgid "Never"
+msgstr "לעולם לא"
+
+msgctxt "#30069"
+msgid "Weekly"
+msgstr "שבועי"
+
+msgctxt "#30070"
+msgid "Daily"
+msgstr "יומי"
+
+msgctxt "#30071"
+msgid "Hourly"
+msgstr "שעתי"
+
+msgctxt "#30072"
+msgid "Stream quality"
+msgstr "איכות הזרמה"
+
+msgctxt "#30073"
+msgid "High"
+msgstr "גבוהה"
+
+msgctxt "#30074"
+msgid "Medium"
+msgstr "בינוני"
+
+msgctxt "#30075"
+msgid "Low"
+msgstr "נמוך"
+
+msgctxt "#30076"
+msgid "Youtube Video Quality"
+msgstr "איכות וידאו מיו-טיוב"
+
+msgctxt "#30077"
+msgid "Any"
+msgstr "הכול"
+
+# ###
+# Navigation menus
+# ###
+msgctxt "#30201"
+msgid "All Songs"
+msgstr "כל השירים"
+
+msgctxt "#30202"
+msgid "Playlists"
+msgstr "רשימת ניגון"
+
+msgctxt "#30203"
+msgid "Stations"
+msgstr "תחנות"
+
+msgctxt "#30204"
+msgid "Auto Playlists"
+msgstr "רשימת ניגון אוטומטיות"
+
+msgctxt "#30205"
+msgid "Artists"
+msgstr "אמנים"
+
+msgctxt "#30206"
+msgid "Albums"
+msgstr "אלבומים"
+
+msgctxt "#30207"
+msgid "Genres"
+msgstr "סגנונות"
+
+msgctxt "#30208"
+msgid "Search"
+msgstr "חיפוש"
+
+msgctxt "#30209"
+msgid "My Library"
+msgstr "הספרייה שלי"
+
+msgctxt "#30210"
+msgid "Shuffle My Library"
+msgstr "ערבב את הספרייה שלי"
+
+msgctxt "#30211"
+msgid "I'm feeling lucky mix"
+msgstr "מיקס - אני מרגיש בר מזל"
+
+msgctxt "#30212"
+msgid "Composers"
+msgstr "מלחינים"
+
+msgctxt "#30213"
+msgid "Songs"
+msgstr "פזמון"
+
+msgctxt "#30214"
+msgid "Shuffle Albums"
+msgstr "ערבב אלבומים"
+
+msgctxt "#30215"
+msgid "Thumbs up"
+msgstr "אהבתי"
+
+msgctxt "#30216"
+msgid "Last added"
+msgstr "האחרון שנוסף"
+
+msgctxt "#30217"
+msgid "Free and purchased"
+msgstr "בחינם ושנרכש"
+
+msgctxt "#30218"
+msgid "Most played"
+msgstr "נוגנו הכי הרבה"
+
+msgctxt "#30219"
+msgid "Listen Now"
+msgstr "הקשב עכשיו"
+
+msgctxt "#30220"
+msgid "Top charts"
+msgstr "הכי גבוה במצעדים"
+
+msgctxt "#30221"
+msgid "New Releases"
+msgstr "שיחרורים חדשים"
+
+msgctxt "#30222"
+msgid "Browse stations"
+msgstr "עיון בתחנות"
+
+# ###
+# Context actions
+# ###
+msgctxt "#30301"
+msgid "Play all"
+msgstr "נגן הכל"
+
+msgctxt "#30302"
+msgid "Play all - shuffle"
+msgstr "נגן הכל - ערבב"
+
+msgctxt "#30303"
+msgid "Update playlist"
+msgstr "עדכן רשימת ניגון"
+
+msgctxt "#30304"
+msgid "Update playlists"
+msgstr "עדכן רשימות ניגון"
+
+msgctxt "#30305"
+msgid "Update library"
+msgstr "עדכון הספרייה"
+
+msgctxt "#30306"
+msgid "Add to favourites"
+msgstr "הוסף למועדפים"
+
+msgctxt "#30307"
+msgid "Add to playlist"
+msgstr "הוסף לרשימת ניגון"
+
+msgctxt "#30308"
+msgid "Remove from playlist"
+msgstr "הסר מרשימת ניגון"
+
+msgctxt "#30309"
+msgid "Add to library"
+msgstr "הוסף לספרייה"
+
+msgctxt "#30310"
+msgid "Start Radio"
+msgstr "התחל רדיו"
+
+msgctxt "#30311"
+msgid "Search in Youtube"
+msgstr "חפש ביו-טיוב"
+
+msgctxt "#30312"
+msgid "Play all in Youtube"
+msgstr "נגן הכול ביו-טיוב"
+
+msgctxt "#30313"
+msgid "Play in Youtube"
+msgstr "נגן ביו-טיוב"
+
+msgctxt "#30314"
+msgid "Export"
+msgstr "ייצא"
+
+msgctxt "#30315"
+msgid "Add to queue"
+msgstr "הכנס פריט לתור"
+
+msgctxt "#30316"
+msgid "Create playlist"
+msgstr "צור רשימת ניגון"
+
+msgctxt "#30317"
+msgid "Delete playlist"
+msgstr "מחק רשימת ניגון"
+
+msgctxt "#30318"
+msgid "Delete station"
+msgstr "מחק תחנה"
+
+msgctxt "#30319"
+msgid "Artist top songs"
+msgstr "השירים הכי טובים של האמן"
+
+msgctxt "#30320"
+msgid "Related artists"
+msgstr "אמנים קשורים"
+
+msgctxt "#30321"
+msgid "Play in Youtube - shuffle"
+msgstr "נגן ביו-טיוב - ערבב"
+
+# ###
+# Messages
+# ###
+msgctxt "#30101"
+msgid "Login failed"
+msgstr "הכניסה נכשלה"
+
+msgctxt "#30102"
+msgid "Invalid credentials or connectivity problems"
+msgstr "שם משתמש או ססמה לא תקינים, או בעיות קישור"
+
+msgctxt "#30103"
+msgid "Library update needed"
+msgstr "נדרש עדכון ספרייה"
+
+msgctxt "#30104"
+msgid "Subscriber track not playable"
+msgstr "רצועת המנוי לא ניתנת להשמעה"
+
+msgctxt "#30105"
+msgid "Loading Library"
+msgstr "טוען ספרייה"
+
+msgctxt "#30106"
+msgid "Cache in use - try later"
+msgstr "המטמון בשימוש - נסה מאוחר יותר"
+
+msgctxt "#30107"
+msgid "Export completed"
+msgstr "הייצוא הושלם"
+
+msgctxt "#30108"
+msgid "Export path not defined"
+msgstr "נתיב הייצוא אינו מוגדר"
+
+msgctxt "#30109"
+msgid "Error calling Youtube Addon"
+msgstr "ארעה שגיאה בעת טעינת הרחבת יו-טיוב"
+
+msgctxt "#30110"
+msgid "Done"
+msgstr "בוצע"
+
+msgctxt "#30401"
+msgid "Add to Playlist..."
+msgstr "הוסף לרשימת ניגון..."
+
+msgctxt "#30402"
+msgid "Radio Name"
+msgstr "שם רדיו"
+
+msgctxt "#30403"
+msgid "Exporting Library"
+msgstr "מייצא ספרייה"
+
+msgctxt "#30404"
+msgid "Please wait"
+msgstr "אנא המתן"
+
+msgctxt "#30405"
+msgid "Confirmation"
+msgstr "אישור"
+
+msgctxt "#30406"
+msgid "Delete playlist?"
+msgstr "מחק רשימת ניגון?"
+
+msgctxt "#30407"
+msgid "Delete station?"
+msgstr "מחק תחנה?"
+
+msgctxt "#30408"
+msgid "Fetching video IDs"
+msgstr "שליפת מזהי וידאו"
+
+msgctxt "#30409"
+msgid "Set Rating"
+msgstr "קבע דירוג"
+
+msgctxt "#30410"
+msgid "Thumbs up"
+msgstr "אהבתי"
+
+msgctxt "#30411"
+msgid "Thumbs down"
+msgstr "לא אהבתי"
+
+msgctxt "#30412"
+msgid "No thumbs"
+msgstr "אין דירוג"
+
+msgctxt "#30413"
+msgid "Playlist Name"
+msgstr "שם רשימת ההשמעה"
