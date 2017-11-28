@@ -201,8 +201,13 @@ class GoogleMusicActions():
             os.mkdir(path)
         for song in songs:
             count = count + 1
-            artist = self._sanitizePath(song['artist'])
+            artist = self._sanitizePath(song['album_artist'])
             album  = self._sanitizePath(song['album'])
+            track = ''
+            if song['tracknumber'] < 10:
+                track = '0'+str(song['tracknumber'])
+            elif song['tracknumber'] >= 10:
+                track = song['tracknumber']
             if not os.path.exists(os.path.join(path, artist)):
                 os.mkdir(os.path.join(path, artist))
             if not os.path.exists(os.path.join(path,artist,album)):
@@ -215,7 +220,7 @@ class GoogleMusicActions():
                 with open(os.path.join(path,artist,album,'album.nfo'), "w") as nfo:
                     nfo.write('<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>\n')
                     nfo.write('<album>\n\t<title>%s</title>\n\t<artist>%s</artist>\n\t<thumb>%s</thumb>\n</album>' % (song['album'], song['artist'], song['artistart']))
-            with open(os.path.join(path,artist,album,str(song['tracknumber'])+'-'+self._sanitizePath(song['title'])+'.strm'), "w") as strm:
+            with open(os.path.join(path,artist,album,str(track)+' - '+self._sanitizePath(song['title'])+'.strm'), "w") as strm:
                 strm.write(utils.getUrl(song))
                 dp.update(int(count * 100 / len(songs)))
 
