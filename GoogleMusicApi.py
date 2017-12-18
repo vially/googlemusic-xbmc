@@ -36,10 +36,11 @@ class GoogleMusicApi():
 
     def getPlaylistSongs(self, playlist_id, forceRenew=False):
         if playlist_id in ('videos','thumbsup','lastadded','mostplayed','freepurchased','feellucky'):
-            songs = storage.getAutoPlaylistSongs(playlist_id)
             if playlist_id == 'thumbsup':
                 """ Try to fetch store thumbs up songs """
-                songs.extend(self._loadStoreTracks(self.getApi().get_promoted_songs()))
+                songs = self._loadStoreTracks(self.getApi().get_promoted_songs())
+            else:
+                songs = storage.getAutoPlaylistSongs(playlist_id)
         else:
             if forceRenew:
                 self.updatePlaylistSongs()
