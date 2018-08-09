@@ -48,7 +48,7 @@ class GoogleMusicStorage():
         if playlist_id == 'all_songs':
             query = "SELECT * FROM songs ORDER BY display_name"
         elif playlist_id == 'shuffled_albums':
-            query = "WITH albums AS (SELECT DISTINCT album, album_artist FROM songs ORDER BY RANDOM()) "\
+            query = "WITH albums AS (SELECT rowid, album, album_artist FROM songs GROUP BY album, album_artist ORDER BY RANDOM()) "\
                     "SELECT songs.* FROM albums LEFT JOIN songs ON songs.album = albums.album AND songs.album_artist = albums.album_artist "\
                     "ORDER BY albums.rowid, songs.discnumber, songs.tracknumber"
         else:
