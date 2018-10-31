@@ -114,6 +114,8 @@ class GoogleMusicApi():
         return storage.getCriteria(criteria,artist)
 
     def getSearch(self, query, max_results=10):
+        import urllib	
+        query = urllib.unquote(query).decode('utf8')
         utils.log("API getsearch: "+query)
         result = storage.getSearch(query, max_results)
         #result = {'tracks':[],'albums':[],'artists':[]}
