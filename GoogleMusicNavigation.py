@@ -425,7 +425,7 @@ class GoogleMusicNavigation():
         li = ListItem(label=name, label2=name2)
         li.setArt({'thumb':arturl, 'fanart':fanarturl})
         li.addContextMenuItems(contextMenu)
-        return "?".join([utils.addon_url, urlencode(params)]), li, "true"
+        return "?".join([utils.addon_url, urlencode(params, doseq=True)]), li, "true"
 
     def createItem(self, song, song_type):
         infoLabels = {
