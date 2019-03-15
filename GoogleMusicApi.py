@@ -190,7 +190,7 @@ class GoogleMusicApi():
                     track_conv['artistart'] = station_arts[random.randint(0,len(station_arts)-1)]['url']
                 result.append(track_conv)
             return result
-        return self._loadStoreTracks(station['tracks'])
+        return self._loadStoreTracks(self.getApi().get_station_tracks(station,100))
         #return self.getApi().create_station(name, track_id=song_id)
 
     def addStoreTrack(self, song_id):

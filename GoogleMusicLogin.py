@@ -31,7 +31,12 @@ class GoogleMusicLogin():
         quality = { '0':'hi','1':'med','2':'low' } [utils.addon.getSetting('quality')]
         utils.log("getStreamUrl songid: %s device: %s quality: %s"%(song_id, device_id, quality))
 
-        return self.gmusicapi.get_stream_url(song_id, device_id, quality, session_token, wentry_id)
+        stream_url = ''
+        if wentry_id:
+            stream_url = self.gmusicapi.get_station_track_stream_url(song_id, wentry_id, session_token, quality)
+        else:
+            stream_url = self.gmusicapi.get_stream_url(song_id, device_id, quality)
+        return stream_url
 
     def getDevice(self):
         return utils.addon.getSetting('device_id')
