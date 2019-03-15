@@ -8,9 +8,9 @@ class GoogleMusicLogin():
 
     def checkCookie(self):
         # Remove cookie data if it is older then 7 days
-        if utils.addon.getSetting('cookie-date') != None and len(utils.addon.getSetting('cookie-date')) > 0:
+        if utils.addon.getSetting('cookie-time'):
             import time
-            if (datetime.now() - datetime(*time.strptime(utils.addon.getSetting('cookie-date'), '%Y-%m-%d %H:%M:%S.%f')[0:6])).days >= 7:
+            if time.time() - float(utils.addon.getSetting('cookie-time')) > 3600*24*7:
                 self.clearCookie()
 
     def checkCredentials(self):
@@ -103,7 +103,8 @@ class GoogleMusicLogin():
                 utils.log("Login succeeded")
                 utils.addon.setSetting('logged_in-mobile', "1")
                 utils.addon.setSetting('authtoken-mobile', self.gmusicapi.session._authtoken)
-                utils.addon.setSetting('cookie-date', str(datetime.now()))
+                import time
+                utils.addon.setSetting('cookie-time', str(time.time()))
                 utils.addon.setSetting('subscriber','1' if self.gmusicapi.is_subscribed else '0')
 
         else:
