@@ -1,5 +1,4 @@
 import utils, xbmc, xbmcgui
-from datetime import datetime
 from gmusicapi import Mobileclient
 
 class GoogleMusicLogin():
@@ -56,13 +55,15 @@ class GoogleMusicLogin():
                     if device["type"] in ("ANDROID","PHONE","IOS"):
                         device_id = str(device["id"])
                         break
-            except:
-                pass
+            except Exception as e:
+                utils.log("ERROR: "+repr(e))
 
             if device_id:
                 if device_id.lower().startswith('0x'): device_id = device_id[2:]
                 utils.addon.setSetting('device_id', device_id)
                 utils.log('Found device_id: '+device_id)
+            else:
+                utils.log('No Android device found in account')
 
     def clearCookie(self):
         utils.addon.setSetting('logged_in-mobile', "")
@@ -83,14 +84,17 @@ class GoogleMusicLogin():
             password = base64.b64decode(utils.addon.getSetting('encpassword'))
 
             try:
-                self.gmusicapi.login(username, password, utils.addon.getSetting('device_id'))
+                self.gmusicapi.login(username, password, self.getDevice() )
+            except Exception as e:
+                utils.log("ERROR: "+repr(e))
+                if 'Your valid device IDs are:' in str(e):
+                    self.gmusicapi.login(username, password, str(e).split('*')[1].strip() )
                 if not self.gmusicapi.is_authenticated():
+                try:
                     utils.log("Login in with device_id failed, trying with MAC")
                     self.gmusicapi.login(username, password, Mobileclient.FROM_MAC_ADDRESS)
-                    if self.gmusicapi.is_authenticated():
-                        utils.addon.setSetting('device_id', self.gmusicapi.android_id)
             except Exception as e:
-                utils.log(repr(e))
+                    utils.log("ERROR: "+repr(e))
 
             if not self.gmusicapi.is_authenticated():
                 utils.log("Login failed")
@@ -100,7 +104,8 @@ class GoogleMusicLogin():
                 dialog.ok(self.language(30101), self.language(30102))
                 raise
             else:
-                utils.log("Login succeeded")
+                utils.log("Login succeeded. Device id: "+self.gmusicapi.android_id)
+                utils.addon.setSetting('device_id', self.gmusicapi.android_id)
                 utils.addon.setSetting('logged_in-mobile', "1")
                 utils.addon.setSetting('authtoken-mobile', self.gmusicapi.session._authtoken)
                 import time
