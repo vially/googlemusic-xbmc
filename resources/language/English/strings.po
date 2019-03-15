@@ -230,6 +230,10 @@ msgctxt "#30222"
 msgid "Browse stations"
 msgstr ""
 
+msgctxt "#30223"
+msgid "New search"
+msgstr ""
+
 ####
 # Context actions
 ####
@@ -317,6 +321,10 @@ msgctxt "#30321"
 msgid "Play in Youtube - shuffle"
 msgstr ""
 
+msgctxt "#30322"
+msgid "Play all from here"
+msgstr ""
+
 ####
 # Messages
 ####
@@ -358,6 +366,10 @@ msgstr ""
 
 msgctxt "#30110"
 msgid "Done"
+msgstr ""
+
+msgctxt "#30111"
+msgid "No Android device found in account, playing a song will probably fail."
 msgstr ""
 
 msgctxt "#30401"
