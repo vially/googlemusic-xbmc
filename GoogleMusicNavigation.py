@@ -167,8 +167,10 @@ class GoogleMusicNavigation():
         elif path == "create_station":
             if utils.addon.getSetting('subscriber') == "0":
                 xbmc.executebuiltin("XBMC.Notification(%s,%s,5000,%s)" % (utils.plugin, utils.tryEncode("Song skipping is limited!"), utils.addon.getAddonInfo('icon')))
-            utils.playAll(self.api.startRadio(unquote_plus(get('name')),artist_id=get('artistid'), genre_id=get('genreid'), curated_station_id=get('curatedid'), track_id=get('trackid')))
-            return
+            tracks = self.api.startRadio(unquote_plus(get('name')),artist_id=get('artistid'), genre_id=get('genreid'), curated_station_id=get('curatedid'), track_id=get('trackid'))
+            listItems = self.addSongsFromLibrary(tracks, 'library')
+            content = "songs"
+            utils.playAll(tracks)
 
         elif path == "genres":
             listItems = self.getGenres(self.api.getApi().get_top_chart_genres())
