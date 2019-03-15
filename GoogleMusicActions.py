@@ -19,12 +19,14 @@ class GoogleMusicActions():
         elif (action == "update_playlists"):
             self.api.getPlaylistsByType(params["playlist_type"], True)
         elif (action == "clear_cache"):
+            utils.log("Clearing cache...")
             self.clearCache()
         elif (action == "clear_cookie"):
             self.api.clearCookie()
             self.notify(self.lang(30110))
         elif (action == "add_favourite"):
-            self.addFavourite(params.pop("title"),params)
+            import urllib
+            self.addFavourite(urllib.unquote_plus(params.pop("title")),params)
             self.notify(self.lang(30110))
         elif (action == "add_library"):
             self.api.addStoreTrack(params["song_id"])
@@ -53,10 +55,12 @@ class GoogleMusicActions():
                 self.notify(self.lang(30108))
                 utils.addon.openSettings()
         elif (action == "export_playlist"):
-            self.exportPlaylist(params.get('title'), params.get('playlist_id'))
+            import urllib
+            self.exportPlaylist(urllib.unquote_plus(params.get('title')), params.get('playlist_id'))
             self.notify(self.lang(30110))
         elif (action == "start_radio"):
-            keyboard = xbmc.Keyboard(self.api.getSong(params["song_id"])['title'], self.lang(30402))
+            import urllib
+            keyboard = xbmc.Keyboard(urllib.unquote_plus(params['title']), self.lang(30402))
             keyboard.doModal()
             if keyboard.isConfirmed() and keyboard.getText():
                 items = self.api.startRadio(keyboard.getText(), params.get('song_id'), playlist_token=params.get('token'))
@@ -64,9 +68,11 @@ class GoogleMusicActions():
                 xbmc.executebuiltin("ActivateWindow(10500)")
                 #xbmc.executebuiltin("XBMC.RunPlugin(%s?path=station&id=%s)" % (sys.argv[0],radio_id))
         elif (action == "search_yt"):
-            xbmc.executebuiltin("ActivateWindow(10025,plugin://plugin.video.youtube/search/?q=%s)" % params['title'])
+            import urllib
+            xbmc.executebuiltin("ActivateWindow(10025,plugin://plugin.video.youtube/search/?q=%s)" % urllib.unquote_plus(params['display_name']))
         elif (action == "play_yt"):
-            self.playYoutube([params.get('artist')+' - '+params.get('title')])
+            import urllib
+            self.playYoutube([urllib.unquote_plus(params.get('display_name'))])
         elif (action == "search"):
             xbmc.executebuiltin("ActivateWindow(10502,%s/?path=search_result&query=%s)" % (utils.addon_url, params.get('filter_criteria')))
         elif (action == "set_thumbs"):
@@ -78,12 +84,14 @@ class GoogleMusicActions():
                 self.api.createPlaylist(keyboard.getText())
                 self.notify(self.lang(30110))
         elif (action == "delete_playlist"):
-            if xbmcgui.Dialog().yesno(self.lang(30405),self.lang(30406),'"'+params["title"]+'"'):
+            import urllib
+            if xbmcgui.Dialog().yesno(self.lang(30405),self.lang(30406),'"'+urllib.unquote_plus(params["title"])+'"'):
                 self.api.deletePlaylist(params["playlist_id"])
                 xbmc.executebuiltin("ActivateWindow(10502,%s/?path=library)" % utils.addon_url)
                 self.notify(self.lang(30110))
         elif (action == "delete_station"):
-            if xbmcgui.Dialog().yesno(self.lang(30405),self.lang(30407),'"'+params["title"]+'"'):
+            import urllib
+            if xbmcgui.Dialog().yesno(self.lang(30405),self.lang(30407),'"'+urllib.unquote_plus(params["title"])+'"'):
                 self.api.getApi().delete_stations(params["radio_id"])
                 xbmc.executebuiltin("ActivateWindow(10502,%s/?path=library)" % utils.addon_url)
                 self.notify(self.lang(30110))
@@ -249,7 +257,8 @@ class GoogleMusicActions():
             utils.log("Loading radio: " + get('radio_id'))
             songs = self.api.getStationTracks(get('radio_id'))
         else:
-            songs = self.api.getFilterSongs(get('filter_type'), get('filter_criteria'), get('artist'))
+            import urllib
+            songs = self.api.getFilterSongs(get('filter_type'), urllib.unquote_plus(get('filter_criteria')), urllib.unquote_plus(get('artist')))
 
 
         return songs
@@ -279,6 +288,7 @@ class GoogleMusicActions():
         url = 'https://www.googleapis.com/youtube/v3/search?%s'
         count = 0
         for title in titles:
+            title = urllib.unquote_plus(title)
             if progress_dialog:
                 if progress_dialog.iscanceled():
                     progress_dialog.close()
@@ -294,10 +304,10 @@ class GoogleMusicActions():
                 continue
 
             # fetch from web
-            params['q'] = '%s -interview -cover -remix -album -rocksmith -solo -lyrics -live -show' % title.lower()
+            params['q'] = '%s official -interview -cover -remix -album -rocksmith -solo -lyrics -live -show' % title.lower()
             req = urllib2.Request(url % urllib.urlencode(params), headers=headers)
             response = urllib2.urlopen(req).read()
-            utils.log(repr(response))
+            utils.log(title+"|"+repr(response))
             searchresults = loadJson(response)['items']
             if searchresults:
                 videoids.append([searchresults[0]['id']['videoId'], title])
