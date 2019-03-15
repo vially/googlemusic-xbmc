@@ -221,11 +221,14 @@ class GoogleMusicApi():
                 self.artistInfo[artistid] = {'artistArtRefs':[{'url':artistart}]}
             else:
                 self.miss += 1
+                try:
                 self.artistInfo[artistid] = self.getApi().get_artist_info(artistid, include_albums=False, max_top_tracks=0, max_rel_artist=0)
+                except:
+                    self.artistInfo[artistid] = {}
                 if 'artistArtRefs' in self.artistInfo[artistid]:
                     storage.setArtist(artistid, self.artistInfo[artistid]['artistArtRefs'][0]['url'])
                 else:
-                    utils.log("NO ART FOR ARTIST: "+repr(self.artistInfo[artistid]))
+                    utils.log("NO ART FOR ARTIST: "+repr(artistid))
                     self.artistInfo[artistid] = {'artistArtRefs':[{'url':''}]}
         return self.artistInfo[artistid]['artistArtRefs']
 
