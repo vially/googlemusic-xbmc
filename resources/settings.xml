@@ -2,37 +2,22 @@
 <settings>
     <!-- General -->
     <category label="30001">
-        <setting id="username"              type="text"   label="30011" default=""/>
-        <setting id="password"              type="text"   label="30012" option="hidden" default=""/>
-        <setting id="encpassword"           type="text"   visible="false"/>
-        <setting type="sep" />
-        <setting id="export_path"           type="folder" label="30052" source="auto" option="writeable" default="" />
-        <setting id="auto_export"           type="bool"   label="30053" default="false" enable="!eq(-1,)" />
-        <setting id="updatelib"             type="enum"   label="30067" lvalues="30068|30069|30070|30071" default="1" />
         <setting id="quality"               type="enum"   label="30072" lvalues="30073|30074|30075" default="0" />
         <setting id="youtube.video.quality" type="enum"   label="30076" lvalues="30073|30075|30077" default="2" />
         <setting id="prefetch"              type="bool"   label="30066" default="false" />
     </category>
 
-    <!-- Views -->
-    <category label="30002">
-        <setting id="overrideview"     type="bool"    label="30065"  default="true" />
-        <setting id="artists_viewid"   type="number"  label="30055"  default="500"  enable="eq(-1,true)" />
-        <setting id="albums_viewid"    type="number"  label="30056"  default="500"  enable="eq(-2,true)" />
-        <setting id="playlists_viewid" type="number"  label="30057"  default="51"   enable="eq(-3,true)" />
-        <setting id="stations_viewid"  type="number"  label="30058"  default="500"  enable="eq(-4,true)" />
-        <setting id="songs_viewid"     type="number"  label="30059"  default="506"  enable="eq(-5,true)" />
-    </category>
-
     <!-- Advanced -->
     <category label="30051">
-        <setting id="load_kodi_library" type="bool"   label="30054" default="false" />
         <setting id="debug"             type="bool"   label="30061" default="true" />
-        <setting id="clear_cookie"      type="action" label="30063" option="close" action="RunPlugin(plugin://plugin.audio.googlemusic.exp/?action=clear_cookie)" />
         <setting id="clear_cache"       type="action" label="30062" option="close" action="RunPlugin(plugin://plugin.audio.googlemusic.exp/?action=clear_cache)" />
+        <setting id="clear_oauth"       type="action" label="30063" option="close" action="RunPlugin(plugin://plugin.audio.googlemusic.exp/?action=clear_oauth_cache)" />
         <setting type="sep" />
-        <setting id="sqlite_db"         type="text"   label="30064" default="googlemusic.db"/>
         <setting id="device_id"         type="text"   label="Device ID" default="" enable="false"/>
+        <!-- invisible settings -->
+        <setting id="subscriber"        type="bool"   default="false"   visible="false"/>
+        <setting id="fetched_time"      type="number" default="0"       visible="false"/>
+        <setting id="fetched_count"     type="number" default="0"       visible="false"/>
     </category>
 
 </settings>

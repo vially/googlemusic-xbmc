@@ -48,7 +48,7 @@ msgid "Clear cache"
 msgstr ""
 
 msgctxt "#30063"
-msgid "Clear cookie"
+msgid "Clear authentication cache"
 msgstr ""
 
 msgctxt "#30064"
@@ -232,6 +232,14 @@ msgstr ""
 
 msgctxt "#30223"
 msgid "New search"
+msgstr ""
+
+msgctxt "#30224"
+msgid "Home"
+msgstr ""
+
+msgctxt "#30225"
+msgid "Recents"
 msgstr ""
 
 ####

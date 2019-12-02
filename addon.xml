@@ -1,20 +1,33 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon id="plugin.audio.googlemusic.exp"
-       name="Google Music"
-       version="0.8.2"
-       provider-name="Valentin-Costel Hăloiu">
+       name="Play [COLOR orange]Music[/COLOR] EXP"
+       version="2.0~beta6"
+       provider-name="ForeverGuest">
   <requires>
-    <import addon="xbmc.python" version="2.1.0"/>
+    <import addon="xbmc.python" version="2.26.0"/>
     <import addon="script.module.decorator" version="3.4.0"/>
     <import addon="script.module.requests" version="1.1.0"/>
+    <import addon="script.module.httplib2" version="0.10"/>
+    <import addon="script.module.oauth2client" version="4.1"/>
+    <import addon="script.module.future" version="0.16"/>
   </requires>
-  <extension point="xbmc.python.pluginsource" library="default.py">
+  <extension point="xbmc.python.pluginsource" library="resources/lib/addon.py">
     <provides>audio</provides>
   </extension>
   <extension point="xbmc.addon.metadata">
     <platform>all</platform>
-    <summary lang="en">Google Music audio plugin</summary>
-    <description lang="en">Plugin that lets you play music from Google Music.</description>
-    <disclaimer>Some parts of this addon may not be legal in your country of residence - please check with your local laws before installing.</disclaimer>
+    <summary lang="en">Experimental Google Play [COLOR orange]Music[/COLOR] plugin</summary>
+    <description lang="en">EXPerimental plugin that lets you play music from Google Play Music.</description>
+    <news>
+2.0
+- Changed authentication to OAuth
+- Load library in background
+- Detect modifications and update library when needed
+- Added 'Home' menu
+    </news>
+    <assets>
+      <icon>resources/icon.png</icon>
+      <fanart>resources/fanart.png</fanart>
+    </assets>
   </extension>
 </addon>

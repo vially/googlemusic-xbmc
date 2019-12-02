@@ -48,8 +48,8 @@ msgid "Clear cache"
 msgstr "Limpar armazenamento temporário (\"cache\")"
 
 msgctxt "#30063"
-msgid "Clear cookie"
-msgstr "Limpar \"cookie\""
+msgid "Clear authentication cache"
+msgstr "Limpar autenticação armazenada"
 
 msgctxt "#30064"
 msgid "SQLite database"
@@ -230,10 +230,6 @@ msgctxt "#30222"
 msgid "Browse stations"
 msgstr "Procurar estações"
 
-msgctxt "#30223"
-msgid "New search"
-msgstr "Nova pesquisa"
-
 ####
 # Context actions
 ####
@@ -321,10 +317,6 @@ msgctxt "#30321"
 msgid "Play in Youtube - shuffle"
 msgstr "Tocar aleatoriamente no Youtube"
 
-msgctxt "#30322"
-msgid "Play all from here"
-msgstr "Tocar tudo a partir daqui"
-
 ####
 # Messages
 ####
@@ -367,10 +359,6 @@ msgstr "Erro ao chamar a extensão do Youtube"
 msgctxt "#30110"
 msgid "Done"
 msgstr "Feito"
-
-msgctxt "#30111"
-msgid "No Android device found in account, playing a song will probably fail."
-msgstr "Nenhum identificador de dispositivo Android foi encontrado, tocar uma música pode falhar"
 
 msgctxt "#30401"
 msgid "Add to Playlist..."

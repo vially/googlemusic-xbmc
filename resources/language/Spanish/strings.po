@@ -48,8 +48,8 @@ msgid "Clear cache"
 msgstr "Borrar cache"
 
 msgctxt "#30063"
-msgid "Clear cookie"
-msgstr "Borrar cookies"
+msgid "Clear authentication cache"
+msgstr ""
 
 msgctxt "#30064"
 msgid "SQLite database"
